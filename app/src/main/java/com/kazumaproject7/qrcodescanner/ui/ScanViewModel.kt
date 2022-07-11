@@ -9,7 +9,7 @@ class ScanViewModel: ViewModel() {
         get() = _scannedString
     private val _scannedString = MutableLiveData("")
 
-    fun updateWhichCameraUsed(value: String){
+    fun updateScannedString(value: String){
         _scannedString.value = value
     }
 }

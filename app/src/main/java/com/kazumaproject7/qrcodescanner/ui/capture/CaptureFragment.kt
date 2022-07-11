@@ -34,7 +34,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 return
             }
             lastText = result.text
-            viewModel.updateWhichCameraUsed(lastText)
+            viewModel.updateScannedString(lastText)
             startResultFragment(result)
             lastText = ""
         }
@@ -53,7 +53,25 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val formats = listOf(BarcodeFormat.QR_CODE)
+        val formats = listOf(
+            BarcodeFormat.QR_CODE,
+            BarcodeFormat.AZTEC,
+            BarcodeFormat.CODABAR,
+            BarcodeFormat.CODE_128,
+            BarcodeFormat.CODE_39,
+            BarcodeFormat.CODE_93,
+            BarcodeFormat.DATA_MATRIX,
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.ITF,
+            BarcodeFormat.MAXICODE,
+            BarcodeFormat.PDF_417,
+            BarcodeFormat.RSS_14,
+            BarcodeFormat.RSS_EXPANDED,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.UPC_E,
+            BarcodeFormat.UPC_EAN_EXTENSION
+        )
         binding.barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
         binding.barcodeView.decodeContinuous(callback)
     }
@@ -81,15 +99,44 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             val width: Int = displayMetrics.widthPixels
             val scaleX = (result.bitmap.width).toDouble() / width.toDouble()
             val scaleY = (result.bitmap.height).toDouble() / height.toDouble()
-            Timber.d("result Points: $scaleX $scaleY ${result.resultPoints[0]} ${result.resultPoints[1]} ${result.resultPoints[2]} ${result.resultPoints[3]} ${result.bitmap.width} ${result.bitmap.height}")
-            Timber.d("result Points2: ${(result.resultPoints[0].x * scaleX).toInt()} ${(result.resultPoints[1].y * scaleY).toInt()} ${((result.resultPoints[2].x * scaleX) - (result.resultPoints[0].x * scaleX)).toInt()} ${((result.resultPoints[3].y * scaleY) - (result.resultPoints[1].y * scaleY)).toInt()} ${result.bitmap.width} ${result.bitmap.height}")
-            val croppedBitmap = Bitmap.createBitmap(
-                result.bitmap,
-                (result.resultPoints[0].x * scaleX + 32).toInt(),
-                (result.resultPoints[1].y * scaleY + 275).toInt(),
-                ((result.resultPoints[2].x * scaleX) - (result.resultPoints[0].x * scaleX) + 64).toInt(),
-                ((result.resultPoints[3].y * scaleY) - (result.resultPoints[1].y * scaleY) + 64).toInt()
-            )
+            Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp}")
+            //Timber.d("result Points2: ${(result.resultPoints[0].x * scaleX).toInt()} ${(result.resultPoints[1].y * scaleY).toInt()} ${((result.resultPoints[2].x * scaleX) - (result.resultPoints[0].x * scaleX)).toInt()} ${((result.resultPoints[3].y * scaleY) - (result.resultPoints[1].y * scaleY)).toInt()} ${result.bitmap.width} ${result.bitmap.height}")
+
+            val croppedBitmap = when (result.transformedResultPoints.size) {
+                // QR Code normal data size
+                4 -> {
+                    Bitmap.createBitmap(
+                        result.bitmap,
+                        (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                        (result.transformedResultPoints[1].y * scaleY).toInt(),
+                        ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                    )
+                }
+                // QR Code smaller data size
+                3 -> {
+                    Bitmap.createBitmap(
+                        result.bitmap,
+                        (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                        (result.transformedResultPoints[1].y * scaleY ).toInt(),
+                        ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                        ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 120).toInt()
+                    )
+                }
+                // Barcode
+                2 -> {
+                    Bitmap.createBitmap(
+                        result.bitmap,
+                        (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
+                        (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
+                        ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
+                        230
+                    )
+                }
+                else -> {
+                    result.bitmap
+                }
+            }
             val bundle = Bundle()
             bundle.putParcelable("barcodeImage",croppedBitmap)
             val resultFragment = ResultFragment()

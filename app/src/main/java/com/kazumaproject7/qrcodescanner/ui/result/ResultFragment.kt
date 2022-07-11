@@ -75,7 +75,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        viewModel.updateWhichCameraUsed("")
+        viewModel.updateScannedString("")
         _binding = null
     }
 
