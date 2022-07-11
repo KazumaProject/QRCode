@@ -12,4 +12,12 @@ class ScanViewModel: ViewModel() {
     fun updateScannedString(value: String){
         _scannedString.value = value
     }
+
+    val scannedType: LiveData<String>
+        get() = _scannedType
+    private val _scannedType = MutableLiveData("")
+
+    fun updateScannedType(value: String){
+        _scannedType.value = value
+    }
 }

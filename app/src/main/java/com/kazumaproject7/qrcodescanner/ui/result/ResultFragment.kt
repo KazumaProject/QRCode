@@ -51,6 +51,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
         viewModel.scannedString.value?.let { url ->
             binding.resultText.text = url
+            binding.contentText.text = url
             if (URLUtil.isValidUrl(url)){
                 binding.resultText.setTextColor(Color.parseColor("#5e6fed"))
                 binding.resultText.paintFlags = Paint.UNDERLINE_TEXT_FLAG
@@ -77,6 +78,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
             }
         }
+
+        viewModel.scannedType.value?.let { type ->
+            binding.typeText.text = "Type: $type"
+        }
+
     }
 
     override fun onPause() {
@@ -87,10 +93,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.updateScannedString("")
+        viewModel.updateScannedType("")
         _binding = null
     }
 
-    fun textCopyThenPost(textCopied:String) {
+    private fun textCopyThenPost(textCopied:String) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         // When setting the clip board text.
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))

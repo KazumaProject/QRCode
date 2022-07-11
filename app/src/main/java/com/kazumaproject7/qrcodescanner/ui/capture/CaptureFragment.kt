@@ -35,6 +35,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
             lastText = result.text
             viewModel.updateScannedString(lastText)
+            viewModel.updateScannedType(result.barcodeFormat.name)
             startResultFragment(result)
             lastText = ""
         }
