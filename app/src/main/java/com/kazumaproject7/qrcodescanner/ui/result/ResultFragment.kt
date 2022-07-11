@@ -19,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
+import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import timber.log.Timber
@@ -50,33 +51,58 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         }
 
         viewModel.scannedString.value?.let { url ->
-            binding.resultText.text = url
-            binding.contentText.text = url
-            if (URLUtil.isValidUrl(url)){
-                binding.resultText.setTextColor(Color.parseColor("#5e6fed"))
-                binding.resultText.paintFlags = Paint.UNDERLINE_TEXT_FLAG
-                binding.resultText.setOnClickListener {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    requireActivity().startActivity(intent)
+
+            viewModel.scannedStringType.value?.let {
+
+                when(it){
+                    is ScannedStringType.Url ->{
+                        binding.resultText.text = url
+                        binding.contentText.text = url
+
+                        binding.resultText.setTextColor(Color.parseColor("#5e6fed"))
+                        binding.resultText.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+                        binding.resultText.setOnClickListener {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            requireActivity().startActivity(intent)
+                        }
+                        binding.resultText.setOnLongClickListener {
+                            textCopyThenPost(url)
+                            return@setOnLongClickListener true
+                        }
+                        snackBar = Snackbar.make(
+                            requireActivity().findViewById(R.id.fragmentHostView),
+                            "Would you like to open a link in your default browser?",
+                            16000
+                        ).setAction("Confirm") {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            requireActivity().startActivity(intent)
+                        }
+                        snackBar?.show()
+                    }
+                    is ScannedStringType.EMail ->{
+                        val str = url.split(":" ).toTypedArray()
+                        binding.resultText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4]}"
+                        binding.contentText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4].replace(";;","")}"
+                        binding.resultText.setOnClickListener {
+                            textCopyThenPost(str[2].replace(";SUB",""))
+                        }
+                    }
+                    is ScannedStringType.Text ->{
+                        binding.resultText.setOnClickListener {
+                            textCopyThenPost(url)
+                        }
+                    }
+                    else -> {
+                        binding.resultText.setOnClickListener {
+                            textCopyThenPost(url)
+                        }
+                    }
                 }
-                binding.resultText.setOnLongClickListener {
-                    textCopyThenPost(url)
-                    return@setOnLongClickListener true
-                }
-                snackBar = Snackbar.make(
-                    requireActivity().findViewById(R.id.fragmentHostView),
-                    "Would you like to open a link in your default browser?",
-                    16000
-                ).setAction("Confirm") {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    requireActivity().startActivity(intent)
-                }
-                snackBar?.show()
-            } else {
-                binding.resultText.setOnClickListener {
-                    textCopyThenPost(url)
-                }
+
+
             }
+
+
         }
 
         viewModel.scannedType.value?.let { type ->

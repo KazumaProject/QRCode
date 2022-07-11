@@ -6,6 +6,7 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import androidx.fragment.app.activityViewModels
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.ResultPoint
@@ -14,6 +15,7 @@ import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
+import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import com.kazumaproject7.qrcodescanner.ui.result.ResultFragment
@@ -34,6 +36,18 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 return
             }
             lastText = result.text
+            if (URLUtil.isValidUrl(lastText)){
+                viewModel.updateScannedStringType(ScannedStringType.Url)
+            }else{
+                when{
+                    lastText.contains("MATMSG") ->{
+                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                    }
+                    else ->{
+                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                    }
+                }
+            }
             viewModel.updateScannedString(lastText)
             viewModel.updateScannedType(result.barcodeFormat.name)
             startResultFragment(result)
