@@ -1,11 +1,15 @@
 package com.kazumaproject7.qrcodescanner.ui.result
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.getIntent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +58,10 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     requireActivity().startActivity(intent)
                 }
+                binding.resultText.setOnLongClickListener {
+                    textCopyThenPost(url)
+                    return@setOnLongClickListener true
+                }
                 snackBar = Snackbar.make(
                     requireActivity().findViewById(R.id.fragmentHostView),
                     "Would you like to open a link in your default browser?",
@@ -63,7 +71,10 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     requireActivity().startActivity(intent)
                 }
                 snackBar?.show()
-
+            } else {
+                binding.resultText.setOnClickListener {
+                    textCopyThenPost(url)
+                }
             }
         }
     }
@@ -77,6 +88,15 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         super.onDestroyView()
         viewModel.updateScannedString("")
         _binding = null
+    }
+
+    fun textCopyThenPost(textCopied:String) {
+        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        // When setting the clip board text.
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
+        // Only show a toast for Android 12 and lower.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            showSnackBar("Copied $textCopied")
     }
 
 }

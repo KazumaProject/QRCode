@@ -105,7 +105,7 @@
                         android:id="@+id/barcode_img"
                         android:layout_width="256dp"
                         android:layout_height="256dp"
-                        android:layout_margin="16dp"
+                        android:layout_margin="8dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"

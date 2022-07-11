@@ -151,4 +151,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     }
 
+
+
 }
