@@ -1,11 +1,16 @@
 package com.kazumaproject7.qrcodescanner.ui.result
 
+import android.content.Intent
 import android.content.Intent.getIntent
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Paint
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import androidx.fragment.app.activityViewModels
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
@@ -38,7 +43,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         }
 
         viewModel.scannedString.value?.let {
-
+            binding.resultText.text = it
+            if (URLUtil.isValidUrl(it)){
+                binding.resultText.setTextColor(Color.parseColor("#5e6fed"))
+                binding.resultText.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                requireActivity().startActivity(intent)
+            }
         }
     }
 
