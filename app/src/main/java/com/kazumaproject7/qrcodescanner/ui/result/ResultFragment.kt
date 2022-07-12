@@ -96,39 +96,53 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     textCopyThenPost(str[2].replace(";SUB",""))
                                 }
                             }
+                            binding.emailParent.textSubjectContent.apply {
+                                text = str[3].replace(";BODY","")
+                                setOnClickListener {
+                                    textCopyThenPost(str[3].replace(";BODY",""))
+                                }
+                            }
+                            binding.emailParent.textMessage.apply {
+                                text = str[4].replace(";;","")
+                                setOnClickListener {
+                                    textCopyThenPost(str[4].replace(";;",""))
+                                }
+                            }
                         } else {
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
                             binding.textText.text = scannedString
                         }
 
-                        /*
-                        val str = url.split(":" ).toTypedArray()
-                        binding.resultText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4]}"
-                        binding.contentText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4].replace(";;","")}"
-                        binding.resultText.setOnClickListener {
-                            textCopyThenPost(str[2].replace(";SUB",""))
-                        }
-
-                         */
                     }
                     is ScannedStringType.EMail2 ->{
                         binding.emailParent.root.visibility = View.VISIBLE
-                        val str = scannedString.split(":" ).toTypedArray()
                         if (scannedString.contains("?body=") || scannedString.contains("?subject=")){
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
-                            binding.textText.text = scannedString
+                            binding.textText.text = scannedString.replace("mailto:","")
                         } else {
-                            val strTmp = scannedString.replace("mailto:","")
-                            val strTmp2 = scannedString.replace(strTmp,"")
-                            if (strTmp2 == "mailto:"){
-                                binding.emailParent.textEmailContent.text = strTmp
-                            }else{
-                                binding.emailParent.root.visibility = View.GONE
-                                binding.textParent.visibility = View.VISIBLE
-                                binding.textText.text = scannedString
+                            if (scannedString.contains("mailto:")){
+                                val emailStr = scannedString.replace("mailto:","")
+                                binding.emailParent.textEmailContent.apply {
+                                    text = emailStr
+                                    setOnClickListener {
+                                        textCopyThenPost(emailStr)
+                                    }
+                                }
+                            }else if (scannedString.contains("MAILTO")){
+                                val emailStr = scannedString.replace("MAILTO","")
+                                binding.emailParent.textEmailContent.apply {
+                                    text = emailStr.replace(":","").replace(" ","")
+                                    setOnClickListener {
+                                        textCopyThenPost(emailStr.replace(":","").replace(" ",""))
+                                    }
+                                }
+                                
+                            } else {
+
                             }
+
                         }
                     }
                     is ScannedStringType.Text ->{

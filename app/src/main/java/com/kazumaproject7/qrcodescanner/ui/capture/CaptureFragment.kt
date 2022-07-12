@@ -36,6 +36,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 return
             }
             lastText = result.text
+            Timber.d("Last Text: $lastText")
             if (URLUtil.isValidUrl(lastText)){
                 viewModel.updateScannedStringType(ScannedStringType.Url)
             }else{
@@ -43,7 +44,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("MATMSG") ->{
                         viewModel.updateScannedStringType(ScannedStringType.EMail)
                     }
-                    lastText.contains("mailto:") ->{
+                    lastText.contains("mailto:") || lastText.contains("MAILTO") ->{
                         viewModel.updateScannedStringType(ScannedStringType.EMail2)
                     }
                     else ->{
