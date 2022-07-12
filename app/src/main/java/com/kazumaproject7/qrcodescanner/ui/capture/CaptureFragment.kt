@@ -43,6 +43,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("MATMSG") ->{
                         viewModel.updateScannedStringType(ScannedStringType.EMail)
                     }
+                    lastText.contains("mailto:") ->{
+                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                    }
                     else ->{
                         viewModel.updateScannedStringType(ScannedStringType.Text)
                     }
@@ -203,7 +206,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 230
                             )
                         }
-                        
+
                         else ->{
                             result.bitmap
                         }

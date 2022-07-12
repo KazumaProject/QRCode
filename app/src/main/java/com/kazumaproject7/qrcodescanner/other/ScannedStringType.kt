@@ -5,6 +5,8 @@ sealed class ScannedStringType{
     object VCard: ScannedStringType()
     object Text: ScannedStringType()
     object EMail: ScannedStringType()
+    object EMail2: ScannedStringType()
+    object EMailONLYMAILTO: ScannedStringType()
     object Wifi: ScannedStringType()
     object SMS: ScannedStringType()
 }

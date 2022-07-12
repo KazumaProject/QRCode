@@ -86,6 +86,17 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                     }
                     is ScannedStringType.EMail ->{
+                        binding.emailParent.root.visibility = View.VISIBLE
+                        val str = scannedString.split(":" ).toTypedArray()
+                        Timber.d("scanned email size: ${str.size}")
+                        if (str.size == 5){
+                            binding.emailParent.textEmailContent.text = str[2].replace(";SUB","")
+                        } else {
+                            binding.emailParent.root.visibility = View.GONE
+                            binding.textParent.visibility = View.VISIBLE
+                            binding.textText.text = scannedString
+                        }
+
                         /*
                         val str = url.split(":" ).toTypedArray()
                         binding.resultText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4]}"
@@ -96,13 +107,15 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                          */
                     }
-                    is ScannedStringType.Text ->{
-                        /*
-                        binding.resultText.setOnClickListener {
-                            textCopyThenPost(url)
-                        }
+                    is ScannedStringType.EMail2 ->{
 
-                         */
+                    }
+                    is ScannedStringType.Text ->{
+                        binding.textParent.visibility = View.VISIBLE
+                        binding.textText.text = scannedString
+                        binding.textText.setOnClickListener {
+                            textCopyThenPost(scannedString)
+                        }
                     }
                     else -> {
                         /*

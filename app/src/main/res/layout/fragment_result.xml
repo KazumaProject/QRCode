@@ -95,6 +95,29 @@
                         android:layout_marginVertical="32dp"/>
                 </RelativeLayout>
 
+                <include
+                    android:id="@+id/email_parent"
+                    layout="@layout/email_parent_layout" />
+
+                <RelativeLayout
+                    android:id="@+id/text_parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/result_bg"
+                    android:visibility="gone">
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/text_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="32dp"
+                        android:textColor="?attr/colorOnSecondary"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginVertical="32dp"/>
+                </RelativeLayout>
+
             </io.github.florent37.shapeofview.shapes.RoundRectView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
