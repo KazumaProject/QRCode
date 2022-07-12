@@ -113,7 +113,23 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                          */
                     }
                     is ScannedStringType.EMail2 ->{
-
+                        binding.emailParent.root.visibility = View.VISIBLE
+                        val str = scannedString.split(":" ).toTypedArray()
+                        if (scannedString.contains("?body=") || scannedString.contains("?subject=")){
+                            binding.emailParent.root.visibility = View.GONE
+                            binding.textParent.visibility = View.VISIBLE
+                            binding.textText.text = scannedString
+                        } else {
+                            val strTmp = scannedString.replace("mailto:","")
+                            val strTmp2 = scannedString.replace(strTmp,"")
+                            if (strTmp2 == "mailto:"){
+                                binding.emailParent.textEmailContent.text = strTmp
+                            }else{
+                                binding.emailParent.root.visibility = View.GONE
+                                binding.textParent.visibility = View.VISIBLE
+                                binding.textText.text = scannedString
+                            }
+                        }
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
@@ -155,6 +171,26 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         viewModel.updateScannedType("")
         _binding = null
     }
+
+    fun composeEmail(addresses: Array<String>, subject: String) {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:") // only email apps should handle this
+            putExtra(Intent.EXTRA_EMAIL, addresses)
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+
+        }
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        }
+    }
+
+    fun createMailIntent(address: String, subject: String, text: String): Intent =
+        Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
 
     private fun textCopyThenPost(textCopied:String) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
