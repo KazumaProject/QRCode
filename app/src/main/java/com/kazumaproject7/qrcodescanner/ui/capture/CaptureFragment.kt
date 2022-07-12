@@ -114,19 +114,62 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             val width: Int = displayMetrics.widthPixels
             val scaleX = (result.bitmap.width).toDouble() / width.toDouble()
             val scaleY = (result.bitmap.height).toDouble() / height.toDouble()
-            Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp}")
+            Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp} ${result.transformedResultPoints.size}")
             //Timber.d("result Points2: ${(result.resultPoints[0].x * scaleX).toInt()} ${(result.resultPoints[1].y * scaleY).toInt()} ${((result.resultPoints[2].x * scaleX) - (result.resultPoints[0].x * scaleX)).toInt()} ${((result.resultPoints[3].y * scaleY) - (result.resultPoints[1].y * scaleY)).toInt()} ${result.bitmap.width} ${result.bitmap.height}")
 
             val croppedBitmap = when (result.transformedResultPoints.size) {
                 // QR Code normal data size
                 4 -> {
-                    Bitmap.createBitmap(
-                        result.bitmap,
-                        (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
-                        (result.transformedResultPoints[1].y * scaleY).toInt(),
-                        ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
-                    )
+                    when{
+                        result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                            result.transformedResultPoints[3].y > result.transformedResultPoints[1].y ->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                            )
+                                }
+
+                        result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                result.transformedResultPoints[3].y > result.transformedResultPoints[1].y->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 150).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 128).toInt(),
+                                ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                            )
+                        }
+
+                        result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                result.transformedResultPoints[1].y > result.transformedResultPoints[3].y ->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                            )
+                        }
+
+                        result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                result.transformedResultPoints[1].y > result.transformedResultPoints[3].y->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 64).toInt(),
+                                ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                            )
+                        }
+
+                        else ->{
+                            result.bitmap
+                        }
+                    }
+
                 }
                 // QR Code smaller data size
                 3 -> {
