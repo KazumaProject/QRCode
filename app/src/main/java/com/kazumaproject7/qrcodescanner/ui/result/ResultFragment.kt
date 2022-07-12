@@ -50,52 +50,67 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             binding.barcodeImg.setImageBitmap(it)
         }
 
-        viewModel.scannedString.value?.let { url ->
+        viewModel.scannedType.value?.let {
+            binding.textCodeType.text = it.replace("_"," ")
+        }
+
+        viewModel.scannedString.value?.let { scannedString ->
 
             viewModel.scannedStringType.value?.let {
 
                 when(it){
                     is ScannedStringType.Url ->{
-                        binding.resultText.text = url
-                        binding.contentText.text = url
+                        binding.urlParent.visibility = View.VISIBLE
+                        binding.textUrl.apply {
+                            text = scannedString
+                            setTextColor(Color.parseColor("#5e6fed"))
+                            paintFlags = Paint.UNDERLINE_TEXT_FLAG
+                            setOnClickListener {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                                requireActivity().startActivity(intent)
+                            }
+                            setOnLongClickListener {
+                                textCopyThenPost(scannedString)
+                                return@setOnLongClickListener true
+                            }
+                            snackBar = Snackbar.make(
+                                requireActivity().findViewById(R.id.fragmentHostView),
+                                "Would you like to open a link in your default browser?",
+                                16000
+                            ).setAction("Confirm") {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                                requireActivity().startActivity(intent)
+                            }
+                            snackBar?.show()
+                        }
 
-                        binding.resultText.setTextColor(Color.parseColor("#5e6fed"))
-                        binding.resultText.paintFlags = Paint.UNDERLINE_TEXT_FLAG
-                        binding.resultText.setOnClickListener {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            requireActivity().startActivity(intent)
-                        }
-                        binding.resultText.setOnLongClickListener {
-                            textCopyThenPost(url)
-                            return@setOnLongClickListener true
-                        }
-                        snackBar = Snackbar.make(
-                            requireActivity().findViewById(R.id.fragmentHostView),
-                            "Would you like to open a link in your default browser?",
-                            16000
-                        ).setAction("Confirm") {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            requireActivity().startActivity(intent)
-                        }
-                        snackBar?.show()
                     }
                     is ScannedStringType.EMail ->{
+                        /*
                         val str = url.split(":" ).toTypedArray()
                         binding.resultText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4]}"
                         binding.contentText.text = "E-mail: ${str[2].replace(";SUB","")}\nSubject: ${str[3].replace(";BODY","")}\nMessage: ${str[4].replace(";;","")}"
                         binding.resultText.setOnClickListener {
                             textCopyThenPost(str[2].replace(";SUB",""))
                         }
+
+                         */
                     }
                     is ScannedStringType.Text ->{
+                        /*
                         binding.resultText.setOnClickListener {
                             textCopyThenPost(url)
                         }
+
+                         */
                     }
                     else -> {
+                        /*
                         binding.resultText.setOnClickListener {
                             textCopyThenPost(url)
                         }
+
+                         */
                     }
                 }
 
@@ -105,9 +120,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
         }
 
-        viewModel.scannedType.value?.let { type ->
-            binding.typeText.text = "Type: $type"
-        }
+//        viewModel.scannedType.value?.let { type ->
+//            binding.typeText.text = "Type: $type"
+//        }
 
     }
 

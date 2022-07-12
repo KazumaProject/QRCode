@@ -161,7 +161,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             transaction.replace(R.id.fragmentHostView,resultFragment)
             transaction.commit()
         }catch (e: Exception){
-            showSnackBar("Cannot read the code.\nStored data is too small or large.")
+            showSnackBar("Something went wrong.")
         }
 
     }
