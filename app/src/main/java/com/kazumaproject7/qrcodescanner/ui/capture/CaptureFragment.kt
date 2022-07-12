@@ -173,23 +173,42 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 }
                 // QR Code smaller data size
                 3 -> {
-                    Bitmap.createBitmap(
-                        result.bitmap,
-                        (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
-                        (result.transformedResultPoints[1].y * scaleY ).toInt(),
-                        ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                        ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 120).toInt()
-                    )
+                    when{
+                        result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                result.transformedResultPoints[0].y > result.transformedResultPoints[2].y ->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY ).toInt(),
+                                ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 120).toInt()
+                            )
+                                }
+
+                        else ->{
+                            result.bitmap
+                        }
+                    }
+
                 }
                 // Barcode
                 2 -> {
-                    Bitmap.createBitmap(
-                        result.bitmap,
-                        (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
-                        (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
-                        ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
-                        230
-                    )
+                    when{
+                        result.transformedResultPoints[1].x > result.transformedResultPoints[0].x ->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
+                                ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
+                                230
+                            )
+                        }
+                        
+                        else ->{
+                            result.bitmap
+                        }
+                    }
+
                 }
                 else -> {
                     result.bitmap
