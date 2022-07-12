@@ -90,7 +90,12 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val str = scannedString.split(":" ).toTypedArray()
                         Timber.d("scanned email size: ${str.size}")
                         if (str.size == 5){
-                            binding.emailParent.textEmailContent.text = str[2].replace(";SUB","")
+                            binding.emailParent.textEmailContent.apply {
+                                text = str[2].replace(";SUB","")
+                                setOnClickListener {
+                                    textCopyThenPost(str[2].replace(";SUB",""))
+                                }
+                            }
                         } else {
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
