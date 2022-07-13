@@ -1,10 +1,8 @@
 package com.kazumaproject7.qrcodescanner.ui.result
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
-import android.content.Intent.getIntent
+import android.content.*
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -14,7 +12,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.URLUtil
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
@@ -67,21 +64,32 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             paintFlags = Paint.UNDERLINE_TEXT_FLAG
                             setOnClickListener {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                                requireActivity().startActivity(intent)
+                                val chooser = Intent.createChooser(intent,"Open $scannedString")
+                                requireActivity().startActivity(chooser)
                             }
                             setOnLongClickListener {
                                 textCopyThenPost(scannedString)
                                 return@setOnLongClickListener true
                             }
-                            snackBar = Snackbar.make(
-                                requireActivity().findViewById(R.id.fragmentHostView),
-                                "Would you like to open a link in your default browser?",
-                                16000
-                            ).setAction("Confirm") {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                                requireActivity().startActivity(intent)
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                            val resInfos: List<ResolveInfo> =
+                                requireActivity().packageManager.queryIntentActivities(
+                                    intent,
+                                    PackageManager.MATCH_DEFAULT_ONLY
+                                )
+                            val intents: MutableList<Intent> = ArrayList()
+                            for (resInfo in resInfos) {
+                                val targeted = Intent(intent)
+                                val packageName = resInfo.activityInfo.packageName
+                                if (requireActivity().packageName.equals(packageName)) {
+                                    continue
+                                }
+                                targeted.setPackage(packageName)
+                                intents.add(targeted)
                             }
-                            snackBar?.show()
+                            val chooser = Intent.createChooser(Intent(), scannedString)
+                            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.toTypedArray())
+                            requireActivity().startActivity(chooser)
                         }
 
                     }
@@ -108,6 +116,16 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     textCopyThenPost(str[4].replace(";;",""))
                                 }
                             }
+
+                            val emailIntent = Intent(
+                                Intent.ACTION_SENDTO, Uri.fromParts(
+                                    "mailto", str[2].replace(";SUB",""), null
+                                )
+                            )
+                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[3].replace(";BODY",""))
+                            emailIntent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";;",""))
+                            startActivity(Intent.createChooser(emailIntent, "Send email..."))
+
                         } else {
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
@@ -138,7 +156,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                         textCopyThenPost(emailStr.replace(":","").replace(" ",""))
                                     }
                                 }
-                                
+
                             } else {
 
                             }
@@ -186,25 +204,58 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         _binding = null
     }
 
-    fun composeEmail(addresses: Array<String>, subject: String) {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:") // only email apps should handle this
-            putExtra(Intent.EXTRA_EMAIL, addresses)
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-
+    private fun launch(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW, uri).also {
+            it.addCategory(Intent.CATEGORY_DEFAULT)
+            it.addCategory(Intent.CATEGORY_BROWSABLE)
+            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        if (intent.resolveActivity(requireActivity().packageManager) != null) {
-            startActivity(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (uri.isWebScheme()) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_REQUIRE_DEFAULT)
+                intent.addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER)
+                try {
+                    // ブラウザ以外のURLに紐付けられたアプリを起動
+                    startActivity(intent)
+                } catch (e : ActivityNotFoundException) {
+                    val intent2 = Intent(Intent.ACTION_VIEW, uri)
+                    requireActivity().startActivity(intent2)
+                }
+            } else {
+                startActivity(intent)
+            }
         }
     }
 
-    fun createMailIntent(address: String, subject: String, text: String): Intent =
-        Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, text)
+    private fun shouldLaunchBrowser(context: Context, uri: Uri): Boolean {
+        val intent = Intent(Intent.ACTION_VIEW, uri).also {
+            it.addCategory(Intent.CATEGORY_DEFAULT)
+            it.addCategory(Intent.CATEGORY_BROWSABLE)
         }
+        return uri.isWebScheme() && !intent.canLaunchNonBrowserWithoutChooser(context)
+    }
+
+    private fun Uri.isWebScheme(): Boolean = scheme.let {
+        it.equals("http", ignoreCase = true) || it.equals("https", ignoreCase = true)
+    }
+
+    private fun Intent.canLaunchNonBrowserWithoutChooser(context: Context): Boolean {
+        val pm = context.packageManager
+        val activities = pm.queryIntentActivities(this, PackageManager.GET_RESOLVED_FILTER or PackageManager.MATCH_DEFAULT_ONLY)
+            .filter { it.filter?.isNotBrowserFilter() ?: false }
+        if (activities.isEmpty()) return false
+        val activityInfo = pm.resolveActivity(this, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo ?: return false
+        return activities.any { it.activityInfo?.packageName == activityInfo.packageName }
+    }
+
+    private fun IntentFilter.isNotBrowserFilter(): Boolean =
+        !hasGenericAuthority() || !hasGenericPath()
+
+    private fun IntentFilter.hasGenericAuthority(): Boolean =
+        countDataAuthorities() == 0 || authoritiesIterator().asSequence().any { it.host == "*" }
+
+    private fun IntentFilter.hasGenericPath(): Boolean =
+        countDataPaths() == 0 || pathsIterator().asSequence().any { it.path == "*" }
 
     private fun textCopyThenPost(textCopied:String) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
