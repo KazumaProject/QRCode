@@ -68,14 +68,14 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             setTextColor(Color.parseColor("#5e6fed"))
                             paintFlags = Paint.UNDERLINE_TEXT_FLAG
                             setOnClickListener {
-                                textCopyThenPost(scannedString)
-                            }
-                            setOnLongClickListener {
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
                                 intent.type = "text/plain"
                                 intent.putExtra(Intent.EXTRA_TEXT, scannedString)
                                 val chooser = Intent.createChooser(intent, scannedString)
                                 requireActivity().startActivity(chooser)
+                            }
+                            setOnLongClickListener {
+                                textCopyThenPost(scannedString)
                                 return@setOnLongClickListener true
                             }
                             binding.openDefaultBrowserBtn.setOnClickListener {
@@ -168,36 +168,46 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         if (str.size == 5){
                             binding.emailParent.textEmailContent.apply {
                                 text = str[2].replace(";SUB","")
-                                setOnClickListener {
-                                    textCopyThenPost(str[2].replace(";SUB",""))
-                                }
                             }
                             binding.emailParent.textSubjectContent.apply {
                                 text = str[3].replace(";BODY","")
-                                setOnClickListener {
-                                    textCopyThenPost(str[3].replace(";BODY",""))
-                                }
                             }
                             binding.emailParent.textMessage.apply {
                                 text = str[4].replace(";;","")
-                                setOnClickListener {
-                                    textCopyThenPost(str[4].replace(";;",""))
-                                }
                             }
-
-                            val emailIntent = Intent(
-                                Intent.ACTION_SENDTO, Uri.fromParts(
-                                    "mailto", str[2].replace(";SUB",""), null
-                                )
-                            )
-                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[3].replace(";BODY",""))
-                            emailIntent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";;",""))
-                            startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                            binding.emailParent.openEmailBtn.setOnClickListener {
+                                val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                emailIntent.data = Uri.parse("mailto:")
+                                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[2].replace(";SUB","")))
+                                emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[3].replace(";BODY",""))
+                                emailIntent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";;",""))
+                                requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                            }
+                            binding.emailParent.emailShareBtn.setOnClickListener {
+                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[2].replace(";SUB","")))
+                                intent.type = "text/plain"
+                                intent.putExtra(Intent.EXTRA_TEXT, str[2].replace(";SUB",""))
+                                val chooser = Intent.createChooser(intent, str[2].replace(";SUB",""))
+                                requireActivity().startActivity(chooser)
+                            }
+                            binding.emailParent.emailCopyBtn.setOnClickListener {
+                                textCopyThenPost(str[2].replace(";SUB",""))
+                            }
 
                         } else {
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
                             binding.textText.text = scannedString
+                            binding.textShareBtn.setOnClickListener {
+                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                intent.type = "text/plain"
+                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                                val chooser = Intent.createChooser(intent, scannedString)
+                                requireActivity().startActivity(chooser)
+                            }
+                            binding.textCopyBtn.setOnClickListener {
+                                textCopyThenPost(scannedString)
+                            }
                         }
 
                     }
@@ -212,19 +222,24 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 val emailStr = scannedString.replace("mailto:","")
                                 binding.emailParent.textEmailContent.apply {
                                     text = emailStr
-                                    setOnClickListener {
-                                        textCopyThenPost(emailStr)
-                                    }
+                                }
+                                binding.emailParent.openEmailBtn.setOnClickListener {
+                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                    emailIntent.data = Uri.parse("mailto:")
+                                    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
+                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                 }
                             }else if (scannedString.contains("MAILTO")){
                                 val emailStr = scannedString.replace("MAILTO","")
                                 binding.emailParent.textEmailContent.apply {
                                     text = emailStr.replace(":","").replace(" ","")
-                                    setOnClickListener {
-                                        textCopyThenPost(emailStr.replace(":","").replace(" ",""))
-                                    }
                                 }
-
+                                binding.emailParent.openEmailBtn.setOnClickListener {
+                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                    emailIntent.data = Uri.parse("mailto:")
+                                    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr.replace(":","").replace(" ","")))
+                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                }
                             } else {
 
                             }
@@ -233,8 +248,28 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
-                        binding.textText.text = scannedString
-                        binding.textText.setOnClickListener {
+                        binding.textText.apply {
+                            text = scannedString
+                            setOnClickListener {
+                                textCopyThenPost(scannedString)
+                            }
+                            setOnLongClickListener {
+                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                intent.type = "text/plain"
+                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                                val chooser = Intent.createChooser(intent, scannedString)
+                                requireActivity().startActivity(chooser)
+                                return@setOnLongClickListener true
+                            }
+                        }
+                        binding.textShareBtn.setOnClickListener {
+                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                            intent.type = "text/plain"
+                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                            val chooser = Intent.createChooser(intent, scannedString)
+                            requireActivity().startActivity(chooser)
+                        }
+                        binding.textCopyBtn.setOnClickListener {
                             textCopyThenPost(scannedString)
                         }
                     }

@@ -157,7 +157,7 @@
                     android:id="@+id/email_parent"
                     layout="@layout/email_parent_layout" />
 
-                <RelativeLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/text_parent"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -171,11 +171,54 @@
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
                         android:layout_marginVertical="32dp"
-                        android:layout_marginStart="32dp"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="24sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="32dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_text">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/text_share_btn"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="Share"
+                            android:textSize="16sp"
+                            app:iconTint="?attr/colorOnSecondary"
+                            app:icon="@drawable/baseline_ios_share_24"
+                            app:iconGravity="start"
+                            android:textColor="?attr/colorOnSecondary"
+                            android:layout_marginHorizontal="8dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/text_copy_btn"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="Copy"
+                            android:textSize="16sp"
+                            app:iconTint="?attr/colorOnSecondary"
+                            app:icon="@drawable/baseline_content_copy_24"
+                            app:iconGravity="start"
+                            android:textColor="?attr/colorOnSecondary"
+                            android:layout_marginHorizontal="8dp"/>
+
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </io.github.florent37.shapeofview.shapes.RoundRectView>
 

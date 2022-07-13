@@ -82,8 +82,59 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/message_title" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_message">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/open_email_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Open"
+            android:textSize="13sp"
+            android:textColor="?attr/colorOnSecondary"
+            app:icon="@drawable/baseline_open_in_browser_24"
+            app:iconTint="?attr/colorOnSecondary"
+            android:layout_marginHorizontal="4dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/email_share_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Share"
+            android:textSize="13sp"
+            app:iconTint="?attr/colorOnSecondary"
+            app:icon="@drawable/baseline_ios_share_24"
+            app:iconGravity="start"
+            android:textColor="?attr/colorOnSecondary"
+            android:layout_marginHorizontal="4dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/email_copy_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Copy"
+            android:textSize="13sp"
+            app:iconTint="?attr/colorOnSecondary"
+            app:icon="@drawable/baseline_content_copy_24"
+            app:iconGravity="start"
+            android:textColor="?attr/colorOnSecondary"
+            android:layout_marginHorizontal="4dp"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
