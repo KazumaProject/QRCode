@@ -3,6 +3,7 @@ package com.kazumaproject7.qrcodescanner.ui.result
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -19,6 +20,10 @@ import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -63,9 +68,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             setTextColor(Color.parseColor("#5e6fed"))
                             paintFlags = Paint.UNDERLINE_TEXT_FLAG
                             setOnClickListener {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                                val chooser = Intent.createChooser(intent,"Open $scannedString")
-                                requireActivity().startActivity(chooser)
+                                textCopyThenPost(scannedString)
                             }
                             setOnLongClickListener {
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
@@ -75,11 +78,86 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                                 return@setOnLongClickListener true
                             }
-                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                            intent.type = "text/plain"
-                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                            val chooser = Intent.createChooser(intent, scannedString)
-                            requireActivity().startActivity(chooser)
+                            binding.openDefaultBrowserBtn.setOnClickListener {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                                val chooser = Intent.createChooser(intent,"Open $scannedString")
+                                requireActivity().startActivity(chooser)
+                            }
+                            binding.shareBtn.setOnClickListener {
+
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
+
+                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                intent.type = "text/plain"
+                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                                val chooser = Intent.createChooser(intent, scannedString)
+                                requireActivity().startActivity(chooser)
+                            }
+                            binding.copyBtn.setOnClickListener {
+
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
+
+                                when (context.resources?.configuration?.uiMode?.and(
+                                    Configuration.UI_MODE_NIGHT_MASK)) {
+                                    Configuration.UI_MODE_NIGHT_YES -> {
+                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                    }
+                                    Configuration.UI_MODE_NIGHT_NO -> {
+                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                    }
+                                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                    }
+                                }
+
+                                textCopyThenPost(scannedString)
+                            }
                         }
 
                     }

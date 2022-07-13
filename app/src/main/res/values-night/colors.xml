@@ -15,4 +15,5 @@
     <color name="dark_blue">#1080a6</color>
     <color name="blue2">#def2fa</color>
     <color name="result_bg">#FF000000</color>
+    <color name="result_text">#FFFFFFFF</color>
 </resources>
