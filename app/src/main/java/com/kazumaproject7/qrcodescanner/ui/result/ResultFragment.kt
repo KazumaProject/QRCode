@@ -68,27 +68,17 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                             }
                             setOnLongClickListener {
-                                textCopyThenPost(scannedString)
+                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                intent.type = "text/plain"
+                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                                val chooser = Intent.createChooser(intent, scannedString)
+                                requireActivity().startActivity(chooser)
                                 return@setOnLongClickListener true
                             }
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                            val resInfos: List<ResolveInfo> =
-                                requireActivity().packageManager.queryIntentActivities(
-                                    intent,
-                                    PackageManager.MATCH_DEFAULT_ONLY
-                                )
-                            val intents: MutableList<Intent> = ArrayList()
-                            for (resInfo in resInfos) {
-                                val targeted = Intent(intent)
-                                val packageName = resInfo.activityInfo.packageName
-                                if (requireActivity().packageName.equals(packageName)) {
-                                    continue
-                                }
-                                targeted.setPackage(packageName)
-                                intents.add(targeted)
-                            }
-                            val chooser = Intent.createChooser(Intent(), scannedString)
-                            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.toTypedArray())
+                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                            intent.type = "text/plain"
+                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                            val chooser = Intent.createChooser(intent, scannedString)
                             requireActivity().startActivity(chooser)
                         }
 
