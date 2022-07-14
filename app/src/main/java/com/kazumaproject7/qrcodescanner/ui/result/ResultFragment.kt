@@ -143,19 +143,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     }
                                 }
 
-                                when (context.resources?.configuration?.uiMode?.and(
-                                    Configuration.UI_MODE_NIGHT_MASK)) {
-                                    Configuration.UI_MODE_NIGHT_YES -> {
-                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                    }
-                                    Configuration.UI_MODE_NIGHT_NO -> {
-                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                    }
-                                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                        binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                    }
-                                }
-
                                 textCopyThenPost(scannedString)
                             }
                         }
@@ -176,22 +163,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 text = str[4].replace(";;","")
                             }
                             binding.emailParent.openEmailBtn.setOnClickListener {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
-                                    delay(100)
-                                    when (context?.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
+                                setBackGroundEmailOpenBtn()
                                 val emailIntent = Intent(Intent.ACTION_SENDTO)
                                 emailIntent.data = Uri.parse("mailto:")
                                 emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[2].replace(";SUB","")))
@@ -200,22 +172,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                             }
                             binding.emailParent.emailShareBtn.setOnClickListener {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
-                                    delay(100)
-                                    when (context?.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
+                                setBackgroundEmailShare()
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[2].replace(";SUB","")))
                                 intent.type = "text/plain"
                                 intent.putExtra(Intent.EXTRA_TEXT, str[2].replace(";SUB",""))
@@ -223,22 +180,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                             }
                             binding.emailParent.emailCopyBtn.setOnClickListener {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
-                                    delay(100)
-                                    when (context?.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
+                                setBackgroundEmailCopy()
                                 textCopyThenPost(str[2].replace(";SUB",""))
                             }
 
@@ -247,6 +189,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             binding.textParent.visibility = View.VISIBLE
                             binding.textText.text = scannedString
                             binding.textShareBtn.setOnClickListener {
+                                setBackGroundTextShareBtn()
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
                                 intent.type = "text/plain"
                                 intent.putExtra(Intent.EXTRA_TEXT, scannedString)
@@ -254,6 +197,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                             }
                             binding.textCopyBtn.setOnClickListener {
+                                setBackGroundTextCopyBtn()
                                 textCopyThenPost(scannedString)
                             }
                         }
@@ -273,6 +217,28 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                         binding.emailParent.textMessage.apply {
                                             text = str[1].replace("body=","")
                                         }
+
+                                        binding.emailParent.openEmailBtn.setOnClickListener {
+                                            setBackGroundEmailOpenBtn()
+                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                            emailIntent.data = Uri.parse("mailto:")
+                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
+                                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[1].replace("body=",""))
+                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                        }
+                                        binding.emailParent.emailShareBtn.setOnClickListener {
+                                            setBackgroundEmailShare()
+                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[0]))
+                                            intent.type = "text/plain"
+                                            intent.putExtra(Intent.EXTRA_TEXT, str[0])
+                                            val chooser = Intent.createChooser(intent, str[0])
+                                            requireActivity().startActivity(chooser)
+                                        }
+                                        binding.emailParent.emailCopyBtn.setOnClickListener {
+                                            setBackgroundEmailCopy()
+                                            textCopyThenPost(str[0])
+                                        }
+
                                     } else {
 
                                     }
@@ -300,6 +266,28 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             binding.emailParent.textSubjectContent.apply {
                                                 text = str[1].replace("subject=","")
                                             }
+
+                                            binding.emailParent.openEmailBtn.setOnClickListener {
+                                                setBackGroundEmailOpenBtn()
+                                                val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                                emailIntent.data = Uri.parse("mailto:")
+                                                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
+                                                emailIntent.putExtra(Intent.EXTRA_SUBJECT,str[1].replace("subject=",""))
+                                                requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                            }
+                                            binding.emailParent.emailShareBtn.setOnClickListener {
+                                                setBackgroundEmailShare()
+                                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[0]))
+                                                intent.type = "text/plain"
+                                                intent.putExtra(Intent.EXTRA_TEXT, str[0])
+                                                val chooser = Intent.createChooser(intent, str[0])
+                                                requireActivity().startActivity(chooser)
+                                            }
+                                            binding.emailParent.emailCopyBtn.setOnClickListener {
+                                                setBackgroundEmailCopy()
+                                                textCopyThenPost(str[0])
+                                            }
+
                                         } else {
 
                                         }
@@ -311,20 +299,23 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             text = emailStr
                                         }
                                         binding.emailParent.openEmailBtn.setOnClickListener {
+                                            setBackGroundEmailOpenBtn()
                                             val emailIntent = Intent(Intent.ACTION_SENDTO)
                                             emailIntent.data = Uri.parse("mailto:")
                                             emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
                                             requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                         }
                                         binding.emailParent.emailShareBtn.setOnClickListener {
-                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                            setBackgroundEmailShare()
+                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(emailStr))
                                             intent.type = "text/plain"
-                                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                                            val chooser = Intent.createChooser(intent, scannedString)
+                                            intent.putExtra(Intent.EXTRA_TEXT, emailStr)
+                                            val chooser = Intent.createChooser(intent, emailStr)
                                             requireActivity().startActivity(chooser)
                                         }
                                         binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            textCopyThenPost(scannedString)
+                                            setBackgroundEmailCopy()
+                                            textCopyThenPost(emailStr)
                                         }
                                     }
                                 }
@@ -335,10 +326,23 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     text = emailStr.replace(":","").replace(" ","")
                                 }
                                 binding.emailParent.openEmailBtn.setOnClickListener {
+                                    setBackGroundEmailOpenBtn()
                                     val emailIntent = Intent(Intent.ACTION_SENDTO)
                                     emailIntent.data = Uri.parse("mailto:")
                                     emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr.replace(":","").replace(" ","")))
                                     requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                }
+                                binding.emailParent.emailShareBtn.setOnClickListener {
+                                    setBackgroundEmailShare()
+                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(emailStr.replace(":","").replace(" ","")))
+                                    intent.type = "text/plain"
+                                    intent.putExtra(Intent.EXTRA_TEXT, emailStr.replace(":","").replace(" ",""))
+                                    val chooser = Intent.createChooser(intent, emailStr.replace(":","").replace(" ",""))
+                                    requireActivity().startActivity(chooser)
+                                }
+                                binding.emailParent.emailCopyBtn.setOnClickListener {
+                                    setBackgroundEmailCopy()
+                                    textCopyThenPost(emailStr.replace(":","").replace(" ",""))
                                 }
                             } else {
 
@@ -363,6 +367,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                         }
                         binding.textShareBtn.setOnClickListener {
+                            setBackGroundTextShareBtn()
                             val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
                             intent.type = "text/plain"
                             intent.putExtra(Intent.EXTRA_TEXT, scannedString)
@@ -370,6 +375,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             requireActivity().startActivity(chooser)
                         }
                         binding.textCopyBtn.setOnClickListener {
+                            setBackGroundTextCopyBtn()
                             textCopyThenPost(scannedString)
                         }
                     }
@@ -407,58 +413,100 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         _binding = null
     }
 
-    private fun launch(uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW, uri).also {
-            it.addCategory(Intent.CATEGORY_DEFAULT)
-            it.addCategory(Intent.CATEGORY_BROWSABLE)
-            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (uri.isWebScheme()) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_REQUIRE_DEFAULT)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER)
-                try {
-                    // ブラウザ以外のURLに紐付けられたアプリを起動
-                    startActivity(intent)
-                } catch (e : ActivityNotFoundException) {
-                    val intent2 = Intent(Intent.ACTION_VIEW, uri)
-                    requireActivity().startActivity(intent2)
+    private fun setBackGroundTextShareBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
                 }
-            } else {
-                startActivity(intent)
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
             }
         }
     }
 
-    private fun shouldLaunchBrowser(context: Context, uri: Uri): Boolean {
-        val intent = Intent(Intent.ACTION_VIEW, uri).also {
-            it.addCategory(Intent.CATEGORY_DEFAULT)
-            it.addCategory(Intent.CATEGORY_BROWSABLE)
+    private fun setBackGroundTextCopyBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
         }
-        return uri.isWebScheme() && !intent.canLaunchNonBrowserWithoutChooser(context)
     }
 
-    private fun Uri.isWebScheme(): Boolean = scheme.let {
-        it.equals("http", ignoreCase = true) || it.equals("https", ignoreCase = true)
+    private fun setBackGroundEmailOpenBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
     }
 
-    private fun Intent.canLaunchNonBrowserWithoutChooser(context: Context): Boolean {
-        val pm = context.packageManager
-        val activities = pm.queryIntentActivities(this, PackageManager.GET_RESOLVED_FILTER or PackageManager.MATCH_DEFAULT_ONLY)
-            .filter { it.filter?.isNotBrowserFilter() ?: false }
-        if (activities.isEmpty()) return false
-        val activityInfo = pm.resolveActivity(this, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo ?: return false
-        return activities.any { it.activityInfo?.packageName == activityInfo.packageName }
+    private fun setBackgroundEmailShare(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
     }
 
-    private fun IntentFilter.isNotBrowserFilter(): Boolean =
-        !hasGenericAuthority() || !hasGenericPath()
-
-    private fun IntentFilter.hasGenericAuthority(): Boolean =
-        countDataAuthorities() == 0 || authoritiesIterator().asSequence().any { it.host == "*" }
-
-    private fun IntentFilter.hasGenericPath(): Boolean =
-        countDataPaths() == 0 || pathsIterator().asSequence().any { it.path == "*" }
+    private fun setBackgroundEmailCopy(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
 
     private fun textCopyThenPost(textCopied:String) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
