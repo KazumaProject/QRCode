@@ -176,6 +176,22 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 text = str[4].replace(";;","")
                             }
                             binding.emailParent.openEmailBtn.setOnClickListener {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context?.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
                                 val emailIntent = Intent(Intent.ACTION_SENDTO)
                                 emailIntent.data = Uri.parse("mailto:")
                                 emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[2].replace(";SUB","")))
@@ -184,6 +200,22 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                             }
                             binding.emailParent.emailShareBtn.setOnClickListener {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context?.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[2].replace(";SUB","")))
                                 intent.type = "text/plain"
                                 intent.putExtra(Intent.EXTRA_TEXT, str[2].replace(";SUB",""))
@@ -191,6 +223,22 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                             }
                             binding.emailParent.emailCopyBtn.setOnClickListener {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    delay(100)
+                                    when (context?.resources?.configuration?.uiMode?.and(
+                                        Configuration.UI_MODE_NIGHT_MASK)) {
+                                        Configuration.UI_MODE_NIGHT_YES -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_NO -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                                        }
+                                    }
+                                }
                                 textCopyThenPost(str[2].replace(";SUB",""))
                             }
 
@@ -213,10 +261,32 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.EMail2 ->{
                         binding.emailParent.root.visibility = View.VISIBLE
-                        if (scannedString.contains("?body=") || scannedString.contains("?subject=")){
-                            binding.emailParent.root.visibility = View.GONE
-                            binding.textParent.visibility = View.VISIBLE
-                            binding.textText.text = scannedString.replace("mailto:","")
+                        if (scannedString.contains("?body=") || scannedString.contains("&subject=")){
+                            when{
+                                scannedString.contains("?body=") && !scannedString.contains("&subject=") ->{
+                                    val str = scannedString.split("?" ).toTypedArray()
+                                    if (str.size >=2){
+                                        val str1 = str[0].replace("mailto:","")
+                                        binding.emailParent.textEmailContent.apply {
+                                            text = str1
+                                        }
+                                        binding.emailParent.textMessage.apply {
+                                            text = str[1].replace("body=","")
+                                        }
+                                    } else {
+
+                                    }
+                                }
+                                !scannedString.contains("?body=") && scannedString.contains("&subject=") ->{
+                                    binding.emailParent.textMessage.text  = scannedString
+                                }
+                                scannedString.contains("?body=") && scannedString.contains("&subject=") ->{
+                                    binding.emailParent.textMessage.text  = scannedString
+                                }
+                                else ->{
+                                    binding.emailParent.textMessage.text  = scannedString
+                                }
+                            }
                         } else {
                             if (scannedString.contains("mailto:")){
                                 val emailStr = scannedString.replace("mailto:","")
