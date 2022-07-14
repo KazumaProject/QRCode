@@ -289,16 +289,46 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                         } else {
                             if (scannedString.contains("mailto:")){
-                                val emailStr = scannedString.replace("mailto:","")
-                                binding.emailParent.textEmailContent.apply {
-                                    text = emailStr
+                                when{
+                                    scannedString.contains("?subject=") ->{
+                                        val emailStr = scannedString.replace("mailto:","")
+                                        val str = emailStr.split("?" ).toTypedArray()
+                                        if (str.size >= 2){
+                                            binding.emailParent.textEmailContent.apply {
+                                                text = str[0]
+                                            }
+                                            binding.emailParent.textSubjectContent.apply {
+                                                text = str[1].replace("subject=","")
+                                            }
+                                        } else {
+
+                                        }
+
+                                    }
+                                    else ->{
+                                        val emailStr = scannedString.replace("mailto:","")
+                                        binding.emailParent.textEmailContent.apply {
+                                            text = emailStr
+                                        }
+                                        binding.emailParent.openEmailBtn.setOnClickListener {
+                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                            emailIntent.data = Uri.parse("mailto:")
+                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
+                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                        }
+                                        binding.emailParent.emailShareBtn.setOnClickListener {
+                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                                            intent.type = "text/plain"
+                                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                                            val chooser = Intent.createChooser(intent, scannedString)
+                                            requireActivity().startActivity(chooser)
+                                        }
+                                        binding.emailParent.emailCopyBtn.setOnClickListener {
+                                            textCopyThenPost(scannedString)
+                                        }
+                                    }
                                 }
-                                binding.emailParent.openEmailBtn.setOnClickListener {
-                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                    emailIntent.data = Uri.parse("mailto:")
-                                    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
-                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                }
+
                             }else if (scannedString.contains("MAILTO")){
                                 val emailStr = scannedString.replace("MAILTO","")
                                 binding.emailParent.textEmailContent.apply {
