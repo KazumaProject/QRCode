@@ -99,7 +99,7 @@ class TargetView(
     private fun setupCrossLinePaint(): Paint {
         return Paint().apply {
             isAntiAlias = true
-            color = ContextCompat.getColor(c, android.R.color.white)
+            color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
             strokeWidth = 6f
         }
     }
