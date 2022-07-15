@@ -8,5 +8,11 @@ plugins {
 version = '4.3.0'
 group = 'com.journeyapps'
 
+ext.kotlin_version = '1.7.10'
+
+ext {
+    nav_version = "2.3.5"
+}
+
 ext.androidTargetSdk = 30
 ext.zxingCore = 'com.google.zxing:core:3.4.1'
