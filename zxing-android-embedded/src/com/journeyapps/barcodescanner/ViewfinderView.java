@@ -16,6 +16,11 @@
 
 package com.journeyapps.barcodescanner;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -25,6 +30,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Animation;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.R;
@@ -137,6 +145,8 @@ public class ViewfinderView extends View {
         }
     }
 
+
+
     @Override
     public void onDraw(Canvas canvas) {
         refreshSizes();
@@ -149,13 +159,15 @@ public class ViewfinderView extends View {
 
         final int width = getWidth();
         final int height = getHeight();
+        final float margin = 50f;
 
         // Draw the exterior (i.e. outside the framing rect) darkened
-        paint.setColor(resultBitmap != null ? resultColor : maskColor);
-        canvas.drawRect(0, 0, width, frame.top, paint);
-        canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-        canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+        // paint.setColor(resultBitmap != null ? resultColor : maskColor);
+//        canvas.drawRect(0, 0, width, frame.top, paint);
+//        canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
+//        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
+//        canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+
 
         if (resultBitmap != null) {
             // Draw the opaque result bitmap over the scanning rectangle
@@ -163,15 +175,18 @@ public class ViewfinderView extends View {
             canvas.drawBitmap(resultBitmap, null, frame, paint);
         } else {
             // If wanted, draw a red "laser scanner" line through the middle to show decoding is active
-            if (laserVisibility) {
-                paint.setColor(laserColor);
+//            if (laserVisibility) {
+//                paint.setColor(laserColor);
+//
+//                paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
+//                scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
+//
+//                final int middle = frame.height() / 2 + frame.top;
+//
+//                canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
+//            }
 
-                paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
-                scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
 
-                final int middle = frame.height() / 2 + frame.top;
-                canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
-            }
 
             final float scaleX = this.getWidth() / (float) previewSize.width;
             final float scaleY = this.getHeight() / (float) previewSize.height;

@@ -86,11 +86,9 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/text_url"
                         android:layout_width="0dp"
+                        android:paddingHorizontal="16dp"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
                         android:layout_marginVertical="32dp"
-                        android:layout_marginStart="8dp"
                         android:textAlignment="textStart"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="24sp"
@@ -166,10 +164,10 @@
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/text_text"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:paddingHorizontal="16dp"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
+                        android:textAlignment="textStart"
                         android:layout_marginVertical="32dp"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="24sp"
