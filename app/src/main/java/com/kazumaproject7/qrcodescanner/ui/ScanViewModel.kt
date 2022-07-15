@@ -31,4 +31,12 @@ class ScanViewModel: ViewModel() {
         _scannedStringType.value = value
     }
 
+    val flashStatus: LiveData<Boolean>
+        get() = _flashStatus
+    private val _flashStatus = MutableLiveData(false)
+
+    fun updateFlashStatus(value: Boolean){
+        _flashStatus.value = value
+    }
+
 }

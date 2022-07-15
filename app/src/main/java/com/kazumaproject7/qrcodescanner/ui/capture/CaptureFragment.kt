@@ -2,19 +2,20 @@ package com.kazumaproject7.qrcodescanner.ui.capture
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Bitmap.Config
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.ResultPoint
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
+import com.journeyapps.barcodescanner.camera.CameraManager
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
@@ -95,6 +96,37 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         )
         binding.barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
         binding.barcodeView.decodeContinuous(callback)
+
+        viewModel.flashStatus.observe(viewLifecycleOwner){
+            if (it){
+                binding.barcodeView.setTorchOn()
+            }else{
+                binding.barcodeView.setTorchOff()
+            }
+        }
+
+        viewModel.flashStatus.value?.let {
+            if (it){
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
+                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            }else{
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
+                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.white)
+            }
+        }
+        binding.flashBtn.setOnClickListener {
+            viewModel.flashStatus.value?.let {
+                if (it){
+                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
+                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
+                    viewModel.updateFlashStatus(false)
+                }else{
+                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
+                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+                    viewModel.updateFlashStatus(true)
+                }
+            }
+        }
     }
 
     override fun onResume() {
