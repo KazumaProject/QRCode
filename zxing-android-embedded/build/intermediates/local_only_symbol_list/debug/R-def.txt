@@ -23,6 +23,7 @@ color zxing_viewfinder_mask
 id centerCrop
 id fitCenter
 id fitXY
+id target_view
 id zxing_back_button
 id zxing_barcode_scanner
 id zxing_barcode_surface

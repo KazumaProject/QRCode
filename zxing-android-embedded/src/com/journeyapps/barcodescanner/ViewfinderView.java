@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 
 import androidx.core.content.ContextCompat;
@@ -143,6 +144,7 @@ public class ViewfinderView extends View {
             this.framingRect = framingRect;
             this.previewSize = previewSize;
         }
+
     }
 
 

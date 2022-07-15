@@ -31,6 +31,7 @@ import java.util.Set;
 public class DecoratedBarcodeView extends FrameLayout {
     private BarcodeView barcodeView;
     private ViewfinderView viewFinder;
+    private TargetView targetView;
 
     /**
      * The instance of @link TorchListener to send events callback.
@@ -103,6 +104,7 @@ public class DecoratedBarcodeView extends FrameLayout {
 
         viewFinder = findViewById(R.id.zxing_viewfinder_view);
 
+
         if (viewFinder == null) {
             throw new IllegalArgumentException(
                 "There is no a com.journeyapps.barcodescanner.ViewfinderView on provided layout " +
@@ -110,6 +112,7 @@ public class DecoratedBarcodeView extends FrameLayout {
         }
 
         viewFinder.setCameraPreview(barcodeView);
+
     }
 
     /**
