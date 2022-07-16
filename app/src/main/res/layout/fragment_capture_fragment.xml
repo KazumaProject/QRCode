@@ -37,7 +37,7 @@
         android:layout_gravity="top">
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/flash_btn"
+            android:id="@+id/folder_open"
             android:tint="@color/black"
             android:layout_width="32dp"
             android:layout_height="32dp"

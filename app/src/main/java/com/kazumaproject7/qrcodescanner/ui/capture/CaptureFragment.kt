@@ -1,8 +1,11 @@
 package com.kazumaproject7.qrcodescanner.ui.capture
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -10,19 +13,23 @@ import android.view.ViewGroup
 import android.webkit.URLUtil
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.ResultPoint
+import com.google.zxing.*
+import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
-import com.journeyapps.barcodescanner.camera.CameraManager
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import com.kazumaproject7.qrcodescanner.ui.result.ResultFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
+
 
 class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
@@ -105,28 +112,38 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
-        viewModel.flashStatus.value?.let {
-            if (it){
-                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
-                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            }else{
-                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
-                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.white)
+        binding.folderOpen.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_folder_open_24)
+        binding.folderOpen.setOnClickListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                binding.folderOpen.backgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+                delay(200)
+                binding.folderOpen.backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             }
+            selectFileByUri()
         }
-        binding.flashBtn.setOnClickListener {
-            viewModel.flashStatus.value?.let {
-                if (it){
-                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
-                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
-                    viewModel.updateFlashStatus(false)
-                }else{
-                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
-                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                    viewModel.updateFlashStatus(true)
-                }
-            }
-        }
+
+//        viewModel.flashStatus.value?.let {
+//            if (it){
+//                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
+//                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+//            }else{
+//                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
+//                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.white)
+//            }
+//        }
+//        binding.flashBtn.setOnClickListener {
+//            viewModel.flashStatus.value?.let {
+//                if (it){
+//                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
+//                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
+//                    viewModel.updateFlashStatus(false)
+//                }else{
+//                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
+//                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+//                    viewModel.updateFlashStatus(true)
+//                }
+//            }
+//        }
     }
 
     override fun onResume() {
@@ -142,6 +159,90 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != RESULT_OK){
+            return
+        }
+        when(requestCode){
+            READ_REQUEST_CODE ->{
+                data?.data?.also { uri ->
+                    try {
+                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
+
+                        if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
+                            val resultText = readQrcode(bitmap)[0]
+                            val barcodeFormat = readQrcode(bitmap)[1]
+
+                            if (URLUtil.isValidUrl(resultText)){
+                                viewModel.updateScannedStringType(ScannedStringType.Url)
+                            }else{
+                                when{
+                                    resultText.contains("MATMSG") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                    }
+                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                    }
+                                    else ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                                    }
+                                }
+                            }
+                            viewModel.updateScannedString(resultText)
+                            viewModel.updateScannedType(barcodeFormat)
+
+                            val bundle = Bundle()
+                            bundle.putParcelable("barcodeImage",bitmap)
+                            val resultFragment = ResultFragment()
+                            resultFragment.arguments = bundle
+                            val transaction = parentFragmentManager.beginTransaction()
+                            transaction.addToBackStack(null)
+                            transaction.replace(R.id.fragmentHostView,resultFragment)
+                            transaction.commit()
+                        } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
+
+                            val resultText = readQrcode(bitmap)[0]
+
+                            if (URLUtil.isValidUrl(resultText)){
+                                viewModel.updateScannedStringType(ScannedStringType.Url)
+                            }else{
+                                when{
+                                    resultText.contains("MATMSG") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                    }
+                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                    }
+                                    else ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                                    }
+                                }
+                            }
+                            viewModel.updateScannedString(resultText)
+
+                            val bundle = Bundle()
+                            bundle.putParcelable("barcodeImage",bitmap)
+                            val resultFragment = ResultFragment()
+                            resultFragment.arguments = bundle
+                            val transaction = parentFragmentManager.beginTransaction()
+                            transaction.addToBackStack(null)
+                            transaction.replace(R.id.fragmentHostView,resultFragment)
+                            transaction.commit()
+
+                        }else{
+
+                        }
+
+                    }catch (e: Exception){
+                        Timber.e(e.localizedMessage)
+                    }
+                }
+
+            }
+        }
     }
 
     private fun startResultFragment(result: BarcodeResult){
@@ -341,6 +442,38 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     }
 
+    private fun readQrcode(bitmap: Bitmap): List<String> {
+        val width = bitmap.width
+        val height = bitmap.height
+        val pixels = IntArray(width * height)
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        try {
+            val source: LuminanceSource = RGBLuminanceSource(width, height, pixels)
+            val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
+            val reader: Reader = MultiFormatReader()
+            val decodeResult: Result = reader.decode(binaryBitmap)
+            val result: String = decodeResult.text
+            val resultBarcode = decodeResult.barcodeFormat.name
+            Timber.d("read QR: $result")
+            val list = mutableListOf<String>(result,resultBarcode)
+            return list.toList()
+        } catch (e: java.lang.Exception) {
+            Timber.d("read QR: ${e.localizedMessage}")
+        }
+        return emptyList()
+    }
+
+    private fun selectFileByUri(){
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+        }
+        startActivityForResult(intent, READ_REQUEST_CODE)
+    }
+
+    companion object {
+        private const val READ_REQUEST_CODE: Int = 77
+    }
 
 
 }

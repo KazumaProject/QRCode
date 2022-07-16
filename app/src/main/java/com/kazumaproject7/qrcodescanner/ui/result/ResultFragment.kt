@@ -80,7 +80,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             binding.openDefaultBrowserBtn.setOnClickListener {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
                                     delay(100)
                                     when (context.resources?.configuration?.uiMode?.and(
                                         Configuration.UI_MODE_NIGHT_MASK)) {
@@ -102,7 +102,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             binding.shareBtn.setOnClickListener {
 
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
                                     delay(100)
                                     when (context.resources?.configuration?.uiMode?.and(
                                         Configuration.UI_MODE_NIGHT_MASK)) {
@@ -127,7 +127,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             binding.copyBtn.setOnClickListener {
 
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+                                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
                                     delay(100)
                                     when (context.resources?.configuration?.uiMode?.and(
                                         Configuration.UI_MODE_NIGHT_MASK)) {
@@ -415,7 +415,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private fun setBackGroundTextShareBtn(){
         CoroutineScope(Dispatchers.Main).launch {
-            binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
             delay(100)
             when (context?.resources?.configuration?.uiMode?.and(
                 Configuration.UI_MODE_NIGHT_MASK)) {
@@ -434,7 +434,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private fun setBackGroundTextCopyBtn(){
         CoroutineScope(Dispatchers.Main).launch {
-            binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
             delay(100)
             when (context?.resources?.configuration?.uiMode?.and(
                 Configuration.UI_MODE_NIGHT_MASK)) {
@@ -453,7 +453,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private fun setBackGroundEmailOpenBtn(){
         CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
             delay(100)
             when (context?.resources?.configuration?.uiMode?.and(
                 Configuration.UI_MODE_NIGHT_MASK)) {
@@ -472,7 +472,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private fun setBackgroundEmailShare(){
         CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
             delay(100)
             when (context?.resources?.configuration?.uiMode?.and(
                 Configuration.UI_MODE_NIGHT_MASK)) {
@@ -491,7 +491,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private fun setBackgroundEmailCopy(){
         CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.blue)
+            binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
             delay(100)
             when (context?.resources?.configuration?.uiMode?.and(
                 Configuration.UI_MODE_NIGHT_MASK)) {
