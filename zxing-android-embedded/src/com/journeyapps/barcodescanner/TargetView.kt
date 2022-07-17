@@ -24,7 +24,7 @@ class TargetView(
     constructor(context: Context, attrs: AttributeSet?): this(context, attrs, 0, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int): this(context, attrs, defStyleAttr, 0)
 
-    private var objectAnimator: ObjectAnimator ?= null
+    private lateinit var objectAnimator: ObjectAnimator
 
     private val c: Context by lazy {
         context
@@ -44,8 +44,7 @@ class TargetView(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        objectAnimator?.cancel()
-        objectAnimator = null
+        objectAnimator.cancel()
     }
 
     private fun drawLeftTopLine(canvas: Canvas?, paint: Paint) {
@@ -85,7 +84,7 @@ class TargetView(
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
         }
-        objectAnimator?.start()
+        objectAnimator.start()
     }
 
     private fun drawCrossLine(canvas: Canvas?, paint: Paint) {

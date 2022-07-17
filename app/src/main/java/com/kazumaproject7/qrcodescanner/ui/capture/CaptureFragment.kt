@@ -54,8 +54,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("MATMSG") ->{
                         viewModel.updateScannedStringType(ScannedStringType.EMail)
                     }
-                    lastText.contains("mailto:") || lastText.contains("MAILTO") ->{
+                    lastText.contains("mailto:") || lastText.contains("MAILTO:") ->{
                         viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                    }
+                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
+                        viewModel.updateScannedStringType(ScannedStringType.SMS)
                     }
                     else ->{
                         viewModel.updateScannedStringType(ScannedStringType.Text)

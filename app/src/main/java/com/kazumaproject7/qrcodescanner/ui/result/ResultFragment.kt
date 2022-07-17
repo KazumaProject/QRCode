@@ -247,7 +247,46 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     binding.emailParent.textMessage.text  = scannedString
                                 }
                                 scannedString.contains("?body=") && scannedString.contains("&subject=") ->{
-                                    binding.emailParent.textMessage.text  = scannedString
+                                    val str = scannedString.split("?" ).toTypedArray()
+                                    if (str.size >=2){
+                                        val str1 = str[0].replace("mailto:","")
+                                        val str2 = str[1].split("&").toTypedArray()
+                                        binding.emailParent.textEmailContent.apply {
+                                            text = str1
+                                        }
+                                        binding.emailParent.textSubjectContent.apply {
+                                            text = str2[1].replace("subject=","")
+                                        }
+                                        binding.emailParent.textMessage.apply {
+
+                                            text = str2[0].replace("body=","")
+                                        }
+
+                                        binding.emailParent.openEmailBtn.setOnClickListener {
+                                            setBackGroundEmailOpenBtn()
+                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                            emailIntent.data = Uri.parse("mailto:")
+                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str1))
+                                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str2[1].replace("subject=",""))
+                                            emailIntent.putExtra(Intent.EXTRA_TEXT, str2[0].replace("body=",""))
+                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                                        }
+                                        binding.emailParent.emailShareBtn.setOnClickListener {
+                                            setBackgroundEmailShare()
+                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str1))
+                                            intent.type = "text/plain"
+                                            intent.putExtra(Intent.EXTRA_TEXT, str1)
+                                            val chooser = Intent.createChooser(intent, str1)
+                                            requireActivity().startActivity(chooser)
+                                        }
+                                        binding.emailParent.emailCopyBtn.setOnClickListener {
+                                            setBackgroundEmailCopy()
+                                            textCopyThenPost(str1)
+                                        }
+
+                                    } else {
+
+                                    }
                                 }
                                 else ->{
                                     binding.emailParent.textMessage.text  = scannedString
@@ -350,6 +389,41 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                         }
                     }
+                    is ScannedStringType.SMS ->{
+                        binding.smsParent.smsLayoutParentView.visibility = View.VISIBLE
+                        val str = scannedString.split(":" ).toTypedArray()
+                        when(str.size){
+                            2 ->{
+
+                            }
+                            3 ->{
+                                binding.smsParent.textSmsContent.text = str[1]
+                                binding.smsParent.smsTextMessage.text = str[2]
+                                binding.smsParent.openSmsBtn.setOnClickListener {
+                                    setBackSMSTextOpenBtn()
+                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
+                                    emailIntent.data = Uri.fromParts("sms",str[1],null)
+                                    emailIntent.putExtra(Intent.EXTRA_TEXT,str[2])
+                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send sms message..."))
+                                }
+                                binding.smsParent.smsShareBtn.setOnClickListener {
+                                    setBackSMSTextShareBtn()
+                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[1]))
+                                    intent.type = "text/plain"
+                                    intent.putExtra(Intent.EXTRA_TEXT, str[1])
+                                    val chooser = Intent.createChooser(intent, str[1])
+                                    requireActivity().startActivity(chooser)
+                                }
+                                binding.smsParent.smsCopyBtn.setOnClickListener {
+                                    setBackSMSTextCopyBtn()
+                                    textCopyThenPost(str[1])
+                                }
+                            }
+                            else ->{
+
+                            }
+                        }
+                    }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
                         binding.textText.apply {
@@ -380,24 +454,14 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                     }
                     else -> {
-                        /*
-                        binding.resultText.setOnClickListener {
-                            textCopyThenPost(url)
-                        }
 
-                         */
                     }
                 }
 
 
             }
 
-
         }
-
-//        viewModel.scannedType.value?.let { type ->
-//            binding.typeText.text = "Type: $type"
-//        }
 
     }
 
@@ -446,6 +510,63 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
                 Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                     binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setBackSMSTextOpenBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setBackSMSTextShareBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setBackSMSTextCopyBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
                 }
             }
         }
