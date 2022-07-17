@@ -112,7 +112,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
-        binding.folderOpen.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_folder_open_24)
+        binding.folderOpen.background = ContextCompat.getDrawable(requireContext(),R.drawable.image)
+        binding.folderOpen.backgroundTintList = requireContext().getColorStateList(android.R.color.white)
         binding.folderOpen.setOnClickListener {
             CoroutineScope(Dispatchers.Main).launch {
                 binding.folderOpen.backgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
@@ -122,28 +123,30 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             selectFileByUri()
         }
 
-//        viewModel.flashStatus.value?.let {
-//            if (it){
-//                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
-//                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-//            }else{
-//                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
-//                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.white)
-//            }
-//        }
-//        binding.flashBtn.setOnClickListener {
-//            viewModel.flashStatus.value?.let {
-//                if (it){
-//                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_off_24)
-//                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
-//                    viewModel.updateFlashStatus(false)
-//                }else{
-//                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flashlight_on_24)
-//                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-//                    viewModel.updateFlashStatus(true)
-//                }
-//            }
-//        }
+        binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
+
+        viewModel.flashStatus.value?.let {
+            if (it){
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flash)
+                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            }else{
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flashoff)
+                binding.flashBtn.supportImageTintList = requireContext().getColorStateList(android.R.color.white)
+            }
+        }
+        binding.flashBtn.setOnClickListener {
+            viewModel.flashStatus.value?.let {
+                if (it){
+                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flashoff)
+                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
+                    viewModel.updateFlashStatus(false)
+                }else{
+                    binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flash)
+                    binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+                    viewModel.updateFlashStatus(true)
+                }
+            }
+        }
     }
 
     override fun onResume() {
