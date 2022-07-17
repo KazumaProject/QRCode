@@ -424,6 +424,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                         }
                     }
+                    is ScannedStringType.Wifi ->{
+
+                    }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
                         binding.textText.apply {

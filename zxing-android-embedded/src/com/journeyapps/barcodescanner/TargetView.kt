@@ -20,9 +20,15 @@ class TargetView(
     defStyleRes: Int
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    constructor(context: Context): this(context, null, 0, 0)
-    constructor(context: Context, attrs: AttributeSet?): this(context, attrs, 0, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int): this(context, attrs, defStyleAttr, 0)
+    constructor(context: Context): this(context, null, 0, 0){
+        expandedAnimation()
+    }
+    constructor(context: Context, attrs: AttributeSet?): this(context, attrs, 0, 0){
+        expandedAnimation()
+    }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int): this(context, attrs, defStyleAttr, 0){
+        expandedAnimation()
+    }
 
     private lateinit var objectAnimator: ObjectAnimator
 
@@ -38,9 +44,10 @@ class TargetView(
         drawLeftBottomLine(canvas, setupPaint())
         drawRightTopLine(canvas, setupPaint())
         drawRightBottomLine(canvas, setupPaint())
-        expandedAnimation()
         drawCrossLine(canvas,setupCrossLinePaint())
     }
+
+
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()

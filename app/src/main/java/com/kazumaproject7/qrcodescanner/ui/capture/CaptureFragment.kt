@@ -60,6 +60,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                     }
+                    lastText.contains("Wifi:")->{
+                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                    }
                     else ->{
                         viewModel.updateScannedStringType(ScannedStringType.Text)
                     }
