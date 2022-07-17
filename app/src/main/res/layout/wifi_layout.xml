@@ -50,11 +50,11 @@
         app:layout_constraintTop_toBottomOf="@+id/wifi_title" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/wifi_text_message"
+        android:id="@+id/wifi_pass_text_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="?attr/colorOnSecondary"
-        android:textSize="28sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginStart="8dp"
         android:ellipsize="end"
@@ -62,6 +62,58 @@
         app:layout_constraintBottom_toBottomOf="@+id/wifi_message_title"
         app:layout_constraintStart_toEndOf="@+id/wifi_message_title"
         app:layout_constraintTop_toTopOf="@+id/wifi_message_title" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/encryption_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Encryption:"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/wifi_message_title" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/wifi_encryption_type_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSecondary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@+id/encryption_title"
+        app:layout_constraintStart_toEndOf="@+id/encryption_title"
+        app:layout_constraintTop_toTopOf="@+id/encryption_title" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/wifi_hidden_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hidden:"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/wifi_encryption_type_text" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/wifi_hidden_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="?attr/colorOnSecondary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/wifi_hidden_title"
+        app:layout_constraintStart_toEndOf="@+id/wifi_hidden_title"
+        app:layout_constraintTop_toTopOf="@+id/wifi_hidden_title" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -74,7 +126,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wifi_text_message">
+        app:layout_constraintTop_toBottomOf="@+id/wifi_hidden_title">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/open_wifi_btn"

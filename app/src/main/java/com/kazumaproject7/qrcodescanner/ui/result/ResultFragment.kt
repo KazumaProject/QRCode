@@ -20,10 +20,10 @@ import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import me.angrybyte.goose.Article
+import me.angrybyte.goose.ContentExtractor
+import me.angrybyte.goose.network.GooseDownloader
 import timber.log.Timber
 
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -74,6 +74,40 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 val chooser = Intent.createChooser(intent, scannedString)
                                 requireActivity().startActivity(chooser)
                             }
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                withContext(Dispatchers.Main){
+                                  binding.urlLogoProgress.visibility = View.VISIBLE
+                                  binding.urlTitleProgress.visibility = View.VISIBLE
+                                }
+                                val config = me.angrybyte.goose.Configuration(requireActivity().cacheDir.absolutePath)
+                                val extractor = ContentExtractor(config)
+                                val article = extractor.extractContent(scannedString,false)
+                                article?.let { article1 ->
+                                    val title = article1.title
+                                    title?.let { str ->
+                                        withContext(Dispatchers.Main){
+                                            binding.textUrlTitleText.text = str
+                                            binding.urlTitleProgress.visibility = View.GONE
+                                        }
+                                    }
+                                    val image = article1.topImage
+                                    if (image == null){
+                                        binding.urlLogoImg.visibility = View.GONE
+                                        binding.urlLogoProgress.visibility = View.GONE
+                                    }
+                                    image?.let { img ->
+                                        val bitmap = GooseDownloader.getPhoto(img.imageSrc, true)
+                                        bitmap?.let { b ->
+                                            withContext(Dispatchers.Main){
+                                                binding.urlLogoImg.setImageBitmap(b)
+                                                binding.urlLogoProgress.visibility = View.GONE
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             setOnLongClickListener {
                                 textCopyThenPost(scannedString)
                                 return@setOnLongClickListener true
@@ -426,6 +460,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Wifi ->{
                         binding.wifiParent.wifiParentView.visibility = View.VISIBLE
+                        binding.wifiParent.textWifiContent.text = scannedString
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
