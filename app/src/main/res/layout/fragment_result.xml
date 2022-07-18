@@ -81,7 +81,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/result_bg"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/text_url"
@@ -96,16 +96,16 @@
                         android:layout_marginTop="24dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_url_title_text" />
+                        app:layout_constraintTop_toBottomOf="@+id/url_logo_img" />
 
-<!--                    <com.google.android.material.imageview.ShapeableImageView-->
-<!--                        android:id="@+id/url_logo_img"-->
-<!--                        android:layout_width="64dp"-->
-<!--                        android:layout_height="64dp"-->
-<!--                        android:layout_marginTop="24dp"-->
-<!--                        android:layout_marginStart="24dp"-->
-<!--                        app:layout_constraintStart_toStartOf="parent"-->
-<!--                        app:layout_constraintTop_toTopOf="parent" />-->
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/url_logo_img"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <ProgressBar
                         android:id="@+id/url_logo_progress"
@@ -122,27 +122,27 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="@+id/text_url_title_text"
+                        app:layout_constraintBottom_toBottomOf="@+id/url_logo_img"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/text_url_title_text"
-                        app:layout_constraintTop_toTopOf="@+id/text_url_title_text" />
+                        app:layout_constraintStart_toEndOf="@+id/url_logo_img"
+                        app:layout_constraintTop_toTopOf="@+id/url_logo_img" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/text_url_title_text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="2"
                         android:paddingHorizontal="24dp"
                         android:textAlignment="textStart"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="20sp"
+                        android:ellipsize="end"
+                        android:maxLines="2"
                         android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@+id/url_logo_img"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:layout_marginTop="24dp"/>
+                        app:layout_constraintStart_toEndOf="@+id/url_logo_img"
+                        app:layout_constraintTop_toTopOf="@+id/url_logo_img" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

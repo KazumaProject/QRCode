@@ -99,46 +99,74 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 return@setOnLongClickListener true
                             }
                         }
-                        CoroutineScope(Dispatchers.IO + Job()).launch {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main){
+                                binding.urlLogoProgress.visibility = View.VISIBLE
+                                binding.urlTitleProgress.visibility = View.VISIBLE
+                            }
                             val config =
                                 me.angrybyte.goose.Configuration(requireActivity().cacheDir.absolutePath)
                             val extractor = ContentExtractor(config)
                             val article = extractor.extractContent(scannedString, false)
 
-                            withContext(Dispatchers.Main) {
-                                binding.urlTitleProgress.visibility = View.VISIBLE
-                                article?.let { article1 ->
-                                    val title = article1.title
-                                    title?.let { str ->
-                                        withContext(Dispatchers.Main) {
-                                            binding.textUrlTitleText.text = str
-                                            binding.urlTitleProgress.visibility = View.GONE
-                                        }
+                            article?.let { article1 ->
+                                val title = article1.title
+                                title?.let { str ->
+                                    withContext(Dispatchers.Main) {
+                                        binding.textUrlTitleText.text = str
+                                        binding.urlTitleProgress.visibility = View.GONE
                                     }
                                 }
-                            }
+                                val image = article1.topImage
+                                if (image == null){
+                                    withContext(Dispatchers.Main){
+                                        binding.urlLogoProgress.visibility =
+                                            View.GONE
+                                    }
+                                }
+                                image?.let { img ->
+                                    var bitmap: Bitmap? = null
+                                    try {
+                                        bitmap =
+                                            GooseDownloader.getPhoto(article1.topImage.imageSrc, false)
+                                    } catch (e: Exception) {
+                                        withContext(Dispatchers.Main) {
+                                            //binding.urlLogoImg.visibility = View.GONE
+                                            binding.urlLogoProgress.visibility = View.GONE
+                                        }
+                                    }
+                                    if (bitmap == null)  binding.urlLogoProgress.visibility = View.GONE
+                                    bitmap?.let { b ->
+                                        withContext(Dispatchers.Main) {
+                                            binding.urlLogoImg.setImageBitmap(b)
+                                            binding.urlLogoProgress.visibility =
+                                                View.GONE
+                                        }
+                                    }
 
-                            binding.openDefaultBrowserBtn.setOnClickListener {
-                                setUrlOpenBtn()
-                                val intent =
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                                val chooser =
-                                    Intent.createChooser(intent, "Open $scannedString")
-                                requireActivity().startActivity(chooser)
+                                }
                             }
-                            binding.shareBtn.setOnClickListener {
-                                setUrlShareBtn()
-                                val intent =
-                                    Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                                intent.type = "text/plain"
-                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                                val chooser = Intent.createChooser(intent, scannedString)
-                                requireActivity().startActivity(chooser)
-                            }
-                            binding.copyBtn.setOnClickListener {
-                                setUrlCopyBtn()
-                                textCopyThenPost(scannedString)
-                            }
+                        }
+                        binding.openDefaultBrowserBtn.setOnClickListener {
+                            setUrlOpenBtn()
+                            val intent =
+                                Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                            val chooser =
+                                Intent.createChooser(intent, "Open $scannedString")
+                            requireActivity().startActivity(chooser)
+                        }
+                        binding.shareBtn.setOnClickListener {
+                            setUrlShareBtn()
+                            val intent =
+                                Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
+                            intent.type = "text/plain"
+                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
+                            val chooser = Intent.createChooser(intent, scannedString)
+                            requireActivity().startActivity(chooser)
+                        }
+                        binding.copyBtn.setOnClickListener {
+                            setUrlCopyBtn()
+                            textCopyThenPost(scannedString)
                         }
                     }
                     is ScannedStringType.EMail ->{

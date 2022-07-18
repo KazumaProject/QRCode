@@ -16,3 +16,4 @@ rootProject.name = "QRCodeScanner"
 include ':app'
 include ':zxing-android-embedded'
 include ':smoothbottombar'
+include ':goose'
