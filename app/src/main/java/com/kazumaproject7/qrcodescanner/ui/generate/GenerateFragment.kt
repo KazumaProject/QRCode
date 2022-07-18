@@ -1,11 +1,18 @@
 package com.kazumaproject7.qrcodescanner.ui.generate
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentGenerateBinding
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
@@ -16,6 +23,8 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
 
     private var _binding: FragmentGenerateBinding ?= null
     private val binding get() = _binding!!
+
+    private val viewModel: GenerateViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +40,58 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val storageDir = getStorageDirectory()
-        storageDir?.let {
 
+        viewModel.hasText.observe(viewLifecycleOwner){
+            binding.generateBtn.isEnabled = it
+        }
+
+        binding.generateSwipeRefresh.apply {
+            setOnRefreshListener {
+                binding.generateEditText.setText("")
+                binding.resultQrCodeImg.setImageBitmap(null)
+                isRefreshing = false
+            }
+        }
+
+        binding.generateEditText.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                p0?.let { p ->
+                    when{
+                        p.isEmpty() ->{
+                            viewModel.updateHasText(false)
+                        }
+                        p.isNotEmpty() ->{
+                            viewModel.updateHasText(true)
+                        }
+                    }
+                }
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+        })
+        binding.generateBtn.setOnClickListener {
+            binding.generateEditText.text?.let { text ->
+                val data = text.toString()
+                val size = 500
+                var bitmap: Bitmap? = null
+
+                try {
+                    val barcodeEncoder = BarcodeEncoder()
+                    bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.QR_CODE,size,size)
+                } catch (e: Exception){
+
+                }
+                bitmap?.let { b ->
+                    binding.resultQrCodeImg.setImageBitmap(b)
+                }
+            }
         }
     }
 
@@ -70,4 +128,6 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
         }
         return null
     }
+
+
 }
