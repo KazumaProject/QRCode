@@ -79,9 +79,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         }
 
         viewModel.scannedString.value?.let { scannedString ->
-
             viewModel.scannedStringType.value?.let {
-
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
@@ -101,46 +99,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 return@setOnLongClickListener true
                             }
                         }
-                        CoroutineScope(Dispatchers.IO).launch {
-                            withContext(Dispatchers.Main){
-                                binding.urlLogoProgress.visibility = View.VISIBLE
-                                binding.urlTitleProgress.visibility = View.VISIBLE
-                            }
-                            val document = Jsoup.connect(scannedString).get()
-                            val img = document.select("img").first()
-                            val imgSrc = img.absUrl("src")
-                            val title = document.title()
-                            title?.let {
-                                withContext(Dispatchers.Main) {
-                                    binding.textUrlTitleText.text = it
-                                    binding.urlTitleProgress.visibility = View.GONE
-                                }
-                            }
-                            try {
-                                val input: InputStream =  URL(imgSrc).openStream()
-                                val bitmap = BitmapFactory.decodeStream(input)
-                                if (bitmap == null){
-                                    withContext(Dispatchers.Main){
-                                        binding.urlLogoProgress.visibility = View.GONE
-                                    }
-                                }
-                                bitmap?.let {
-                                    withContext(Dispatchers.Main){
-                                        binding.urlLogoImg.setImageBitmap(it)
-                                        binding.urlLogoProgress.visibility = View.GONE
-                                    }
-                                }
 
-                            }catch (e: Exception){
-                                showSnackBar(e.toString())
-                                withContext(Dispatchers.Main){
-                                    binding.urlTitleProgress.visibility = View.GONE
-                                    binding.urlLogoProgress.visibility = View.GONE
-                                }
-                            }
-
-
+                        setURLTitleLogo(scannedString)
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            setURLTitleLogo(scannedString)
+                            binding.swipeToRefreshResult.isRefreshing = false
                         }
+
                         binding.openDefaultBrowserBtn.setOnClickListener {
                             setUrlOpenBtn()
                             val intent =
@@ -165,6 +130,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.EMail ->{
                         binding.emailParent.root.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            binding.swipeToRefreshResult.isRefreshing = false
+                        }
                         val str = scannedString.split(":" ).toTypedArray()
                         Timber.d("scanned email size: ${str.size}")
                         if (str.size == 5){
@@ -220,6 +188,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.EMail2 ->{
                         binding.emailParent.root.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            binding.swipeToRefreshResult.isRefreshing = false
+                        }
                         if (scannedString.contains("?body=") || scannedString.contains("&subject=")){
                             when{
                                 scannedString.contains("?body=") && !scannedString.contains("&subject=") ->{
@@ -406,6 +377,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.SMS ->{
                         binding.smsParent.smsLayoutParentView.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            binding.swipeToRefreshResult.isRefreshing = false
+                        }
                         val str = scannedString.split(":" ).toTypedArray()
                         when(str.size){
                             2 ->{
@@ -441,6 +415,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Wifi ->{
                         binding.wifiParent.wifiParentView.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            binding.swipeToRefreshResult.isRefreshing = false
+                        }
                         val str = scannedString.split(":" ).toTypedArray()
                         Timber.d("Type Wifi: ${str.size} $scannedString")
                         when(str.size){
@@ -470,6 +447,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.setOnRefreshListener {
+                            binding.swipeToRefreshResult.isRefreshing = false
+                        }
                         binding.textText.apply {
                             text = scannedString
                             setOnClickListener {
@@ -522,6 +502,51 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         viewModel.updateScannedString("")
         viewModel.updateScannedType("")
         _binding = null
+    }
+
+    private fun setURLTitleLogo(scannedString: String){
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                binding.urlLogoProgress.visibility = View.VISIBLE
+                binding.urlTitleProgress.visibility = View.VISIBLE
+            }
+
+            try {
+
+                val document = Jsoup.connect(scannedString).get()
+                val img = document.select("img").first()
+                val imgSrc = img.absUrl("src")
+                val title = document.title()
+                title?.let {
+                    withContext(Dispatchers.Main) {
+                        binding.textUrlTitleText.text = it
+                        binding.urlTitleProgress.visibility = View.GONE
+                    }
+                }
+
+                val input: InputStream =  URL(imgSrc).openStream()
+                val bitmap = BitmapFactory.decodeStream(input)
+                if (bitmap == null){
+                    withContext(Dispatchers.Main){
+                        binding.urlLogoProgress.visibility = View.GONE
+                    }
+                }
+                bitmap?.let {
+                    withContext(Dispatchers.Main){
+                        binding.urlLogoImg.setImageBitmap(it)
+                        binding.urlLogoProgress.visibility = View.GONE
+                    }
+                }
+
+            }catch (e: Exception){
+                Timber.d("Error Result Fragment: $e")
+                //showSnackBar(e.toString())
+                withContext(Dispatchers.Main){
+                    binding.urlTitleProgress.visibility = View.GONE
+                    binding.urlLogoProgress.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun setUrlOpenBtn(){
