@@ -10,9 +10,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
-import com.kazumaproject7.qrcodescanner.other.Constants
-import com.kazumaproject7.qrcodescanner.ui.capture.CaptureFragment
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,14 +35,24 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_CODE_PERMISSIONS
             )
         } else {
+            val navController = findNavController(R.id.fragmentHostView)
+            val popMenu = PopupMenu(this,null)
+            popMenu.inflate(R.menu.bottom_menu)
+            val menu = popMenu.menu
+            binding.bottomBar.setupWithNavController(menu,navController)
+            navController.addOnDestinationChangedListener{_,destination,_ ->
+                when(destination.id){
+                    R.id.resultFragment ->{
+                        binding.bottomBar.visibility = View.GONE
+                    }
+                    else ->{
+                        binding.bottomBar.visibility = View.VISIBLE
+                    }
+                }
+            }
             //startCaptureFragment()
         }
 
-        val navController = findNavController(R.id.fragmentHostView)
-        val popMenu = PopupMenu(this,null)
-        popMenu.inflate(R.menu.bottom_menu)
-        val menu = popMenu.menu
-        binding.bottomBar.setupWithNavController(menu,navController)
 
     }
 
@@ -72,12 +79,5 @@ class MainActivity : AppCompatActivity() {
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
-
-//    private fun startCaptureFragment(){
-//        val cameraCaptureFragment = CaptureFragment()
-//        val transaction = supportFragmentManager.beginTransaction()
-//        transaction.add(binding.fragmentHostView.id,cameraCaptureFragment,Constants.CAPTURE_FRAGMENT)
-//        transaction.commit()
-//    }
 
 }
