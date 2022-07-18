@@ -104,44 +104,48 @@ public class GooseDownloader {
 
         // loop for redirects
         while (true) {
-            parsed = new URL(url);
-            conn = (HttpURLConnection) parsed.openConnection();
-            // we will handle redirects manually, because automatic redirect
-            // works only when the same protocol is being used
-            conn.setInstanceFollowRedirects(!followRedirects);
-            conn.setReadTimeout(10 * 1000);
-            conn.setConnectTimeout(15 * 1000);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            conn.setUseCaches(true);
+            try{
+                parsed = new URL(url);
+                conn = (HttpURLConnection) parsed.openConnection();
+                // we will handle redirects manually, because automatic redirect
+                // works only when the same protocol is being used
+                conn.setInstanceFollowRedirects(!followRedirects);
+                conn.setReadTimeout(10 * 1000);
+                conn.setConnectTimeout(15 * 1000);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.setUseCaches(true);
 
-            conn.setRequestProperty("User-agent", AGENT);
-            conn.setRequestProperty("http.User-Agent", AGENT);
-            conn.setRequestProperty("http.protocol.cookie-policy", "compatibility");
-            conn.setRequestProperty("http.language.Accept-Language", "en-us"); // MM do we need this?
-            conn.setRequestProperty("http.protocol.content-charset", "UTF-8");
-            conn.setRequestProperty("Accept", CONTENT);
-            conn.setRequestProperty("Cache-Control", "max-age=0");
-            conn.setRequestProperty("http.connection.stalecheck", "false"); // stale check impacts performance
+                conn.setRequestProperty("User-agent", AGENT);
+                conn.setRequestProperty("http.User-Agent", AGENT);
+                conn.setRequestProperty("http.protocol.cookie-policy", "compatibility");
+                conn.setRequestProperty("http.language.Accept-Language", "en-us"); // MM do we need this?
+                conn.setRequestProperty("http.protocol.content-charset", "UTF-8");
+                conn.setRequestProperty("Accept", CONTENT);
+                conn.setRequestProperty("Cache-Control", "max-age=0");
+                conn.setRequestProperty("http.connection.stalecheck", "false"); // stale check impacts performance
 
-            // MM this may not be needed either
-            conn.setRequestProperty("http.conn-manager.timeout", "120000");
-            conn.setRequestProperty("http.protocol.wait-for-continue", "10000");
-            conn.setRequestProperty("http.tcp.nodelay", "true");
+                // MM this may not be needed either
+                conn.setRequestProperty("http.conn-manager.timeout", "120000");
+                conn.setRequestProperty("http.protocol.wait-for-continue", "10000");
+                conn.setRequestProperty("http.tcp.nodelay", "true");
 
-            if (followRedirects) {
-                switch (conn.getResponseCode()) {
-                    case HttpURLConnection.HTTP_MOVED_PERM:
-                    case HttpURLConnection.HTTP_MOVED_TEMP:
-                        String location = conn.getHeaderField("Location");
-                        // deal with relative URLs, don't reuse instance (bugs...)
-                        base = new URL(url);
-                        next = new URL(base, location);
-                        url = next.toExternalForm();
-                        continue;
+                if (followRedirects) {
+                    switch (conn.getResponseCode()) {
+                        case HttpURLConnection.HTTP_MOVED_PERM:
+                        case HttpURLConnection.HTTP_MOVED_TEMP:
+                            String location = conn.getHeaderField("Location");
+                            // deal with relative URLs, don't reuse instance (bugs...)
+                            base = new URL(url);
+                            next = new URL(base, location);
+                            url = next.toExternalForm();
+                            continue;
+                    }
                 }
+                break;
+            }catch (Exception e){
+                return null;
             }
-            break;
         }
 
         return conn;

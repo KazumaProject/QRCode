@@ -1,10 +1,12 @@
 package com.kazumaproject7.qrcodescanner.ui.result
 
-import android.content.*
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
@@ -23,10 +25,10 @@ import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import kotlinx.coroutines.*
-import me.angrybyte.goose.Article
-import me.angrybyte.goose.ContentExtractor
-import me.angrybyte.goose.network.GooseDownloader
+import org.jsoup.Jsoup
 import timber.log.Timber
+import java.io.InputStream
+import java.net.URL
 
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
@@ -104,48 +106,33 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 binding.urlLogoProgress.visibility = View.VISIBLE
                                 binding.urlTitleProgress.visibility = View.VISIBLE
                             }
-                            val config =
-                                me.angrybyte.goose.Configuration(requireActivity().cacheDir.absolutePath)
-                            val extractor = ContentExtractor(config)
-                            val article = extractor.extractContent(scannedString, false)
-
-                            article?.let { article1 ->
-                                val title = article1.title
-                                title?.let { str ->
-                                    withContext(Dispatchers.Main) {
-                                        binding.textUrlTitleText.text = str
-                                        binding.urlTitleProgress.visibility = View.GONE
-                                    }
+                            val document = Jsoup.connect(scannedString).get()
+                            val img = document.select("img").first()
+                            val imgSrc = img.absUrl("src")
+                            val input: InputStream =
+                                withContext(Dispatchers.IO) {
+                                    URL(imgSrc).openStream()
                                 }
-                                val image = article1.topImage
-                                if (image == null){
-                                    withContext(Dispatchers.Main){
-                                        binding.urlLogoProgress.visibility =
-                                            View.GONE
-                                    }
-                                }
-                                image?.let { img ->
-                                    var bitmap: Bitmap? = null
-                                    try {
-                                        bitmap =
-                                            GooseDownloader.getPhoto(article1.topImage.imageSrc, false)
-                                    } catch (e: Exception) {
-                                        withContext(Dispatchers.Main) {
-                                            //binding.urlLogoImg.visibility = View.GONE
-                                            binding.urlLogoProgress.visibility = View.GONE
-                                        }
-                                    }
-                                    if (bitmap == null)  binding.urlLogoProgress.visibility = View.GONE
-                                    bitmap?.let { b ->
-                                        withContext(Dispatchers.Main) {
-                                            binding.urlLogoImg.setImageBitmap(b)
-                                            binding.urlLogoProgress.visibility =
-                                                View.GONE
-                                        }
-                                    }
-
+                            val bitmap = BitmapFactory.decodeStream(input)
+                            val title = document.title()
+                            if (bitmap == null){
+                                withContext(Dispatchers.Main){
+                                    binding.urlLogoProgress.visibility = View.GONE
                                 }
                             }
+                            bitmap?.let {
+                                withContext(Dispatchers.Main){
+                                    binding.urlLogoImg.setImageBitmap(it)
+                                     binding.urlLogoProgress.visibility = View.GONE
+                                }
+                            }
+                            title?.let {
+                                withContext(Dispatchers.Main) {
+                                        binding.textUrlTitleText.text = it
+                                        binding.urlTitleProgress.visibility = View.GONE
+                                    }
+                            }
+
                         }
                         binding.openDefaultBrowserBtn.setOnClickListener {
                             setUrlOpenBtn()
