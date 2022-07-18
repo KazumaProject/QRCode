@@ -9,8 +9,16 @@ class GenerateViewModel: ViewModel() {
         get() = _hasText
     private val _hasText = MutableLiveData(false)
 
+    val spinnerSelectedPosition: LiveData<Int>
+        get() = _spinnerSelectedPosition
+    private val _spinnerSelectedPosition = MutableLiveData(0)
+
     fun updateHasText(value : Boolean){
         _hasText.value = value
+    }
+
+    fun updateSpinnerSelectedPosition(value : Int){
+        _spinnerSelectedPosition.value = value
     }
 
 }

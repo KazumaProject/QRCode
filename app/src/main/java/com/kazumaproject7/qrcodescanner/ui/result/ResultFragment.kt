@@ -17,8 +17,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
+import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
@@ -27,6 +29,9 @@ import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import timber.log.Timber
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 
@@ -70,8 +75,16 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
         val barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
 
-        barcodeBitmap?.let {
-            binding.barcodeImg.setImageBitmap(it)
+        barcodeBitmap?.let { b ->
+            binding.barcodeImg.apply {
+                setImageBitmap(b)
+                setOnLongClickListener {
+                    saveImage(b)?.let { uri ->
+                        shareImageUri(uri)
+                    }
+                    return@setOnLongClickListener true
+                }
+            }
         }
 
         viewModel.scannedType.value?.let {
@@ -612,6 +625,33 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
             }
         }
+    }
+
+    private fun saveImage(image: Bitmap): Uri? {
+        val imagesFolder = File(requireActivity().cacheDir, "images")
+        var uri: Uri? = null
+        try {
+            imagesFolder.mkdirs()
+            val file = File(imagesFolder, "qr_code_scanner_code.png")
+            val stream = FileOutputStream(file)
+            image.compress(Bitmap.CompressFormat.PNG, 90, stream)
+            stream.flush()
+            stream.close()
+            uri = FileProvider.getUriForFile(
+                requireContext(),
+                BuildConfig.APPLICATION_ID + ".provider", file)
+        } catch (e: IOException) {
+            Timber.d( "IOException while trying to write file for sharing: " + e.message)
+        }
+        return uri
+    }
+
+    private fun shareImageUri(uri: Uri) {
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.type = "image/png"
+        requireActivity().startActivity(Intent.createChooser(intent,"Save code"))
     }
 
     private fun setUrlOpenBtn(){
