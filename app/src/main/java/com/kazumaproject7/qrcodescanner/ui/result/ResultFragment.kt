@@ -109,29 +109,36 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             val document = Jsoup.connect(scannedString).get()
                             val img = document.select("img").first()
                             val imgSrc = img.absUrl("src")
-                            val input: InputStream =
-                                withContext(Dispatchers.IO) {
-                                    URL(imgSrc).openStream()
-                                }
-                            val bitmap = BitmapFactory.decodeStream(input)
                             val title = document.title()
-                            if (bitmap == null){
+                            title?.let {
+                                withContext(Dispatchers.Main) {
+                                    binding.textUrlTitleText.text = it
+                                    binding.urlTitleProgress.visibility = View.GONE
+                                }
+                            }
+                            try {
+                                val input: InputStream =  URL(imgSrc).openStream()
+                                val bitmap = BitmapFactory.decodeStream(input)
+                                if (bitmap == null){
+                                    withContext(Dispatchers.Main){
+                                        binding.urlLogoProgress.visibility = View.GONE
+                                    }
+                                }
+                                bitmap?.let {
+                                    withContext(Dispatchers.Main){
+                                        binding.urlLogoImg.setImageBitmap(it)
+                                        binding.urlLogoProgress.visibility = View.GONE
+                                    }
+                                }
+
+                            }catch (e: Exception){
+                                showSnackBar(e.toString())
                                 withContext(Dispatchers.Main){
+                                    binding.urlTitleProgress.visibility = View.GONE
                                     binding.urlLogoProgress.visibility = View.GONE
                                 }
                             }
-                            bitmap?.let {
-                                withContext(Dispatchers.Main){
-                                    binding.urlLogoImg.setImageBitmap(it)
-                                     binding.urlLogoProgress.visibility = View.GONE
-                                }
-                            }
-                            title?.let {
-                                withContext(Dispatchers.Main) {
-                                        binding.textUrlTitleText.text = it
-                                        binding.urlTitleProgress.visibility = View.GONE
-                                    }
-                            }
+
 
                         }
                         binding.openDefaultBrowserBtn.setOnClickListener {
