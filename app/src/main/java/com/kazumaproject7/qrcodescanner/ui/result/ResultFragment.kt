@@ -130,8 +130,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.EMail ->{
                         binding.emailParent.root.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            binding.swipeToRefreshResult.isRefreshing = false
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
                         }
                         val str = scannedString.split(":" ).toTypedArray()
                         Timber.d("scanned email size: ${str.size}")
@@ -188,8 +191,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.EMail2 ->{
                         binding.emailParent.root.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            binding.swipeToRefreshResult.isRefreshing = false
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
                         }
                         if (scannedString.contains("?body=") || scannedString.contains("&subject=")){
                             when{
@@ -377,8 +383,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.SMS ->{
                         binding.smsParent.smsLayoutParentView.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            binding.swipeToRefreshResult.isRefreshing = false
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
                         }
                         val str = scannedString.split(":" ).toTypedArray()
                         when(str.size){
@@ -415,8 +424,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Wifi ->{
                         binding.wifiParent.wifiParentView.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            binding.swipeToRefreshResult.isRefreshing = false
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
                         }
                         val str = scannedString.split(":" ).toTypedArray()
                         Timber.d("Type Wifi: ${str.size} $scannedString")
@@ -447,6 +459,12 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Cryptocurrency ->{
                         Timber.d("Cryptocurrency: $scannedString")
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
+                        }
                         binding.cryptocurrencyParent.cryptocurrencyParentView.visibility = View.VISIBLE
                         val str = scannedString.split(":" ).toTypedArray()
                         when(str.size){
@@ -479,8 +497,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            binding.swipeToRefreshResult.isRefreshing = false
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
                         }
                         binding.textText.apply {
                             text = scannedString
