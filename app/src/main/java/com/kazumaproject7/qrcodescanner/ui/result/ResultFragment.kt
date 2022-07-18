@@ -445,6 +445,38 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
 
                     }
+                    is ScannedStringType.Cryptocurrency ->{
+                        Timber.d("Cryptocurrency: $scannedString")
+                        binding.cryptocurrencyParent.cryptocurrencyParentView.visibility = View.VISIBLE
+                        val str = scannedString.split(":" ).toTypedArray()
+                        when(str.size){
+                            2 ->{
+                                binding.cryptocurrencyParent.textCryptocurrencyContent.text = str[0]
+                                val str2 = str[1].split("?" ).toTypedArray()
+                                when(str2.size){
+                                    2 ->{
+                                        binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = str2[0]
+                                        val str3 = str2[1].split("&" ).toTypedArray()
+                                        when(str3.size){
+                                            2 ->{
+                                                binding.cryptocurrencyParent.cryptocurrencyTextAmount.text = str3[0].replace("amount=","")
+                                                binding.cryptocurrencyParent.cryptocurrencyMessageContent.text = str3[1].replace("message=","")
+                                            }
+                                            else ->{
+
+                                            }
+                                        }
+                                    }
+                                    else ->{
+
+                                    }
+                                }
+                            }
+                            else ->{
+
+                            }
+                        }
+                    }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
                         binding.swipeToRefreshResult.setOnRefreshListener {

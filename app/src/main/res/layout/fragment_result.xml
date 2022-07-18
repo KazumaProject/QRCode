@@ -217,6 +217,10 @@
                        android:id="@+id/wifi_parent"
                        layout="@layout/wifi_layout"/>
 
+                   <include
+                       android:id="@+id/cryptocurrency_parent"
+                       layout="@layout/cryptocurrency_layout"/>
+
                    <androidx.constraintlayout.widget.ConstraintLayout
                        android:id="@+id/text_parent"
                        android:layout_width="match_parent"

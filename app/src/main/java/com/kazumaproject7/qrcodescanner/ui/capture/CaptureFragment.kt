@@ -63,6 +63,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                     }
+                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                            lastText.contains("xrp:")
+                    ->{
+                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                    }
                     else ->{
                         viewModel.updateScannedStringType(ScannedStringType.Text)
                     }
@@ -194,6 +200,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     }
                                     resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
                                         viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                    }
+                                    resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                    }
+                                    resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
                                     else ->{
                                         viewModel.updateScannedStringType(ScannedStringType.Text)

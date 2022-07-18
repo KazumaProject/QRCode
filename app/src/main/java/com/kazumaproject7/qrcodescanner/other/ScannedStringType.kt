@@ -8,4 +8,5 @@ sealed class ScannedStringType{
     object EMail2: ScannedStringType()
     object Wifi: ScannedStringType()
     object SMS: ScannedStringType()
+    object Cryptocurrency: ScannedStringType()
 }
