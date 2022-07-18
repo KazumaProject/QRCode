@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/captureFragment">
+
+    <fragment
+        android:id="@+id/captureFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.capture.CaptureFragment"
+        android:label="fragment_capture_fragment"
+        tools:layout="@layout/fragment_capture_fragment" >
+        <action
+            android:id="@+id/action_captureFragment_to_resultFragment"
+            app:destination="@id/resultFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/generateFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.generate.GenerateFragment"
+        android:label="fragment_generate"
+        tools:layout="@layout/fragment_generate" />
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.result.ResultFragment"
+        android:label="fragment_result"
+        tools:layout="@layout/fragment_result" />
+</navigation>

@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.webkit.URLUtil
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.BarcodeCallback
@@ -20,6 +21,7 @@ import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
+import com.kazumaproject7.qrcodescanner.other.Constants
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
@@ -452,12 +454,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
             val bundle = Bundle()
             bundle.putParcelable("barcodeImage",croppedBitmap)
-            val resultFragment = ResultFragment()
-            resultFragment.arguments = bundle
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.addToBackStack(null)
-            transaction.replace(R.id.fragmentHostView,resultFragment)
-            transaction.commit()
+            findNavController().navigate(R.id.resultFragment,bundle)
         }catch (e: Exception){
             showSnackBar("Something went wrong.")
         }

@@ -3,11 +3,16 @@ package com.kazumaproject7.qrcodescanner
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
+import com.kazumaproject7.qrcodescanner.other.Constants
 import com.kazumaproject7.qrcodescanner.ui.capture.CaptureFragment
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,8 +38,15 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_CODE_PERMISSIONS
             )
         } else {
-            startCaptureFragment()
+            //startCaptureFragment()
         }
+
+        val navController = findNavController(R.id.fragmentHostView)
+        val popMenu = PopupMenu(this,null)
+        popMenu.inflate(R.menu.bottom_menu)
+        val menu = popMenu.menu
+        binding.bottomBar.setupWithNavController(menu,navController)
+
     }
 
     override fun onDestroy() {
@@ -52,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             if (!allPermissionsGranted()) {
                 this.finish()
             } else {
-                startCaptureFragment()
+                //startCaptureFragment()
             }
         }
     }
@@ -61,11 +73,11 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun startCaptureFragment(){
-        val cameraCaptureFragment = CaptureFragment()
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.add(binding.fragmentHostView.id,cameraCaptureFragment)
-        transaction.commit()
-    }
+//    private fun startCaptureFragment(){
+//        val cameraCaptureFragment = CaptureFragment()
+//        val transaction = supportFragmentManager.beginTransaction()
+//        transaction.add(binding.fragmentHostView.id,cameraCaptureFragment,Constants.CAPTURE_FRAGMENT)
+//        transaction.commit()
+//    }
 
 }

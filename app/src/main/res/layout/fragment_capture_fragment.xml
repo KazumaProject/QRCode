@@ -11,24 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <me.ibrahimsn.lib.SmoothBottomBar
-        android:id="@+id/bottom_bar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_menu"
-        app:backgroundColor="@color/black"
-        app:textColor="@color/white"
-        app:textSize="14sp"
-        app:iconSize="24dp"
-        app:indicatorColor="@android:color/holo_green_dark"
-        app:indicatorRadius="32dp"
-        app:sideMargins="10dp"
-        app:itemPadding="10dp"
-        app:iconTint="#C8FFFFFF"
-        app:iconTintActive="#FFFFFF"
-        app:corners="top_left|bottom_right"
-        />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
