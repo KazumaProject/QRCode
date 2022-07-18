@@ -474,6 +474,18 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 when(str2.size){
                                     2 ->{
                                         binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = str2[0]
+                                        binding.cryptocurrencyParent.shareCryptoBtn.setOnClickListener {
+                                            setCryptoShareBtn()
+                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str2[0]))
+                                            intent.type = "text/plain"
+                                            intent.putExtra(Intent.EXTRA_TEXT, str2[0])
+                                            val chooser = Intent.createChooser(intent, str2[0])
+                                            requireActivity().startActivity(chooser)
+                                        }
+                                        binding.cryptocurrencyParent.copyCryptoBtn.setOnClickListener {
+                                            setCryptoCopyBtn()
+                                            textCopyThenPost(str2[0])
+                                        }
                                         val str3 = str2[1].split("&" ).toTypedArray()
                                         when(str3.size){
                                             2 ->{
@@ -654,6 +666,44 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
                 Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                     binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setCryptoShareBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setCryptoCopyBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
                 }
             }
         }
