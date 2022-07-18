@@ -247,6 +247,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                     }catch (e: Exception){
                         Timber.e(e.localizedMessage)
+                        showSnackBar("Could not read qr code. Please try again.")
                     }
                 }
 

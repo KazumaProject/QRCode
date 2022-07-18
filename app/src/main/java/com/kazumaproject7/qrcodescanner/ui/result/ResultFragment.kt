@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
@@ -34,6 +36,24 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
     private val viewModel: ScanViewModel by activityViewModels()
 
     private var snackBar: Snackbar? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val window = requireActivity().window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        when (context?.resources?.configuration?.uiMode?.and(
+            Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> {
+                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.black)
+            }
+            Configuration.UI_MODE_NIGHT_NO -> {
+                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.off_white)
+            }
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.off_white)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -113,45 +133,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 return@setOnLongClickListener true
                             }
                             binding.openDefaultBrowserBtn.setOnClickListener {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                                    delay(100)
-                                    when (context.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
+                                setUrlOpenBtn()
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
                                 val chooser = Intent.createChooser(intent,"Open $scannedString")
                                 requireActivity().startActivity(chooser)
                             }
                             binding.shareBtn.setOnClickListener {
-
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                                    delay(100)
-                                    when (context.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
-
+                                setUrlShareBtn()
                                 val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
                                 intent.type = "text/plain"
                                 intent.putExtra(Intent.EXTRA_TEXT, scannedString)
@@ -159,24 +147,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(chooser)
                             }
                             binding.copyBtn.setOnClickListener {
-
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                                    delay(100)
-                                    when (context.resources?.configuration?.uiMode?.and(
-                                        Configuration.UI_MODE_NIGHT_MASK)) {
-                                        Configuration.UI_MODE_NIGHT_YES -> {
-                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_NO -> {
-                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                        Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                                        }
-                                    }
-                                }
-
+                                setUrlCopyBtn()
                                 textCopyThenPost(scannedString)
                             }
                         }
@@ -460,7 +431,32 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Wifi ->{
                         binding.wifiParent.wifiParentView.visibility = View.VISIBLE
-                        binding.wifiParent.textWifiContent.text = scannedString
+                        val str = scannedString.split(":" ).toTypedArray()
+                        Timber.d("Type Wifi: ${str.size} $scannedString")
+                        when(str.size){
+                            6 ->{
+                                binding.wifiParent.textWifiContent.text = str[3].replace(";P","")
+                                binding.wifiParent.wifiPassTextMessage.text = str[4].replace(";H","")
+                                binding.wifiParent.wifiEncryptionTypeText.text = str[2].replace(";S","")
+                                binding.wifiParent.wifiHiddenText.text = str[5].replace(";","")
+                                binding.wifiParent.shareWifiBtn.setOnClickListener {
+                                    setWifiTextShareBtn()
+                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[4].replace(";H","")))
+                                    intent.type = "text/plain"
+                                    intent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";H",""))
+                                    val chooser = Intent.createChooser(intent, str[4].replace(";H",""))
+                                    requireActivity().startActivity(chooser)
+                                }
+                                binding.wifiParent.copyWifiBtn.setOnClickListener {
+                                    setWifiTextCopyBtn()
+                                    textCopyThenPost(str[4].replace(";H",""))
+                                }
+                            }
+                            else ->{
+
+                            }
+                        }
+
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
@@ -510,9 +506,69 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        val window = requireActivity().window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.black)
         viewModel.updateScannedString("")
         viewModel.updateScannedType("")
         _binding = null
+    }
+
+    private fun setUrlOpenBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setUrlShareBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setUrlCopyBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
     }
 
     private fun setBackGroundTextShareBtn(){
@@ -548,6 +604,44 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
                 Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                     binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setWifiTextShareBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+            }
+        }
+    }
+
+    private fun setWifiTextCopyBtn(){
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+            delay(100)
+            when (context?.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> {
+                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
+                }
+                Configuration.UI_MODE_NIGHT_NO -> {
+                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
+                }
+                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
                 }
             }
         }

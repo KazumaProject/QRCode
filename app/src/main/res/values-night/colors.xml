@@ -16,4 +16,5 @@
     <color name="blue2">#def2fa</color>
     <color name="result_bg">#FF000000</color>
     <color name="result_text">#FFFFFFFF</color>
+    <color name="off_white">#f2f0f4</color>
 </resources>
