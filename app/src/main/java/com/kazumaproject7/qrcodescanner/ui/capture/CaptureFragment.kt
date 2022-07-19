@@ -1,5 +1,6 @@
 package com.kazumaproject7.qrcodescanner.ui.capture
 
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.res.Configuration
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -164,101 +166,94 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         _binding = null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_OK){
-            return
-        }
-        when(requestCode){
-            READ_REQUEST_CODE ->{
-                data?.data?.also { uri ->
-                    try {
-                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
+    private val startSelectImageFromURI = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.data?.let { uri ->
+                try {
+                    val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
 
-                        if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
-                            val resultText = readQrcode(bitmap)[0]
-                            val barcodeFormat = readQrcode(bitmap)[1]
+                    if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
+                        val resultText = readQrcode(bitmap)[0]
+                        val barcodeFormat = readQrcode(bitmap)[1]
 
-                            if (URLUtil.isValidUrl(resultText)){
-                                viewModel.updateScannedStringType(ScannedStringType.Url)
-                            }else{
-                                when{
-                                    resultText.contains("MATMSG") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                    }
-                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                    }
-                                    resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                    }
-                                    resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                    }
-                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                            lastText.contains("xrp:")
-                                    ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                    }
-                                    else ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                                    }
-                                }
-                            }
-                            viewModel.updateScannedString(resultText)
-                            viewModel.updateScannedType(barcodeFormat)
-
-                            val bundle = Bundle()
-                            bundle.putParcelable("barcodeImage",bitmap)
-                            findNavController().navigate(R.id.resultFragment,bundle)
-                        } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
-
-                            val resultText = readQrcode(bitmap)[0]
-
-                            if (URLUtil.isValidUrl(resultText)){
-                                viewModel.updateScannedStringType(ScannedStringType.Url)
-                            }else{
-                                when{
-                                    resultText.contains("MATMSG") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                    }
-                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                    }
-                                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                    }
-                                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                    }
-                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                            lastText.contains("xrp:")
-                                    ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                    }
-                                    else ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                                    }
-                                }
-                            }
-                            viewModel.updateScannedString(resultText)
-
-                            val bundle = Bundle()
-                            bundle.putParcelable("barcodeImage",bitmap)
-                            findNavController().navigate(R.id.resultFragment,bundle)
-
+                        if (URLUtil.isValidUrl(resultText)){
+                            viewModel.updateScannedStringType(ScannedStringType.Url)
                         }else{
-
+                            when{
+                                resultText.contains("MATMSG") ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                }
+                                resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                }
+                                resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
+                                    viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                }
+                                resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                                }
+                                lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                        lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                        lastText.contains("xrp:")
+                                ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                }
+                                else ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Text)
+                                }
+                            }
                         }
+                        viewModel.updateScannedString(resultText)
+                        viewModel.updateScannedType(barcodeFormat)
 
-                    }catch (e: Exception){
-                        Timber.e(e.localizedMessage)
-                        showSnackBar("Could not read qr code. Please try again.")
+                        val bundle = Bundle()
+                        bundle.putParcelable("barcodeImage",bitmap)
+                        findNavController().navigate(R.id.resultFragment,bundle)
+                    } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
+
+                        val resultText = readQrcode(bitmap)[0]
+
+                        if (URLUtil.isValidUrl(resultText)){
+                            viewModel.updateScannedStringType(ScannedStringType.Url)
+                        }else{
+                            when{
+                                resultText.contains("MATMSG") ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                }
+                                resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                }
+                                lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
+                                    viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                }
+                                lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                                }
+                                lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                        lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                        lastText.contains("xrp:")
+                                ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                }
+                                else ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.Text)
+                                }
+                            }
+                        }
+                        viewModel.updateScannedString(resultText)
+
+                        val bundle = Bundle()
+                        bundle.putParcelable("barcodeImage",bitmap)
+                        findNavController().navigate(R.id.resultFragment,bundle)
+
+                    }else{
+
                     }
-                }
 
+                }catch (e: Exception){
+                    Timber.e(e.localizedMessage)
+                    showSnackBar("Could not read qr code. Please try again.")
+                }
             }
         }
     }
@@ -525,7 +520,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "image/*"
         }
-        startActivityForResult(intent, READ_REQUEST_CODE)
+        startSelectImageFromURI.launch(intent)
     }
 
 }
