@@ -14,6 +14,9 @@
             android:id="@+id/action_captureFragment_to_resultFragment"
             app:destination="@id/resultFragment"
             />
+        <action
+            android:id="@+id/action_captureFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
     </fragment>
     <fragment
         android:id="@+id/generateFragment"
@@ -25,4 +28,9 @@
         android:name="com.kazumaproject7.qrcodescanner.ui.result.ResultFragment"
         android:label="fragment_result"
         tools:layout="@layout/fragment_result" />
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.history.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
 </navigation>

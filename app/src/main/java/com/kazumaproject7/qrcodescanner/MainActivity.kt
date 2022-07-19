@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomBar.setupWithNavController(menu,navController)
             navController.addOnDestinationChangedListener{_,destination,_ ->
                 when(destination.id){
-                    R.id.resultFragment ->{
+                    R.id.resultFragment, R.id.historyFragment ->{
                         binding.bottomBar.visibility = View.GONE
                     }
                     else ->{
