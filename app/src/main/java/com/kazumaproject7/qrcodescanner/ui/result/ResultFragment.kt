@@ -24,6 +24,9 @@ import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
+import com.kazumaproject7.qrcodescanner.other.getBodyEmailType1
+import com.kazumaproject7.qrcodescanner.other.getEmailEmailType1
+import com.kazumaproject7.qrcodescanner.other.getSubjectEmailType1
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -85,6 +88,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
+                        //shareText(scannedString)
                         binding.textUrl.apply {
                             text = scannedString
                             setTextColor(Color.parseColor("#5e6fed"))
@@ -129,37 +133,27 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        val email = getEmailEmailType1(scannedString)
+                        val subject = getSubjectEmailType1(scannedString)
+                        val message = getBodyEmailType1(scannedString)
                         val str = scannedString.split(":" ).toTypedArray()
-                        Timber.d("scanned email size: ${str.size}")
-                        if (str.size == 5){
-                            binding.emailParent.textEmailContent.apply {
-                                text = str[2].replace(";SUB","")
-                            }
-                            binding.emailParent.textSubjectContent.apply {
-                                text = str[3].replace(";BODY","")
-                            }
-                            binding.emailParent.textMessage.apply {
-                                text = str[4].replace(";;","")
-                            }
-                            binding.emailParent.openEmailBtn.setOnClickListener {
-                                toggleButtonColor(binding.emailParent.openEmailBtn)
-                                val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                emailIntent.data = Uri.parse("mailto:")
-                                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[2].replace(";SUB","")))
-                                emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[3].replace(";BODY",""))
-                                emailIntent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";;",""))
-                                requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                            }
-                            binding.emailParent.emailShareBtn.setOnClickListener {
-                                toggleButtonColor(binding.emailParent.emailShareBtn)
-                                shareText(str[2].replace(";SUB",""))
-                            }
+                        binding.emailParent.textEmailContent.text = email
+                        binding.emailParent.textSubjectContent.text = subject
+                        binding.emailParent.textMessage.text = message
+                        binding.emailParent.openEmailBtn.setOnClickListener {
+                            toggleButtonColor(binding.emailParent.openEmailBtn)
+                            createEmailIntent(email,subject, message)
+                        }
+                        binding.emailParent.emailShareBtn.setOnClickListener {
+                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                            shareText(email)
                             binding.emailParent.emailCopyBtn.setOnClickListener {
                                 toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                textCopyThenPost(str[2].replace(";SUB",""))
+                                textCopyThenPost(email)
                             }
-
-                        } else {
+                        }
+                        Timber.d("scanned email size: ${str.size}")
+                        if (str.size != 5) {
                             binding.emailParent.root.visibility = View.GONE
                             binding.textParent.visibility = View.VISIBLE
                             binding.textText.text = scannedString
@@ -170,10 +164,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             binding.textCopyBtn.setOnClickListener {
                                 toggleButtonColor(binding.textCopyBtn)
                                 textCopyThenPost(scannedString)
+                                }
                             }
                         }
-
-                    }
                     is ScannedStringType.EMail2 ->{
                         binding.emailParent.root.visibility = View.VISIBLE
                         binding.swipeToRefreshResult.apply {
@@ -461,6 +454,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
+                        //shareText(scannedString)
                         binding.swipeToRefreshResult.apply {
                             setOnRefreshListener {
                                 isRefreshing = false
@@ -575,6 +569,15 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             Timber.d( "IOException while trying to write file for sharing: " + e.message)
         }
         return uri
+    }
+
+    private fun createEmailIntent(email: String, subject: String, message: String){
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse("mailto:")
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+        emailIntent.putExtra(Intent.EXTRA_TEXT, message)
+        requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
     }
 
     private fun shareImageUri(uri: Uri) {

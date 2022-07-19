@@ -1,19 +1,22 @@
 package com.kazumaproject7.qrcodescanner.ui.capture
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
@@ -23,11 +26,9 @@ import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
-import com.kazumaproject7.qrcodescanner.other.Constants
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
-import com.kazumaproject7.qrcodescanner.ui.result.ResultFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,10 +45,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private val viewModel: ScanViewModel by activityViewModels()
 
     private var lastText: String = ""
-
-    companion object {
-        private const val READ_REQUEST_CODE: Int = 77
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -245,9 +242,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         val bundle = Bundle()
                         bundle.putParcelable("barcodeImage",bitmap)
                         findNavController().navigate(R.id.resultFragment,bundle)
-
-                    }else{
-
                     }
 
                 }catch (e: Exception){
@@ -302,17 +296,17 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         }
     }
 
+
+
     private fun startResultFragment(result: BarcodeResult){
         try {
-            val displayMetrics = DisplayMetrics()
-            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-            val height: Int = displayMetrics.heightPixels
-            val width: Int = displayMetrics.widthPixels
+//            val displayMetrics = DisplayMetrics()
+//            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val height: Int = windowHeight
+            val width: Int = windowWidth
             val scaleX = (result.bitmap.width).toDouble() / width.toDouble()
             val scaleY = (result.bitmap.height).toDouble() / height.toDouble()
             Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp} ${result.transformedResultPoints.size}")
-            //Timber.d("result Points2: ${(result.resultPoints[0].x * scaleX).toInt()} ${(result.resultPoints[1].y * scaleY).toInt()} ${((result.resultPoints[2].x * scaleX) - (result.resultPoints[0].x * scaleX)).toInt()} ${((result.resultPoints[3].y * scaleY) - (result.resultPoints[1].y * scaleY)).toInt()} ${result.bitmap.width} ${result.bitmap.height}")
-
             val orientation = requireContext().resources.configuration.orientation
 
             val croppedBitmap = when (result.transformedResultPoints.size) {
