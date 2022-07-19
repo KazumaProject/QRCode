@@ -6,11 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.kazumaproject7.qrcodescanner.R
+import com.kazumaproject7.qrcodescanner.ui.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-class HistoryFragment : Fragment() {
+@AndroidEntryPoint
+class HistoryFragment : BaseFragment(R.layout.fragment_history) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        changeStatusBarColor()
     }
 
     override fun onCreateView(

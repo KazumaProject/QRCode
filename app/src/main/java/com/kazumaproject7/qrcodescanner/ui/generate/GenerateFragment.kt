@@ -1,6 +1,7 @@
 package com.kazumaproject7.qrcodescanner.ui.generate
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -9,8 +10,10 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
 import com.google.zxing.BarcodeFormat
@@ -19,12 +22,13 @@ import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentGenerateBinding
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.*
 
+@AndroidEntryPoint
 class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
 
     private var _binding: FragmentGenerateBinding ?= null
@@ -34,6 +38,7 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        changeStatusBarColor()
     }
 
     override fun onCreateView(

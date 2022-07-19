@@ -26,13 +26,14 @@ import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import com.kazumaproject7.qrcodescanner.ui.result.ResultFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-
+@AndroidEntryPoint
 class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private var _binding : FragmentCaptureFragmentBinding? = null
@@ -42,48 +43,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private var lastText: String = ""
 
-    private val callback = object : BarcodeCallback {
-        override fun barcodeResult(result: BarcodeResult?) {
-            if (result?.text == null || result.text == lastText) {
-                return
-            }
-            lastText = result.text
-            Timber.d("Last Text: $lastText")
-            if (URLUtil.isValidUrl(lastText)){
-                viewModel.updateScannedStringType(ScannedStringType.Url)
-            }else{
-                when{
-                    lastText.contains("MATMSG") ->{
-                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                    }
-                    lastText.contains("mailto:") || lastText.contains("MAILTO:") ->{
-                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                    }
-                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
-                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                    }
-                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
-                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                    }
-                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                            lastText.contains("xrp:")
-                    ->{
-                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                    }
-                    else ->{
-                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                    }
-                }
-            }
-            viewModel.updateScannedString(lastText)
-            viewModel.updateScannedType(result.barcodeFormat.name)
-            startResultFragment(result)
-            lastText = ""
-        }
-        override fun possibleResultPoints(resultPoints: MutableList<ResultPoint>?) {
+    companion object {
+        private const val READ_REQUEST_CODE: Int = 77
+    }
 
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        returnStatusBarColor()
     }
 
     override fun onCreateView(
@@ -130,11 +96,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             background = ContextCompat.getDrawable(requireContext(),R.drawable.image)
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
-                CoroutineScope(Dispatchers.Main).launch {
-                    backgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                    delay(200)
-                    backgroundTintList = requireContext().getColorStateList(android.R.color.white)
-                }
+                toggleImageButtonColor(binding.folderOpen)
                 selectFileByUri()
             }
         }
@@ -174,14 +136,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_history_24)
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
+                toggleImageButtonColor(binding.historyBtn)
                 CoroutineScope(Dispatchers.Main).launch {
-                    backgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                    delay(200)
-                    backgroundTintList = requireContext().getColorStateList(android.R.color.white)
+                    delay(100)
+                    findNavController().navigate(
+                        CaptureFragmentDirections.actionCaptureFragmentToHistoryFragment()
+                    )
                 }
-                findNavController().navigate(
-                    CaptureFragmentDirections.actionCaptureFragmentToHistoryFragment()
-                )
             }
         }
 
@@ -190,6 +151,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onResume() {
         super.onResume()
         binding.barcodeView.resume()
+        returnStatusBarColor()
     }
 
     override fun onPause() {
@@ -233,6 +195,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
                                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
+                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                            lastText.contains("xrp:")
+                                    ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                    }
                                     else ->{
                                         viewModel.updateScannedStringType(ScannedStringType.Text)
                                     }
@@ -243,12 +211,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                             val bundle = Bundle()
                             bundle.putParcelable("barcodeImage",bitmap)
-                            val resultFragment = ResultFragment()
-                            resultFragment.arguments = bundle
-                            val transaction = parentFragmentManager.beginTransaction()
-                            transaction.addToBackStack(null)
-                            transaction.replace(R.id.fragmentHostView,resultFragment)
-                            transaction.commit()
+                            findNavController().navigate(R.id.resultFragment,bundle)
                         } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
 
                             val resultText = readQrcode(bitmap)[0]
@@ -263,6 +226,18 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
                                         viewModel.updateScannedStringType(ScannedStringType.EMail2)
                                     }
+                                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                    }
+                                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                                    }
+                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                            lastText.contains("xrp:")
+                                    ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                    }
                                     else ->{
                                         viewModel.updateScannedStringType(ScannedStringType.Text)
                                     }
@@ -272,12 +247,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                             val bundle = Bundle()
                             bundle.putParcelable("barcodeImage",bitmap)
-                            val resultFragment = ResultFragment()
-                            resultFragment.arguments = bundle
-                            val transaction = parentFragmentManager.beginTransaction()
-                            transaction.addToBackStack(null)
-                            transaction.replace(R.id.fragmentHostView,resultFragment)
-                            transaction.commit()
+                            findNavController().navigate(R.id.resultFragment,bundle)
 
                         }else{
 
@@ -290,6 +260,50 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 }
 
             }
+        }
+    }
+
+    private val callback = object : BarcodeCallback {
+        override fun barcodeResult(result: BarcodeResult?) {
+            if (result?.text == null || result.text == lastText) {
+                return
+            }
+            lastText = result.text
+            Timber.d("Last Text: $lastText")
+            if (URLUtil.isValidUrl(lastText)){
+                viewModel.updateScannedStringType(ScannedStringType.Url)
+            }else{
+                when{
+                    lastText.contains("MATMSG") ->{
+                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                    }
+                    lastText.contains("mailto:") || lastText.contains("MAILTO:") ->{
+                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                    }
+                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
+                        viewModel.updateScannedStringType(ScannedStringType.SMS)
+                    }
+                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                    }
+                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                            lastText.contains("xrp:")
+                    ->{
+                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                    }
+                    else ->{
+                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                    }
+                }
+            }
+            viewModel.updateScannedString(lastText)
+            viewModel.updateScannedType(result.barcodeFormat.name)
+            startResultFragment(result)
+            lastText = ""
+        }
+        override fun possibleResultPoints(resultPoints: MutableList<ResultPoint>?) {
+
         }
     }
 
@@ -513,10 +527,5 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         }
         startActivityForResult(intent, READ_REQUEST_CODE)
     }
-
-    companion object {
-        private const val READ_REQUEST_CODE: Int = 77
-    }
-
 
 }

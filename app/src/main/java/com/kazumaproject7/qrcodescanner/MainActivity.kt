@@ -10,7 +10,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     companion object{
@@ -50,7 +52,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            //startCaptureFragment()
         }
 
 

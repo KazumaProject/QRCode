@@ -26,6 +26,7 @@ import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import timber.log.Timber
@@ -35,6 +36,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 
+@AndroidEntryPoint
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     private var _binding : FragmentResultBinding? = null
@@ -46,20 +48,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val window = requireActivity().window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        when (context?.resources?.configuration?.uiMode?.and(
-            Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> {
-                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.black)
-            }
-            Configuration.UI_MODE_NIGHT_NO -> {
-                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.off_white)
-            }
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.off_white)
-            }
-        }
+        changeStatusBarColor()
     }
 
     override fun onCreateView(
@@ -101,11 +90,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             setTextColor(Color.parseColor("#5e6fed"))
                             paintFlags = Paint.UNDERLINE_TEXT_FLAG
                             setOnClickListener {
-                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                                intent.type = "text/plain"
-                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                                val chooser = Intent.createChooser(intent, scannedString)
-                                requireActivity().startActivity(chooser)
+                                shareText(scannedString)
                             }
                             setOnLongClickListener {
                                 textCopyThenPost(scannedString)
@@ -120,7 +105,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
 
                         binding.openDefaultBrowserBtn.setOnClickListener {
-                            setUrlOpenBtn()
+                            toggleButtonColor(binding.openDefaultBrowserBtn)
                             val intent =
                                 Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
                             val chooser =
@@ -128,16 +113,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             requireActivity().startActivity(chooser)
                         }
                         binding.shareBtn.setOnClickListener {
-                            setUrlShareBtn()
-                            val intent =
-                                Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                            intent.type = "text/plain"
-                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                            val chooser = Intent.createChooser(intent, scannedString)
-                            requireActivity().startActivity(chooser)
+                            toggleButtonColor(binding.shareBtn)
+                            shareText(scannedString)
                         }
                         binding.copyBtn.setOnClickListener {
-                            setUrlCopyBtn()
+                            toggleButtonColor(binding.copyBtn)
                             textCopyThenPost(scannedString)
                         }
                     }
@@ -162,7 +142,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 text = str[4].replace(";;","")
                             }
                             binding.emailParent.openEmailBtn.setOnClickListener {
-                                setBackGroundEmailOpenBtn()
+                                toggleButtonColor(binding.emailParent.openEmailBtn)
                                 val emailIntent = Intent(Intent.ACTION_SENDTO)
                                 emailIntent.data = Uri.parse("mailto:")
                                 emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[2].replace(";SUB","")))
@@ -171,15 +151,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                             }
                             binding.emailParent.emailShareBtn.setOnClickListener {
-                                setBackgroundEmailShare()
-                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[2].replace(";SUB","")))
-                                intent.type = "text/plain"
-                                intent.putExtra(Intent.EXTRA_TEXT, str[2].replace(";SUB",""))
-                                val chooser = Intent.createChooser(intent, str[2].replace(";SUB",""))
-                                requireActivity().startActivity(chooser)
+                                toggleButtonColor(binding.emailParent.emailShareBtn)
+                                shareText(str[2].replace(";SUB",""))
                             }
                             binding.emailParent.emailCopyBtn.setOnClickListener {
-                                setBackgroundEmailCopy()
+                                toggleButtonColor(binding.emailParent.emailCopyBtn)
                                 textCopyThenPost(str[2].replace(";SUB",""))
                             }
 
@@ -188,15 +164,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             binding.textParent.visibility = View.VISIBLE
                             binding.textText.text = scannedString
                             binding.textShareBtn.setOnClickListener {
-                                setBackGroundTextShareBtn()
-                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                                intent.type = "text/plain"
-                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                                val chooser = Intent.createChooser(intent, scannedString)
-                                requireActivity().startActivity(chooser)
+                                toggleButtonColor(binding.textShareBtn)
+                                shareText(scannedString)
                             }
                             binding.textCopyBtn.setOnClickListener {
-                                setBackGroundTextCopyBtn()
+                                toggleButtonColor(binding.textCopyBtn)
                                 textCopyThenPost(scannedString)
                             }
                         }
@@ -224,7 +196,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                         }
 
                                         binding.emailParent.openEmailBtn.setOnClickListener {
-                                            setBackGroundEmailOpenBtn()
+                                            toggleButtonColor(binding.emailParent.openEmailBtn)
                                             val emailIntent = Intent(Intent.ACTION_SENDTO)
                                             emailIntent.data = Uri.parse("mailto:")
                                             emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
@@ -232,15 +204,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                         }
                                         binding.emailParent.emailShareBtn.setOnClickListener {
-                                            setBackgroundEmailShare()
-                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[0]))
-                                            intent.type = "text/plain"
-                                            intent.putExtra(Intent.EXTRA_TEXT, str[0])
-                                            val chooser = Intent.createChooser(intent, str[0])
-                                            requireActivity().startActivity(chooser)
+                                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                                            shareText(str[0])
                                         }
                                         binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            setBackgroundEmailCopy()
+                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
                                             textCopyThenPost(str[0])
                                         }
 
@@ -268,7 +236,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                         }
 
                                         binding.emailParent.openEmailBtn.setOnClickListener {
-                                            setBackGroundEmailOpenBtn()
+                                            toggleButtonColor(binding.emailParent.openEmailBtn)
                                             val emailIntent = Intent(Intent.ACTION_SENDTO)
                                             emailIntent.data = Uri.parse("mailto:")
                                             emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str1))
@@ -277,15 +245,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                         }
                                         binding.emailParent.emailShareBtn.setOnClickListener {
-                                            setBackgroundEmailShare()
-                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str1))
-                                            intent.type = "text/plain"
-                                            intent.putExtra(Intent.EXTRA_TEXT, str1)
-                                            val chooser = Intent.createChooser(intent, str1)
-                                            requireActivity().startActivity(chooser)
+                                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                                            shareText(str1)
                                         }
                                         binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            setBackgroundEmailCopy()
+                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
                                             textCopyThenPost(str1)
                                         }
 
@@ -312,7 +276,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             }
 
                                             binding.emailParent.openEmailBtn.setOnClickListener {
-                                                setBackGroundEmailOpenBtn()
+                                                toggleButtonColor(binding.emailParent.openEmailBtn)
                                                 val emailIntent = Intent(Intent.ACTION_SENDTO)
                                                 emailIntent.data = Uri.parse("mailto:")
                                                 emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
@@ -320,15 +284,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                                 requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                             }
                                             binding.emailParent.emailShareBtn.setOnClickListener {
-                                                setBackgroundEmailShare()
-                                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[0]))
-                                                intent.type = "text/plain"
-                                                intent.putExtra(Intent.EXTRA_TEXT, str[0])
-                                                val chooser = Intent.createChooser(intent, str[0])
-                                                requireActivity().startActivity(chooser)
+                                                toggleButtonColor(binding.emailParent.emailShareBtn)
+                                                shareText(str[0])
                                             }
                                             binding.emailParent.emailCopyBtn.setOnClickListener {
-                                                setBackgroundEmailCopy()
+                                                toggleButtonColor(binding.emailParent.emailCopyBtn)
                                                 textCopyThenPost(str[0])
                                             }
 
@@ -343,22 +303,18 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                             text = emailStr
                                         }
                                         binding.emailParent.openEmailBtn.setOnClickListener {
-                                            setBackGroundEmailOpenBtn()
+                                            toggleButtonColor(binding.emailParent.openEmailBtn)
                                             val emailIntent = Intent(Intent.ACTION_SENDTO)
                                             emailIntent.data = Uri.parse("mailto:")
                                             emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
                                             requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                         }
                                         binding.emailParent.emailShareBtn.setOnClickListener {
-                                            setBackgroundEmailShare()
-                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(emailStr))
-                                            intent.type = "text/plain"
-                                            intent.putExtra(Intent.EXTRA_TEXT, emailStr)
-                                            val chooser = Intent.createChooser(intent, emailStr)
-                                            requireActivity().startActivity(chooser)
+                                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                                            shareText(emailStr)
                                         }
                                         binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            setBackgroundEmailCopy()
+                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
                                             textCopyThenPost(emailStr)
                                         }
                                     }
@@ -370,22 +326,18 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     text = emailStr.replace(":","").replace(" ","")
                                 }
                                 binding.emailParent.openEmailBtn.setOnClickListener {
-                                    setBackGroundEmailOpenBtn()
+                                    toggleButtonColor(binding.emailParent.openEmailBtn)
                                     val emailIntent = Intent(Intent.ACTION_SENDTO)
                                     emailIntent.data = Uri.parse("mailto:")
                                     emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr.replace(":","").replace(" ","")))
                                     requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
                                 }
                                 binding.emailParent.emailShareBtn.setOnClickListener {
-                                    setBackgroundEmailShare()
-                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(emailStr.replace(":","").replace(" ","")))
-                                    intent.type = "text/plain"
-                                    intent.putExtra(Intent.EXTRA_TEXT, emailStr.replace(":","").replace(" ",""))
-                                    val chooser = Intent.createChooser(intent, emailStr.replace(":","").replace(" ",""))
-                                    requireActivity().startActivity(chooser)
+                                    toggleButtonColor(binding.emailParent.emailShareBtn)
+                                    shareText(emailStr.replace(":","").replace(" ",""))
                                 }
                                 binding.emailParent.emailCopyBtn.setOnClickListener {
-                                    setBackgroundEmailCopy()
+                                    toggleButtonColor(binding.emailParent.emailCopyBtn)
                                     textCopyThenPost(emailStr.replace(":","").replace(" ",""))
                                 }
                             } else {
@@ -411,22 +363,18 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 binding.smsParent.textSmsContent.text = str[1]
                                 binding.smsParent.smsTextMessage.text = str[2]
                                 binding.smsParent.openSmsBtn.setOnClickListener {
-                                    setBackSMSTextOpenBtn()
+                                    toggleButtonColor(binding.smsParent.openSmsBtn)
                                     val emailIntent = Intent(Intent.ACTION_SENDTO)
                                     emailIntent.data = Uri.fromParts("sms",str[1],null)
                                     emailIntent.putExtra(Intent.EXTRA_TEXT,str[2])
                                     requireActivity().startActivity(Intent.createChooser(emailIntent, "Send sms message..."))
                                 }
                                 binding.smsParent.smsShareBtn.setOnClickListener {
-                                    setBackSMSTextShareBtn()
-                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[1]))
-                                    intent.type = "text/plain"
-                                    intent.putExtra(Intent.EXTRA_TEXT, str[1])
-                                    val chooser = Intent.createChooser(intent, str[1])
-                                    requireActivity().startActivity(chooser)
+                                    toggleButtonColor(binding.smsParent.smsShareBtn)
+                                    shareText(str[1])
                                 }
                                 binding.smsParent.smsCopyBtn.setOnClickListener {
-                                    setBackSMSTextCopyBtn()
+                                    toggleButtonColor(binding.smsParent.smsCopyBtn)
                                     textCopyThenPost(str[1])
                                 }
                             }
@@ -452,15 +400,11 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 binding.wifiParent.wifiEncryptionTypeText.text = str[2].replace(";S","")
                                 binding.wifiParent.wifiHiddenText.text = str[5].replace(";","")
                                 binding.wifiParent.shareWifiBtn.setOnClickListener {
-                                    setWifiTextShareBtn()
-                                    val intent = Intent(Intent.ACTION_SEND, Uri.parse(str[4].replace(";H","")))
-                                    intent.type = "text/plain"
-                                    intent.putExtra(Intent.EXTRA_TEXT, str[4].replace(";H",""))
-                                    val chooser = Intent.createChooser(intent, str[4].replace(";H",""))
-                                    requireActivity().startActivity(chooser)
+                                    toggleButtonColor(binding.wifiParent.shareWifiBtn)
+                                    shareText(str[4].replace(";H",""))
                                 }
                                 binding.wifiParent.copyWifiBtn.setOnClickListener {
-                                    setWifiTextCopyBtn()
+                                    toggleButtonColor(binding.wifiParent.copyWifiBtn)
                                     textCopyThenPost(str[4].replace(";H",""))
                                 }
                             }
@@ -488,15 +432,10 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                     2 ->{
                                         binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = str2[0]
                                         binding.cryptocurrencyParent.shareCryptoBtn.setOnClickListener {
-                                            setCryptoShareBtn()
-                                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(str2[0]))
-                                            intent.type = "text/plain"
-                                            intent.putExtra(Intent.EXTRA_TEXT, str2[0])
-                                            val chooser = Intent.createChooser(intent, str2[0])
-                                            requireActivity().startActivity(chooser)
+                                            shareText(str2[0])
                                         }
                                         binding.cryptocurrencyParent.copyCryptoBtn.setOnClickListener {
-                                            setCryptoCopyBtn()
+                                            toggleButtonColor(binding.cryptocurrencyParent.copyCryptoBtn)
                                             textCopyThenPost(str2[0])
                                         }
                                         val str3 = str2[1].split("&" ).toTypedArray()
@@ -534,24 +473,16 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 textCopyThenPost(scannedString)
                             }
                             setOnLongClickListener {
-                                val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                                intent.type = "text/plain"
-                                intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                                val chooser = Intent.createChooser(intent, scannedString)
-                                requireActivity().startActivity(chooser)
+                                shareText(scannedString)
                                 return@setOnLongClickListener true
                             }
                         }
                         binding.textShareBtn.setOnClickListener {
-                            setBackGroundTextShareBtn()
-                            val intent = Intent(Intent.ACTION_SEND, Uri.parse(scannedString))
-                            intent.type = "text/plain"
-                            intent.putExtra(Intent.EXTRA_TEXT, scannedString)
-                            val chooser = Intent.createChooser(intent, scannedString)
-                            requireActivity().startActivity(chooser)
+                            toggleButtonColor(binding.textShareBtn)
+                            shareText(scannedString)
                         }
                         binding.textCopyBtn.setOnClickListener {
-                            setBackGroundTextCopyBtn()
+                            toggleButtonColor(binding.textCopyBtn)
                             textCopyThenPost(scannedString)
                         }
                     }
@@ -654,289 +585,12 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         requireActivity().startActivity(Intent.createChooser(intent,"Save code"))
     }
 
-    private fun setUrlOpenBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.openDefaultBrowserBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setUrlShareBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.shareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setUrlCopyBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.copyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setCryptoShareBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.cryptocurrencyParent.shareCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setCryptoCopyBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.cryptocurrencyParent.copyCryptoBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackGroundTextShareBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.textShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackGroundTextCopyBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.textCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setWifiTextShareBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.wifiParent.shareWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setWifiTextCopyBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.wifiParent.copyWifiBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackSMSTextOpenBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.smsParent.openSmsBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackSMSTextShareBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.smsParent.smsShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackSMSTextCopyBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.smsParent.smsCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackGroundEmailOpenBtn(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.emailParent.openEmailBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackgroundEmailShare(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.emailParent.emailShareBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
-    }
-
-    private fun setBackgroundEmailCopy(){
-        CoroutineScope(Dispatchers.Main).launch {
-            binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-            delay(100)
-            when (context?.resources?.configuration?.uiMode?.and(
-                Configuration.UI_MODE_NIGHT_MASK)) {
-                Configuration.UI_MODE_NIGHT_YES -> {
-                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.dark_gray4)
-                }
-                Configuration.UI_MODE_NIGHT_NO -> {
-                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-                Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    binding.emailParent.emailCopyBtn.supportBackgroundTintList = requireContext().getColorStateList(R.color.white)
-                }
-            }
-        }
+    private fun shareText(text: String){
+        val intent = Intent(Intent.ACTION_SEND, Uri.parse(text))
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, text)
+        val chooser = Intent.createChooser(intent, text)
+        requireActivity().startActivity(chooser)
     }
 
     private fun textCopyThenPost(textCopied:String) {
