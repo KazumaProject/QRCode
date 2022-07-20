@@ -202,3 +202,55 @@ fun String.getSMSMessage():String{
         }
     }
 }
+
+fun String.getWifiSSID():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        6 ->{
+            str[3].replace(";P","")
+        }
+        else ->{
+            ""
+        }
+    }
+}
+
+fun String.getWifiPassword():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        6 ->{
+            str[4].replace(";H","")
+        }
+        else ->{
+            ""
+        }
+    }
+}
+
+fun String.getWifiEncryptionType():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        6 ->{
+            str[2].replace(";S","")
+        }
+        else ->{
+            ""
+        }
+    }
+}
+
+fun String.getWifiIsHidden():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        6 ->{
+            if (str[5].replace(";","") == ""){
+                "false"
+            } else {
+                str[5].replace(";","")
+            }
+        }
+        else ->{
+            ""
+        }
+    }
+}

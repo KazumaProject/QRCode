@@ -237,26 +237,21 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
-                        val str = scannedString.split(":" ).toTypedArray()
-                        Timber.d("Type Wifi: ${str.size} $scannedString")
-                        when(str.size){
-                            6 ->{
-                                binding.wifiParent.textWifiContent.text = str[3].replace(";P","")
-                                binding.wifiParent.wifiPassTextMessage.text = str[4].replace(";H","")
-                                binding.wifiParent.wifiEncryptionTypeText.text = str[2].replace(";S","")
-                                binding.wifiParent.wifiHiddenText.text = str[5].replace(";","")
-                                binding.wifiParent.shareWifiBtn.setOnClickListener {
-                                    toggleButtonColor(binding.wifiParent.shareWifiBtn)
-                                    shareText(str[4].replace(";H",""))
-                                }
-                                binding.wifiParent.copyWifiBtn.setOnClickListener {
-                                    toggleButtonColor(binding.wifiParent.copyWifiBtn)
-                                    textCopyThenPost(str[4].replace(";H",""))
-                                }
-                            }
-                            else ->{
-
-                            }
+                        val wifiSSID = scannedString.getWifiSSID()
+                        val wifiPassword = scannedString.getWifiPassword()
+                        val wifiEncryptionType = scannedString.getWifiEncryptionType()
+                        val wifiIsHidden = scannedString.getWifiIsHidden()
+                        binding.wifiParent.textWifiContent.text = wifiSSID
+                        binding.wifiParent.wifiPassTextMessage.text = wifiPassword
+                        binding.wifiParent.wifiEncryptionTypeText.text = wifiEncryptionType
+                        binding.wifiParent.wifiHiddenText.text = wifiIsHidden
+                        binding.wifiParent.shareWifiBtn.setOnClickListener {
+                            toggleButtonColor(binding.wifiParent.shareWifiBtn)
+                            shareText(wifiPassword)
+                        }
+                        binding.wifiParent.copyWifiBtn.setOnClickListener {
+                            toggleButtonColor(binding.wifiParent.copyWifiBtn)
+                            textCopyThenPost(wifiPassword)
                         }
 
                     }
