@@ -209,33 +209,24 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
-                        val str = scannedString.split(":" ).toTypedArray()
-                        when(str.size){
-                            2 ->{
-
-                            }
-                            3 ->{
-                                binding.smsParent.textSmsContent.text = str[1]
-                                binding.smsParent.smsTextMessage.text = str[2]
-                                binding.smsParent.openSmsBtn.setOnClickListener {
-                                    toggleButtonColor(binding.smsParent.openSmsBtn)
-                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                    emailIntent.data = Uri.fromParts("sms",str[1],null)
-                                    emailIntent.putExtra(Intent.EXTRA_TEXT,str[2])
-                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send sms message..."))
-                                }
-                                binding.smsParent.smsShareBtn.setOnClickListener {
-                                    toggleButtonColor(binding.smsParent.smsShareBtn)
-                                    shareText(str[1])
-                                }
-                                binding.smsParent.smsCopyBtn.setOnClickListener {
-                                    toggleButtonColor(binding.smsParent.smsCopyBtn)
-                                    textCopyThenPost(str[1])
-                                }
-                            }
-                            else ->{
-
-                            }
+                        val smsNumber = scannedString.getSMSNumber()
+                        val smsMessage = scannedString.getSMSMessage()
+                        binding.smsParent.textSmsContent.text = smsNumber
+                        binding.smsParent.smsTextMessage.text = smsMessage
+                        binding.smsParent.openSmsBtn.setOnClickListener {
+                            toggleButtonColor(binding.smsParent.openSmsBtn)
+                            val smsIntent = Intent(Intent.ACTION_SENDTO)
+                            smsIntent.data = Uri.fromParts("sms",smsNumber,null)
+                            smsIntent.putExtra(Intent.EXTRA_TEXT,smsMessage)
+                            requireActivity().startActivity(Intent.createChooser(smsIntent, "Send sms message..."))
+                        }
+                        binding.smsParent.smsShareBtn.setOnClickListener {
+                            toggleButtonColor(binding.smsParent.smsShareBtn)
+                            shareText(smsNumber)
+                        }
+                        binding.smsParent.smsCopyBtn.setOnClickListener {
+                            toggleButtonColor(binding.smsParent.smsCopyBtn)
+                            textCopyThenPost(smsNumber)
                         }
                     }
                     is ScannedStringType.Wifi ->{

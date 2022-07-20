@@ -1,5 +1,8 @@
 package com.kazumaproject7.qrcodescanner.other
 
+import android.content.Intent
+import android.net.Uri
+
 fun String.getEmailEmailTypeOne(): String {
     val str = this.split(":" ).toTypedArray()
     return if (str.size == 5){
@@ -165,6 +168,36 @@ fun String.getEmailMessageTypeTwo():String{
         } else if (this.contains("MAILTO")) {
             ""
         } else {
+            ""
+        }
+    }
+}
+
+fun String.getSMSNumber():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        2 ->{
+            ""
+        }
+        3 ->{
+            str[1]
+        }
+        else ->{
+            ""
+        }
+    }
+}
+
+fun String.getSMSMessage():String{
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        2 ->{
+            ""
+        }
+        3 ->{
+            str[2]
+        }
+        else ->{
             ""
         }
     }
