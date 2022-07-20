@@ -254,3 +254,91 @@ fun String.getWifiIsHidden():String{
         }
     }
 }
+
+fun String.getCryptocurrencyType():String {
+    val str = this.split(":" ).toTypedArray()
+    return when(str.size){
+        2 ->{
+            str[0]
+        }
+        else ->{
+            ""
+        }
+    }
+}
+
+fun String.getCryptocurrencyAddress():String {
+    val str = this.split(":" ).toTypedArray()
+    when(str.size){
+        2 ->{
+            val str2 = str[1].split("?" ).toTypedArray()
+            return when(str2.size){
+                2 ->{
+                    str2[0]
+                }
+                else ->{
+                    ""
+                }
+            }
+        }
+        else ->{
+            return ""
+        }
+    }
+}
+
+fun String.getCryptocurrencyAmount():String {
+    val str = this.split(":" ).toTypedArray()
+    when(str.size){
+        2 ->{
+            val str2 = str[1].split("?" ).toTypedArray()
+            when(str2.size){
+                2 ->{
+                    val str3 = str2[1].split("&" ).toTypedArray()
+                    return when(str3.size){
+                        2 ->{
+                            str3[0].replace("amount=","")
+                        }
+                        else ->{
+                            ""
+                        }
+                    }
+                }
+                else ->{
+                    return ""
+                }
+            }
+        }
+        else ->{
+            return ""
+        }
+    }
+}
+
+fun String.getCryptocurrencyMessage():String {
+    val str = this.split(":" ).toTypedArray()
+    when(str.size){
+        2 ->{
+            val str2 = str[1].split("?" ).toTypedArray()
+            when(str2.size){
+                2 ->{
+                    val str3 = str2[1].split("&" ).toTypedArray()
+                    return when(str3.size){
+                        2 ->{
+                            str3[1].replace("message=","")
+                        }
+                        else ->{
+                            ""
+                        }
+                    }
+                }
+                else ->{
+                    return ""
+                }
+            }
+        }
+        else ->{
+            return ""
+        }
+    }
+}

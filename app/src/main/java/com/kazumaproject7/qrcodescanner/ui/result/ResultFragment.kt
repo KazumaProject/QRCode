@@ -85,6 +85,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                setURLTitleLogo(scannedString)
+                                binding.swipeToRefreshResult.isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
+                        }
                         binding.textUrl.apply {
                             text = scannedString
                             setTextColor(Color.parseColor("#5e6fed"))
@@ -99,10 +106,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
 
                         setURLTitleLogo(scannedString)
-                        binding.swipeToRefreshResult.setOnRefreshListener {
-                            setURLTitleLogo(scannedString)
-                            binding.swipeToRefreshResult.isRefreshing = false
-                        }
 
                         binding.openDefaultBrowserBtn.setOnClickListener {
                             toggleButtonColor(binding.openDefaultBrowserBtn)
@@ -264,40 +267,20 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             isNestedScrollingEnabled = true
                         }
                         binding.cryptocurrencyParent.cryptocurrencyParentView.visibility = View.VISIBLE
-                        val str = scannedString.split(":" ).toTypedArray()
-                        when(str.size){
-                            2 ->{
-                                binding.cryptocurrencyParent.textCryptocurrencyContent.text = str[0]
-                                val str2 = str[1].split("?" ).toTypedArray()
-                                when(str2.size){
-                                    2 ->{
-                                        binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = str2[0]
-                                        binding.cryptocurrencyParent.shareCryptoBtn.setOnClickListener {
-                                            shareText(str2[0])
-                                        }
-                                        binding.cryptocurrencyParent.copyCryptoBtn.setOnClickListener {
-                                            toggleButtonColor(binding.cryptocurrencyParent.copyCryptoBtn)
-                                            textCopyThenPost(str2[0])
-                                        }
-                                        val str3 = str2[1].split("&" ).toTypedArray()
-                                        when(str3.size){
-                                            2 ->{
-                                                binding.cryptocurrencyParent.cryptocurrencyTextAmount.text = str3[0].replace("amount=","")
-                                                binding.cryptocurrencyParent.cryptocurrencyMessageContent.text = str3[1].replace("message=","")
-                                            }
-                                            else ->{
-
-                                            }
-                                        }
-                                    }
-                                    else ->{
-
-                                    }
-                                }
-                            }
-                            else ->{
-
-                            }
+                        val cryptocurrencyType = scannedString.getCryptocurrencyType()
+                        val cryptocurrencyAddress = scannedString.getCryptocurrencyAddress()
+                        val cryptocurrencyAmount = scannedString.getCryptocurrencyAmount()
+                        val cryptocurrencyOptionalMessage = scannedString.getCryptocurrencyMessage()
+                        binding.cryptocurrencyParent.textCryptocurrencyContent.text = cryptocurrencyType
+                        binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = cryptocurrencyAddress
+                        binding.cryptocurrencyParent.cryptocurrencyTextAmount.text = cryptocurrencyAmount
+                        binding.cryptocurrencyParent.cryptocurrencyMessageContent.text = cryptocurrencyOptionalMessage
+                        binding.cryptocurrencyParent.shareCryptoBtn.setOnClickListener {
+                            shareText(cryptocurrencyAddress)
+                        }
+                        binding.cryptocurrencyParent.copyCryptoBtn.setOnClickListener {
+                            toggleButtonColor(binding.cryptocurrencyParent.copyCryptoBtn)
+                            textCopyThenPost(cryptocurrencyAddress)
                         }
                     }
                     is ScannedStringType.Text ->{
