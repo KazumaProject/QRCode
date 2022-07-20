@@ -23,10 +23,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
-import com.kazumaproject7.qrcodescanner.other.ScannedStringType
-import com.kazumaproject7.qrcodescanner.other.getBodyEmailType1
-import com.kazumaproject7.qrcodescanner.other.getEmailEmailType1
-import com.kazumaproject7.qrcodescanner.other.getSubjectEmailType1
+import com.kazumaproject7.qrcodescanner.other.*
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,7 +85,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
-                        //shareText(scannedString)
                         binding.textUrl.apply {
                             text = scannedString
                             setTextColor(Color.parseColor("#5e6fed"))
@@ -133,9 +129,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
-                        val email = getEmailEmailType1(scannedString)
-                        val subject = getSubjectEmailType1(scannedString)
-                        val message = getBodyEmailType1(scannedString)
+                        val email = scannedString.getEmailEmailTypeOne()
+                        val subject = scannedString.getSubjectEmailTypeOne()
+                        val message = scannedString.getMessageEmailTypeOne()
                         val str = scannedString.split(":" ).toTypedArray()
                         binding.emailParent.textEmailContent.text = email
                         binding.emailParent.textSubjectContent.text = subject
@@ -175,168 +171,34 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
-                        if (scannedString.contains("?body=") || scannedString.contains("&subject=")){
-                            when{
-                                scannedString.contains("?body=") && !scannedString.contains("&subject=") ->{
-                                    val str = scannedString.split("?" ).toTypedArray()
-                                    if (str.size >=2){
-                                        val str1 = str[0].replace("mailto:","")
-                                        binding.emailParent.textEmailContent.apply {
-                                            text = str1
-                                        }
-                                        binding.emailParent.textMessage.apply {
-                                            text = str[1].replace("body=","")
-                                        }
-
-                                        binding.emailParent.openEmailBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.openEmailBtn)
-                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                            emailIntent.data = Uri.parse("mailto:")
-                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
-                                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str[1].replace("body=",""))
-                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                        }
-                                        binding.emailParent.emailShareBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailShareBtn)
-                                            shareText(str[0])
-                                        }
-                                        binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                            textCopyThenPost(str[0])
-                                        }
-
-                                    } else {
-
-                                    }
-                                }
-                                !scannedString.contains("?body=") && scannedString.contains("&subject=") ->{
-                                    binding.emailParent.textMessage.text  = scannedString
-                                }
-                                scannedString.contains("?body=") && scannedString.contains("&subject=") ->{
-                                    val str = scannedString.split("?" ).toTypedArray()
-                                    if (str.size >=2){
-                                        val str1 = str[0].replace("mailto:","")
-                                        val str2 = str[1].split("&").toTypedArray()
-                                        binding.emailParent.textEmailContent.apply {
-                                            text = str1
-                                        }
-                                        binding.emailParent.textSubjectContent.apply {
-                                            text = str2[1].replace("subject=","")
-                                        }
-                                        binding.emailParent.textMessage.apply {
-
-                                            text = str2[0].replace("body=","")
-                                        }
-
-                                        binding.emailParent.openEmailBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.openEmailBtn)
-                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                            emailIntent.data = Uri.parse("mailto:")
-                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str1))
-                                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, str2[1].replace("subject=",""))
-                                            emailIntent.putExtra(Intent.EXTRA_TEXT, str2[0].replace("body=",""))
-                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                        }
-                                        binding.emailParent.emailShareBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailShareBtn)
-                                            shareText(str1)
-                                        }
-                                        binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                            textCopyThenPost(str1)
-                                        }
-
-                                    } else {
-
-                                    }
-                                }
-                                else ->{
-                                    binding.emailParent.textMessage.text  = scannedString
-                                }
-                            }
-                        } else {
-                            if (scannedString.contains("mailto:")){
-                                when{
-                                    scannedString.contains("?subject=") ->{
-                                        val emailStr = scannedString.replace("mailto:","")
-                                        val str = emailStr.split("?" ).toTypedArray()
-                                        if (str.size >= 2){
-                                            binding.emailParent.textEmailContent.apply {
-                                                text = str[0]
-                                            }
-                                            binding.emailParent.textSubjectContent.apply {
-                                                text = str[1].replace("subject=","")
-                                            }
-
-                                            binding.emailParent.openEmailBtn.setOnClickListener {
-                                                toggleButtonColor(binding.emailParent.openEmailBtn)
-                                                val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                                emailIntent.data = Uri.parse("mailto:")
-                                                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(str[0]))
-                                                emailIntent.putExtra(Intent.EXTRA_SUBJECT,str[1].replace("subject=",""))
-                                                requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                            }
-                                            binding.emailParent.emailShareBtn.setOnClickListener {
-                                                toggleButtonColor(binding.emailParent.emailShareBtn)
-                                                shareText(str[0])
-                                            }
-                                            binding.emailParent.emailCopyBtn.setOnClickListener {
-                                                toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                                textCopyThenPost(str[0])
-                                            }
-
-                                        } else {
-
-                                        }
-
-                                    }
-                                    else ->{
-                                        val emailStr = scannedString.replace("mailto:","")
-                                        binding.emailParent.textEmailContent.apply {
-                                            text = emailStr
-                                        }
-                                        binding.emailParent.openEmailBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.openEmailBtn)
-                                            val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                            emailIntent.data = Uri.parse("mailto:")
-                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr))
-                                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                        }
-                                        binding.emailParent.emailShareBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailShareBtn)
-                                            shareText(emailStr)
-                                        }
-                                        binding.emailParent.emailCopyBtn.setOnClickListener {
-                                            toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                            textCopyThenPost(emailStr)
-                                        }
-                                    }
-                                }
-
-                            }else if (scannedString.contains("MAILTO")){
-                                val emailStr = scannedString.replace("MAILTO","")
-                                binding.emailParent.textEmailContent.apply {
-                                    text = emailStr.replace(":","").replace(" ","")
-                                }
-                                binding.emailParent.openEmailBtn.setOnClickListener {
-                                    toggleButtonColor(binding.emailParent.openEmailBtn)
-                                    val emailIntent = Intent(Intent.ACTION_SENDTO)
-                                    emailIntent.data = Uri.parse("mailto:")
-                                    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(emailStr.replace(":","").replace(" ","")))
-                                    requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                                }
-                                binding.emailParent.emailShareBtn.setOnClickListener {
-                                    toggleButtonColor(binding.emailParent.emailShareBtn)
-                                    shareText(emailStr.replace(":","").replace(" ",""))
-                                }
-                                binding.emailParent.emailCopyBtn.setOnClickListener {
-                                    toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                    textCopyThenPost(emailStr.replace(":","").replace(" ",""))
-                                }
-                            } else {
-
-                            }
-
+                        val email = scannedString.getEmailEmailTypeTwo()
+                        val subject = scannedString.getEmailSubjectTypeTwo()
+                        val message = scannedString.getEmailMessageTypeTwo()
+                        binding.emailParent.textEmailContent.apply {
+                            text = email
+                        }
+                        binding.emailParent.textSubjectContent.apply {
+                            text = subject
+                        }
+                        binding.emailParent.textMessage.apply {
+                            text = message
+                        }
+                        binding.emailParent.openEmailBtn.setOnClickListener {
+                            toggleButtonColor(binding.emailParent.openEmailBtn)
+                            val emailIntent = Intent(Intent.ACTION_SENDTO)
+                            emailIntent.data = Uri.parse("mailto:")
+                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+                            emailIntent.putExtra(Intent.EXTRA_SUBJECT,subject)
+                            emailIntent.putExtra(Intent.EXTRA_TEXT, message)
+                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                        }
+                        binding.emailParent.emailShareBtn.setOnClickListener {
+                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                            shareText(email)
+                        }
+                        binding.emailParent.emailCopyBtn.setOnClickListener {
+                            toggleButtonColor(binding.emailParent.emailCopyBtn)
+                            textCopyThenPost(email)
                         }
                     }
                     is ScannedStringType.SMS ->{
