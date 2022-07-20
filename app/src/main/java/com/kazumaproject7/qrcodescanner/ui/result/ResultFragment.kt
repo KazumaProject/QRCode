@@ -283,6 +283,18 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             textCopyThenPost(cryptocurrencyAddress)
                         }
                     }
+                    is ScannedStringType.VCard ->{
+                        binding.swipeToRefreshResult.apply {
+                            setOnRefreshListener {
+                                isRefreshing = false
+                            }
+                            isNestedScrollingEnabled = true
+                        }
+                        binding.vcardParent.vcardParentView.visibility = View.VISIBLE
+                        Timber.d("Vcard Text: $scannedString")
+                        binding.vcardParent.vcardNameContent.text = scannedString.getVcardName()
+
+                    }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
                         //shareText(scannedString)
@@ -310,9 +322,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             toggleButtonColor(binding.textCopyBtn)
                             textCopyThenPost(scannedString)
                         }
-                    }
-                    else -> {
-
                     }
                 }
 
@@ -344,9 +353,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 binding.urlLogoProgress.visibility = View.VISIBLE
                 binding.urlTitleProgress.visibility = View.VISIBLE
             }
-
             try {
-
                 val document = Jsoup.connect(scannedString).get()
                 val img = document.select("img").first()
                 val imgSrc = img.absUrl("src")

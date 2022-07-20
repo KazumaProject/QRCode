@@ -232,6 +232,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 ->{
                                     viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
                                 }
+                                lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
+                                    viewModel.updateScannedStringType(ScannedStringType.VCard)
+                                }
                                 else ->{
                                     viewModel.updateScannedStringType(ScannedStringType.Text)
                                 }
@@ -280,6 +283,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                             lastText.contains("xrp:")
                     ->{
                         viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                    }
+                    lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
+                        viewModel.updateScannedStringType(ScannedStringType.VCard)
                     }
                     else ->{
                         viewModel.updateScannedStringType(ScannedStringType.Text)

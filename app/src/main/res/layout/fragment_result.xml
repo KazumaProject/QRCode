@@ -206,20 +206,29 @@
 
                    <include
                        android:id="@+id/email_parent"
-                       layout="@layout/email_parent_layout" />
+                       layout="@layout/email_parent_layout"
+                       android:visibility="gone"/>
 
                    <include
                        android:id="@+id/sms_parent"
                        layout="@layout/sms_result_layout"
+                       android:visibility="gone"
                        />
 
                    <include
                        android:id="@+id/wifi_parent"
-                       layout="@layout/wifi_layout"/>
+                       layout="@layout/wifi_layout"
+                       android:visibility="gone"/>
 
                    <include
                        android:id="@+id/cryptocurrency_parent"
-                       layout="@layout/cryptocurrency_layout"/>
+                       layout="@layout/cryptocurrency_layout"
+                       android:visibility="gone"/>
+
+                   <include
+                       android:id="@+id/vcard_parent"
+                       layout="@layout/vcard_layout"
+                       android:visibility="gone"/>
 
                    <androidx.constraintlayout.widget.ConstraintLayout
                        android:id="@+id/text_parent"

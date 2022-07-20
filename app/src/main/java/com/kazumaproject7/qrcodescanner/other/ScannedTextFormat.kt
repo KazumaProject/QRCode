@@ -1,7 +1,6 @@
 package com.kazumaproject7.qrcodescanner.other
 
-import android.content.Intent
-import android.net.Uri
+import timber.log.Timber
 
 fun String.getEmailEmailTypeOne(): String {
     val str = this.split(":" ).toTypedArray()
@@ -341,4 +340,58 @@ fun String.getCryptocurrencyMessage():String {
             return ""
         }
     }
+}
+
+fun String.getVcardName():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("N:")->{
+                return it.replace("N:","").replace(";"," ")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardMobileNumber():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("TEL;CELL:")->{
+                return it.replace("TEL;CELL:","")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardWorkPhoneNumber():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("TEL;WORK;VOICE:")->{
+                return it.replace("TEL;WORK;VOICE:","")
+            }
+        }
+    }
+    return ""
 }
