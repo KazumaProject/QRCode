@@ -373,6 +373,9 @@ fun String.getVcardMobileNumber():String {
             it.contains("TEL;CELL:")->{
                 return it.replace("TEL;CELL:","")
             }
+            it.contains("TEL;TYPE=CELL:")->{
+                return it.replace("TEL;TYPE=CELL:","")
+            }
         }
     }
     return ""
@@ -390,6 +393,9 @@ fun String.getVcardWorkPhoneNumber():String {
         when{
             it.contains("TEL;WORK;VOICE:")->{
                 return it.replace("TEL;WORK;VOICE:","")
+            }
+            it.contains("TEL:")->{
+                return it.replace("TEL:","")
             }
         }
     }
@@ -409,6 +415,9 @@ fun String.getVcardFaxNumber():String {
             it.contains("TEL;FAX:")->{
                 return it.replace("TEL;FAX:","")
             }
+            it.contains("TEL;TYPE=FAX:")->{
+                return it.replace("TEL;TYPE=FAX:","")
+            }
         }
     }
     return ""
@@ -418,15 +427,15 @@ fun String.getVcardEmail():String {
     val str = this.replace("BEGIN:VCARD","")
         .replace("VERSION:3.0","")
         .replace("END:VCARD","")
-        .replace(" ","")
     Timber.d("Vcard Text1 $str")
     val str2 = str.split("\n").toTypedArray()
     str2.forEach {
         Timber.d("Vcard text1: $it")
-        when{
-            it.contains("EMAIL;WORK;INTERNET:")->{
-                return it.replace("EMAIL;WORK;INTERNET:","")
-            }
+        if (it.contains("EMAIL;WORK;INTERNET:")){
+            return it.replace("EMAIL;WORK;INTERNET:","")
+        }
+        if (it.contains("EMAIL;TYPE=INTERNET:")){
+            return it.replace("EMAIL;TYPE=INTERNET:","")
         }
     }
     return ""
@@ -436,7 +445,6 @@ fun String.getVcardAddress():String {
     val str = this.replace("BEGIN:VCARD","")
         .replace("VERSION:3.0","")
         .replace("END:VCARD","")
-        .replace(" ","")
     Timber.d("Vcard Text1 $str")
     val str2 = str.split("\n").toTypedArray()
     str2.forEach {
@@ -447,6 +455,98 @@ fun String.getVcardAddress():String {
                 val str4 = str3.split(";").toTypedArray()
                 return if (str4.size == 5) {
                     str4[0] + "\n" + str4[1] + "\n" + str4[2] + "\n" + str4[4]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardStreet():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[0]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardCity():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[1]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardState():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[2]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardCountry():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[4]
                 }else{
                     ""
                 }

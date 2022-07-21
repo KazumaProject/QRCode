@@ -293,17 +293,27 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         binding.vcardParent.vcardParentView.visibility = View.VISIBLE
                         Timber.d("Vcard Text: $scannedString")
                         val vcardName = scannedString.getVcardName()
-                        val vcardNumber = "C: ${scannedString.getVcardMobileNumber()}\nW: ${scannedString.getVcardWorkPhoneNumber()}\nFax: ${scannedString.getVcardFaxNumber()}"
+                        val vcardNumber = scannedString.getVcardMobileNumber()
+                        val vcardPhoneNumber = scannedString.getVcardWorkPhoneNumber()
+                        val vcardFax = scannedString.getVcardFaxNumber()
                         val vcardEmail = scannedString.getVcardEmail()
-                        val vcardAddress = scannedString.getVcardAddress()
+                        val vcardStreet = scannedString.getVcardStreet()
+                        val vcardCity= scannedString.getVcardCity()
+                        val vcardState = scannedString.getVcardState()
+                        val vcardCountry = scannedString.getVcardCountry()
                         val vcardZip = scannedString.getVcardZip()
-                        val vcardCompany = "${scannedString.getVcardCompanyName()} ${scannedString.getVcardCompanyTitle()}"
+                        val vcardCompany = scannedString.getVcardCompanyName()
                         val vcardWebsite = scannedString.getVcardWebsite()
                         binding.vcardParent.vcardNameContent.text = vcardName
                         binding.vcardParent.vcardMobileContent.text = vcardNumber
+                        binding.vcardParent.vcardWorkPhoneContent.text = vcardPhoneNumber
+                        binding.vcardParent.vcardWorkFaxContent.text = vcardFax
                         binding.vcardParent.vcardEmailContent.text = vcardEmail
                         binding.vcardParent.vcardCompanyContent.text = vcardCompany
-                        binding.vcardParent.vcardAddressContent.text = vcardAddress
+                        binding.vcardParent.vcardAddressContent.text = vcardStreet
+                        binding.vcardParent.vcardCityContent.text = vcardCity
+                        binding.vcardParent.vcardStateContent.text = vcardState
+                        binding.vcardParent.vcardCountryContent.text = vcardCountry
                         binding.vcardParent.vcardZipContent.text = vcardZip
                         binding.vcardParent.vcardWebsiteContent.text = vcardWebsite
                     }
