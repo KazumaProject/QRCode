@@ -86,6 +86,26 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         }
     }
 
+    fun isNightMode(): Boolean{
+        val window = requireActivity().window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        return when (context?.resources?.configuration?.uiMode?.and(
+            Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> {
+                true
+            }
+            Configuration.UI_MODE_NIGHT_NO -> {
+                false
+            }
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                true
+            }
+            else ->{
+                true
+            }
+        }
+    }
+
     inline val Fragment.windowHeight: Int
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

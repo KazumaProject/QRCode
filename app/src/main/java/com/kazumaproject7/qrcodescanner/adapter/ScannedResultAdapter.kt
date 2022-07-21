@@ -57,7 +57,7 @@ class ScannedResultAdapter(
         val scannedResultText = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_text)
         val scannedResultTimeStamp = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_time_stamp_text)
         val scannedResultImg = holder.itemView.findViewById<ShapeableImageView>(R.id.scanned_result_img)
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("MMMM.dd.yyyy, HH:mm", Locale.getDefault())
         val dateString = dateFormat.format(scannedResult.curDate)
 
         scannedResultText.text = scannedResult.scannedString
@@ -66,17 +66,17 @@ class ScannedResultAdapter(
             TYPE_QR_CODE ->{
                 scannedResultImg.background = ContextCompat.getDrawable(context,R.drawable.q_code)
                 if (isNightMode){
-                    scannedResultImg.supportImageTintList = context.getColorStateList(android.R.color.white)
+                    scannedResultImg.supportBackgroundTintList = context.getColorStateList(android.R.color.white)
                 }else{
-                    scannedResultImg.supportImageTintList = context.getColorStateList(android.R.color.black)
+                    scannedResultImg.supportBackgroundTintList = context.getColorStateList(android.R.color.black)
                 }
             }
             TYPE_BAR_CODE ->{
                 scannedResultImg.background = ContextCompat.getDrawable(context,R.drawable.barcode)
                 if (isNightMode){
-                    scannedResultImg.supportImageTintList = context.getColorStateList(android.R.color.white)
+                    scannedResultImg.supportBackgroundTintList = context.getColorStateList(android.R.color.white)
                 }else{
-                    scannedResultImg.supportImageTintList = context.getColorStateList(android.R.color.black)
+                    scannedResultImg.supportBackgroundTintList = context.getColorStateList(android.R.color.black)
                 }
             }
             else ->{

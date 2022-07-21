@@ -22,8 +22,19 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
+import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentResultBinding
 import com.kazumaproject7.qrcodescanner.other.*
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_CRYPTOCURRENCY
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL1
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL2
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_VCARD
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +46,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
+import java.util.UUID
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -85,6 +98,15 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
+
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_URL,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                        ))
+
                         binding.swipeToRefreshResult.apply {
                             setOnRefreshListener {
                                 setURLTitleLogo(scannedString)
@@ -132,6 +154,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_EMAIL1,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         val email = scannedString.getEmailEmailTypeOne()
                         val subject = scannedString.getSubjectEmailTypeOne()
                         val message = scannedString.getMessageEmailTypeOne()
@@ -174,6 +203,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_EMAIL2,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         val email = scannedString.getEmailEmailTypeTwo()
                         val subject = scannedString.getEmailSubjectTypeTwo()
                         val message = scannedString.getEmailMessageTypeTwo()
@@ -212,6 +248,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_SMS,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         val smsNumber = scannedString.getSMSNumber()
                         val smsMessage = scannedString.getSMSMessage()
                         binding.smsParent.textSmsContent.text = smsNumber
@@ -240,6 +283,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_WIFI,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         val wifiSSID = scannedString.getWifiSSID()
                         val wifiPassword = scannedString.getWifiPassword()
                         val wifiEncryptionType = scannedString.getWifiEncryptionType()
@@ -266,6 +316,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_CRYPTOCURRENCY,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         binding.cryptocurrencyParent.cryptocurrencyParentView.visibility = View.VISIBLE
                         val cryptocurrencyType = scannedString.getCryptocurrencyType()
                         val cryptocurrencyAddress = scannedString.getCryptocurrencyAddress()
@@ -290,6 +347,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = scannedString,
+                                scannedStringType = TYPE_VCARD,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
                         binding.vcardParent.vcardParentView.visibility = View.VISIBLE
                         Timber.d("Vcard Text: $scannedString")
                         val vcardName = scannedString.getVcardName()
@@ -328,6 +392,27 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
+
+                        viewModel.scannedType.value?.let { codeType ->
+                            if (codeType.replace("_"," ") == "QR CODE"){
+                                viewModel.insertScannedResult(
+                                    ScannedResult(
+                                        scannedString = scannedString,
+                                        scannedStringType = TYPE_TEXT,
+                                        scannedCodeType = TYPE_QR_CODE,
+                                        System.currentTimeMillis()
+                                    ))
+                            } else {
+                                viewModel.insertScannedResult(
+                                    ScannedResult(
+                                        scannedString = scannedString,
+                                        scannedStringType = TYPE_TEXT,
+                                        scannedCodeType = TYPE_BAR_CODE,
+                                        System.currentTimeMillis()
+                                    ))
+                            }
+                        }
+
                         binding.textText.apply {
                             text = scannedString
                             setOnClickListener {
