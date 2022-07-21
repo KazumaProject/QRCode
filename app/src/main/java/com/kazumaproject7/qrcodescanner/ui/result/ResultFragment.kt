@@ -303,6 +303,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val vcardCountry = scannedString.getVcardCountry()
                         val vcardZip = scannedString.getVcardZip()
                         val vcardCompany = scannedString.getVcardCompanyName()
+                        val vcardTitle = scannedString.getVcardCompanyTitle()
                         val vcardWebsite = scannedString.getVcardWebsite()
                         binding.vcardParent.vcardNameContent.text = vcardName
                         binding.vcardParent.vcardMobileContent.text = vcardNumber
@@ -310,6 +311,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         binding.vcardParent.vcardWorkFaxContent.text = vcardFax
                         binding.vcardParent.vcardEmailContent.text = vcardEmail
                         binding.vcardParent.vcardCompanyContent.text = vcardCompany
+                        binding.vcardParent.vcardCompanyTitleContent.text = vcardTitle
                         binding.vcardParent.vcardAddressContent.text = vcardStreet
                         binding.vcardParent.vcardCityContent.text = vcardCity
                         binding.vcardParent.vcardStateContent.text = vcardState
@@ -346,12 +348,8 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                     }
                 }
-
-
             }
-
         }
-
     }
 
     override fun onPause() {

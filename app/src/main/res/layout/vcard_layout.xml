@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:visibility="visible"
+    android:visibility="gone"
     android:background="@color/result_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -173,6 +173,34 @@
         app:layout_constraintTop_toTopOf="@+id/vcard_company_title" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/vcard_company_title_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title:"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_marginTop="64dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vcard_company_title" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/vcard_company_title_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:textColor="?attr/colorOnSecondary"
+        android:maxLines="2"
+        android:textSize="22sp"
+        android:layout_marginStart="8dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.7"
+        app:layout_constraintBottom_toBottomOf="@+id/vcard_company_title_title"
+        app:layout_constraintStart_toEndOf="@+id/vcard_company_title_title"
+        app:layout_constraintTop_toTopOf="@+id/vcard_company_title_title" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/vcard_address_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -182,7 +210,7 @@
         android:layout_marginTop="64dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vcard_company_title" />
+        app:layout_constraintTop_toBottomOf="@+id/vcard_company_title_title" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/vcard_address_content"
@@ -314,8 +342,10 @@
         android:textStyle="bold"
         android:layout_marginTop="64dp"
         android:layout_marginStart="16dp"
+        android:layout_marginBottom="32dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vcard_zip_title" />
+        app:layout_constraintTop_toBottomOf="@+id/vcard_zip_title"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/vcard_website_content"
@@ -332,46 +362,5 @@
         app:layout_constraintBottom_toBottomOf="@+id/vcard_website_title"
         app:layout_constraintStart_toEndOf="@+id/vcard_website_title"
         app:layout_constraintTop_toTopOf="@+id/vcard_website_title" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="32dp"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vcard_website_title">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/open_email_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Open"
-            android:textSize="13sp"
-            android:textColor="?attr/colorOnSecondary"
-            app:icon="@drawable/baseline_open_in_browser_24"
-            app:iconTint="?attr/colorOnSecondary"
-            android:layout_marginHorizontal="4dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/email_share_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Share"
-            android:textSize="13sp"
-            app:iconTint="?attr/colorOnSecondary"
-            app:icon="@drawable/baseline_ios_share_24"
-            app:iconGravity="start"
-            android:textColor="?attr/colorOnSecondary"
-            android:layout_marginHorizontal="4dp"/>
-
-    </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
