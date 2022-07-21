@@ -395,3 +395,141 @@ fun String.getVcardWorkPhoneNumber():String {
     }
     return ""
 }
+
+fun String.getVcardFaxNumber():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("TEL;FAX:")->{
+                return it.replace("TEL;FAX:","")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardEmail():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("EMAIL;WORK;INTERNET:")->{
+                return it.replace("EMAIL;WORK;INTERNET:","")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardAddress():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[0] + "\n" + str4[1] + "\n" + str4[2] + "\n" + str4[4]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardZip():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ADR:;;")->{
+                val str3 = it.replace("ADR:;;","")
+                val str4 = str3.split(";").toTypedArray()
+                return if (str4.size == 5) {
+                    str4[3]
+                }else{
+                    ""
+                }
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardCompanyName():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("ORG:")->{
+                return it.replace("ORG:","")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardCompanyTitle():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("TITLE:")->{
+                return it.replace("TITLE:","")
+            }
+        }
+    }
+    return ""
+}
+
+fun String.getVcardWebsite():String {
+    val str = this.replace("BEGIN:VCARD","")
+        .replace("VERSION:3.0","")
+        .replace("END:VCARD","")
+        .replace(" ","")
+    Timber.d("Vcard Text1 $str")
+    val str2 = str.split("\n").toTypedArray()
+    str2.forEach {
+        Timber.d("Vcard text1: $it")
+        when{
+            it.contains("URL:")->{
+                return it.replace("URL:","")
+            }
+        }
+    }
+    return ""
+}

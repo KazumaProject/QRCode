@@ -292,8 +292,20 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                         binding.vcardParent.vcardParentView.visibility = View.VISIBLE
                         Timber.d("Vcard Text: $scannedString")
-                        binding.vcardParent.vcardNameContent.text = scannedString.getVcardName()
-
+                        val vcardName = scannedString.getVcardName()
+                        val vcardNumber = "C: ${scannedString.getVcardMobileNumber()}\nW: ${scannedString.getVcardWorkPhoneNumber()}\nFax: ${scannedString.getVcardFaxNumber()}"
+                        val vcardEmail = scannedString.getVcardEmail()
+                        val vcardAddress = scannedString.getVcardAddress()
+                        val vcardZip = scannedString.getVcardZip()
+                        val vcardCompany = "${scannedString.getVcardCompanyName()} ${scannedString.getVcardCompanyTitle()}"
+                        val vcardWebsite = scannedString.getVcardWebsite()
+                        binding.vcardParent.vcardNameContent.text = vcardName
+                        binding.vcardParent.vcardMobileContent.text = vcardNumber
+                        binding.vcardParent.vcardEmailContent.text = vcardEmail
+                        binding.vcardParent.vcardCompanyContent.text = vcardCompany
+                        binding.vcardParent.vcardAddressContent.text = vcardAddress
+                        binding.vcardParent.vcardZipContent.text = vcardZip
+                        binding.vcardParent.vcardWebsiteContent.text = vcardWebsite
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE

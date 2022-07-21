@@ -43,7 +43,7 @@
         android:text="Phone:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="128dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_name_title" />
@@ -54,12 +54,11 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:textColor="?attr/colorOnSecondary"
-        android:maxLines="2"
+        android:maxLines="3"
         android:textSize="22sp"
         android:layout_marginStart="8dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.7"
         app:layout_constraintBottom_toBottomOf="@+id/vcard_phone_title"
         app:layout_constraintStart_toEndOf="@+id/vcard_phone_title"
         app:layout_constraintTop_toTopOf="@+id/vcard_phone_title" />
@@ -71,7 +70,7 @@
         android:text="Email:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="128dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_phone_title" />
@@ -99,7 +98,7 @@
         android:text="Company:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="64dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_email_title" />
@@ -127,7 +126,7 @@
         android:text="Address:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="128dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_company_title" />
@@ -138,12 +137,11 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:textColor="?attr/colorOnSecondary"
-        android:maxLines="2"
+        android:maxLines="5"
         android:textSize="22sp"
         android:layout_marginStart="8dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.7"
         app:layout_constraintBottom_toBottomOf="@+id/vcard_address_title"
         app:layout_constraintStart_toEndOf="@+id/vcard_address_title"
         app:layout_constraintTop_toTopOf="@+id/vcard_address_title" />
@@ -155,7 +153,7 @@
         android:text="ZIP:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="128dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_address_title" />
@@ -183,7 +181,7 @@
         android:text="Website:"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="64dp"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/vcard_zip_title" />
