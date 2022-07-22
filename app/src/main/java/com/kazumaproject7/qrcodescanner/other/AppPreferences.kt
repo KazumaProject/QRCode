@@ -2,17 +2,16 @@ package com.kazumaproject7.qrcodescanner.other
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 
 object AppPreferences {
-    private const val NAME = "qr_code_scanner"
-    private const val MODE = Context.MODE_PRIVATE
     private lateinit var preferences: SharedPreferences
 
-    private val MASK_VISIBILITY = Pair("camera_mask_key",true)
+    private val MASK_VISIBILITY = Pair("camera_mask_key",false)
     private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",false)
 
     fun init(context: Context) {
-        preferences = context.getSharedPreferences(NAME, MODE)
+        preferences = PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     private inline fun SharedPreferences.edit(operation: (SharedPreferences.Editor) -> Unit) {

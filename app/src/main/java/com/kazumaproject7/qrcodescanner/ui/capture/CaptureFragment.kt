@@ -62,7 +62,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //disableLaser(binding.barcodeView)
+        if (!AppPreferences.isMaskVisible){
+            disableMask(binding.barcodeView)
+        }
 
         val formats = listOf(
             BarcodeFormat.QR_CODE,
@@ -184,6 +186,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("maskVisibility")
         scannerAlphaField.isAccessible = true
         scannerAlphaField.set(decoratedBarcodeView.viewFinder, false)
+    }
+
+    private fun disableLaser(decoratedBarcodeView: DecoratedBarcodeView) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("SCANNER_ALPHA")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, intArrayOf(0))
     }
 
     private val startSelectImageFromURI = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

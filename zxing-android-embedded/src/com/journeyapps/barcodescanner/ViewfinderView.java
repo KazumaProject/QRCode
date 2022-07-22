@@ -163,24 +163,13 @@ public class ViewfinderView extends View {
 
         final int width = getWidth();
         final int height = getHeight();
-        final float margin = 50f;
-
-
-
-        // Draw the exterior (i.e. outside the framing rect) darkened
-        // paint.setColor(resultBitmap != null ? resultColor : maskColor);
-//        canvas.drawRect(0, 0, width, frame.top, paint);
-//        canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-//        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-//        canvas.drawRect(0, frame.bottom + 1, width, height, paint);
-
 
         if (resultBitmap != null) {
             // Draw the opaque result bitmap over the scanning rectangle
             paint.setAlpha(CURRENT_POINT_OPACITY);
             canvas.drawBitmap(resultBitmap, null, frame, paint);
         } else {
-            // If wanted, draw a red "laser scanner" line through the middle to show decoding is active
+            
             if (maskVisibility){
                 paint.setColor(maskColor);
                 canvas.drawRect(0, 0, width, frame.top, paint);

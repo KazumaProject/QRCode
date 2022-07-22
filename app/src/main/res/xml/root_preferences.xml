@@ -1,17 +1,20 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="Camera">
 
         <SwitchPreference
             app:key="camera_mask_key"
-            app:title="Mask visibility"/>
+            app:title="Mask visibility"
+            app:defaultValue="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory app:title="Result">
         <SwitchPreference
             app:key="result_open_url_by_default_key"
-            app:title="Open default browser when URL is detected"/>
+            app:title="Open default browser when URL is detected"
+            app:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory app:title="About">

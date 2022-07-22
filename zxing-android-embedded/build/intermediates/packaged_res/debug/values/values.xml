@@ -8,7 +8,7 @@
     <color name="zxing_result_view">#b0000000</color>
     <color name="zxing_status_text">#ffffffff</color>
     <color name="zxing_transparent">#00000000</color>
-    <color name="zxing_viewfinder_laser">#ffcc0000</color>
+    <color name="zxing_viewfinder_laser">#ff669900</color>
     <color name="zxing_viewfinder_mask">#60000000</color>
     <item name="zxing_back_button" type="id"/>
     <item name="zxing_camera_closed" type="id"/>
