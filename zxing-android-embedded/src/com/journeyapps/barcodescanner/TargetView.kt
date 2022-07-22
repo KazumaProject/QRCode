@@ -110,7 +110,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
-            strokeWidth = 6f
+            strokeWidth = 2f
         }
     }
 
