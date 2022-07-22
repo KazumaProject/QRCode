@@ -1,7 +1,9 @@
 package com.kazumaproject7.qrcodescanner.ui.capture
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Build
@@ -11,9 +13,11 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.view.WindowInsets
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -22,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
+import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.AppPreferences
@@ -45,6 +50,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private var lastText: String = ""
 
+    companion object{
+        private const val REQUEST_CODE_PERMISSIONS = 77
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         returnStatusBarColor()
@@ -62,8 +74,25 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!AppPreferences.isMaskVisible){
-            disableMask(binding.barcodeView)
+        if (!allPermissionsGranted()){
+            ActivityCompat.requestPermissions(requireActivity(),
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS
+            )
+        } else {
+
+        }
+
+        if (AppPreferences.isMaskVisible){
+            showMask(binding.barcodeView)
+        }
+
+        if (AppPreferences.isHorizontalLineVisible){
+            showLaser(binding.barcodeView)
+        }
+
+        if (AppPreferences.isCenterCrossVisible){
+            showCenterCrossLine(binding.barcodeView)
         }
 
         val formats = listOf(
@@ -182,16 +211,39 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         _binding = null
     }
 
-    private fun disableMask(decoratedBarcodeView: DecoratedBarcodeView) {
-        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("maskVisibility")
-        scannerAlphaField.isAccessible = true
-        scannerAlphaField.set(decoratedBarcodeView.viewFinder, false)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS){
+            if (!allPermissionsGranted()) {
+                requireActivity().finish()
+            }
+        }
     }
 
-    private fun disableLaser(decoratedBarcodeView: DecoratedBarcodeView) {
-        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("SCANNER_ALPHA")
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun showMask(decoratedBarcodeView: DecoratedBarcodeView) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("maskVisibility")
         scannerAlphaField.isAccessible = true
-        scannerAlphaField.set(decoratedBarcodeView.viewFinder, intArrayOf(0))
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, true)
+    }
+
+    private fun showLaser(decoratedBarcodeView: DecoratedBarcodeView) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("laserVisibility2")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, true)
+    }
+
+    private fun showCenterCrossLine(decoratedBarcodeView: DecoratedBarcodeView) {
+        val scannerAlphaField = TargetView::class.java.getDeclaredField("isCrossLineVisible")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.targetView, true)
     }
 
     private val startSelectImageFromURI = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

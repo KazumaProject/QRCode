@@ -3,8 +3,10 @@ package com.journeyapps.barcodescanner;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -103,7 +105,7 @@ public class DecoratedBarcodeView extends FrameLayout {
 
 
         viewFinder = findViewById(R.id.zxing_viewfinder_view);
-
+        targetView = findViewById(R.id.target_view);
 
         if (viewFinder == null) {
             throw new IllegalArgumentException(
@@ -112,7 +114,14 @@ public class DecoratedBarcodeView extends FrameLayout {
         }
 
         viewFinder.setCameraPreview(barcodeView);
+    }
 
+    public void setTargetViewSize(int width, int height){
+        if (targetView != null){
+            ViewGroup.LayoutParams params = targetView.getLayoutParams();
+            params.width = width;
+            params.height = height;
+        }
     }
 
     /**
@@ -206,6 +215,14 @@ public class DecoratedBarcodeView extends FrameLayout {
 
     public ViewfinderView getViewFinder() {
         return viewFinder;
+    }
+
+    public TargetView getTargetView(){
+        return targetView;
+    }
+
+    public Rect getPreviewSize(){
+        return viewFinder.framingRect;
     }
 
     /**

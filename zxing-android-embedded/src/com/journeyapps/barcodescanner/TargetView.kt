@@ -13,7 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-class TargetView(
+open class TargetView(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
@@ -32,6 +32,8 @@ class TargetView(
 
     private lateinit var objectAnimator: ObjectAnimator
 
+    var isCrossLineVisible = false
+
     private val c: Context by lazy {
         context
     }
@@ -44,7 +46,9 @@ class TargetView(
         drawLeftBottomLine(canvas, setupPaint())
         drawRightTopLine(canvas, setupPaint())
         drawRightBottomLine(canvas, setupPaint())
-        drawCrossLine(canvas,setupCrossLinePaint())
+        if (isCrossLineVisible){
+            drawCrossLine(canvas,setupCrossLinePaint())
+        }
     }
 
 

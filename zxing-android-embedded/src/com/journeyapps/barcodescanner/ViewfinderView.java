@@ -56,6 +56,7 @@ public class ViewfinderView extends View {
     protected static final int MAX_RESULT_POINTS = 20;
     protected static final int POINT_SIZE = 6;
     protected boolean maskVisibility;
+    protected boolean laserVisibility2;
 
     protected final Paint paint;
     protected Bitmap resultBitmap;
@@ -96,7 +97,8 @@ public class ViewfinderView extends View {
                 resources.getColor(R.color.zxing_possible_result_points));
         this.laserVisibility = attributes.getBoolean(R.styleable.zxing_finder_zxing_viewfinder_laser_visibility,
                 true);
-        this.maskVisibility = true;
+        this.maskVisibility = false;
+        this.laserVisibility2 = false;
 
         attributes.recycle();
 
@@ -169,13 +171,21 @@ public class ViewfinderView extends View {
             paint.setAlpha(CURRENT_POINT_OPACITY);
             canvas.drawBitmap(resultBitmap, null, frame, paint);
         } else {
-            
+
             if (maskVisibility){
                 paint.setColor(maskColor);
                 canvas.drawRect(0, 0, width, frame.top, paint);
                 canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
                 canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
                 canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+            }
+
+            if (laserVisibility2) {
+                paint.setColor(laserColor);
+                paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
+                scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
+                final int middle = frame.height() / 2 + frame.top;
+                canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
             }
 
             final float scaleX = this.getWidth() / (float) previewSize.width;

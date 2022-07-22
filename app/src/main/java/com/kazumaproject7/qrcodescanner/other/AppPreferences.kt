@@ -8,6 +8,8 @@ object AppPreferences {
     private lateinit var preferences: SharedPreferences
 
     private val MASK_VISIBILITY = Pair("camera_mask_key",false)
+    private val CENTER_CROSS_VISIBILITY = Pair("camera_cross_visibility_key",false)
+    private val HORIZONTAL_LINE_VISIBILITY = Pair("camera_horizontal_line_visibility_key",false)
     private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",false)
 
     fun init(context: Context) {
@@ -25,6 +27,20 @@ object AppPreferences {
 
         set(value) = preferences.edit {
             it.putBoolean(MASK_VISIBILITY.first, value)
+        }
+
+    var isCenterCrossVisible: Boolean
+        get() = preferences.getBoolean(CENTER_CROSS_VISIBILITY.first, CENTER_CROSS_VISIBILITY.second)
+
+        set(value) = preferences.edit {
+            it.putBoolean(CENTER_CROSS_VISIBILITY.first, value)
+        }
+
+    var isHorizontalLineVisible: Boolean
+        get() = preferences.getBoolean(HORIZONTAL_LINE_VISIBILITY.first, HORIZONTAL_LINE_VISIBILITY.second)
+
+        set(value) = preferences.edit {
+            it.putBoolean(HORIZONTAL_LINE_VISIBILITY.first, value)
         }
 
     var isUrlOpen: Boolean
