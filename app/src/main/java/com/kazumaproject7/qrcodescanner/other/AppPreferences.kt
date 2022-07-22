@@ -9,7 +9,7 @@ object AppPreferences {
 
     private val MASK_VISIBILITY = Pair("camera_mask_key",false)
     private val CENTER_CROSS_VISIBILITY = Pair("camera_cross_visibility_key",false)
-    private val HORIZONTAL_LINE_VISIBILITY = Pair("camera_horizontal_line_visibility_key",false)
+    private val HORIZONTAL_LINE_VISIBILITY = Pair("camera_horizontal_line_visibility_key",true)
     private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",false)
 
     fun init(context: Context) {
