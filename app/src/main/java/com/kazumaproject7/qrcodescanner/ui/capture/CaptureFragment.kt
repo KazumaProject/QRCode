@@ -145,6 +145,18 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
+        binding.settingBtn.apply {
+            background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_settings_24)
+            backgroundTintList = requireContext().getColorStateList(android.R.color.white)
+            setOnClickListener {
+                toggleImageButtonColor(binding.settingBtn)
+                CoroutineScope(Dispatchers.Main).launch {
+                    delay(100)
+
+                }
+            }
+        }
+
     }
 
     override fun onResume() {

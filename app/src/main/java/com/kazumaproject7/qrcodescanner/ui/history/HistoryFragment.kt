@@ -6,7 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
@@ -46,6 +49,7 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
             binding.historyRecyclerView.apply {
                 adapter = a
                 layoutManager = LinearLayoutManager(requireContext())
+                ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
             }
         }
     }
@@ -54,6 +58,37 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
         super.onDestroyView()
         adapter = null
         _binding = null
+    }
+
+    private val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+        0, ItemTouchHelper.LEFT
+    ){
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            adapter?.let { a ->
+                val position = viewHolder.layoutPosition
+                val scannedResult = a.scannedResults[position]
+                viewModel.deleteScannedResult(scannedResult.id)
+                Snackbar.make(
+                    requireView(),
+                    "${scannedResult.scannedString} was successfully deleted.",
+                    Snackbar.LENGTH_LONG
+                ).apply {
+                    setAction("Undo"){
+                        viewModel.insertScannedResult(scannedResult)
+                    }
+                    show()
+                }.show()
+            }
+        }
+
     }
 
 }
