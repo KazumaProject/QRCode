@@ -1,5 +1,7 @@
 package com.kazumaproject7.qrcodescanner.ui.history
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -50,6 +52,9 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                 adapter = a
                 layoutManager = LinearLayoutManager(requireContext())
                 ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
+                a.setOnItemLongClickListener {
+                    shareText(it.scannedString)
+                }
             }
         }
     }
@@ -89,6 +94,14 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
             }
         }
 
+    }
+
+    private fun shareText(text: String){
+        val intent = Intent(Intent.ACTION_SEND, Uri.parse(text))
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, text)
+        val chooser = Intent.createChooser(intent, text)
+        requireActivity().startActivity(chooser)
     }
 
 }

@@ -35,6 +35,7 @@ class ScannedResultAdapter(
     }
 
     private var onItemClickListener: ((ScannedResult) -> Unit)? = null
+    private var onItemLongClickListener: ((ScannedResult) -> Unit)? = null
 
     private val differ = AsyncListDiffer(this, diffCallback)
 
@@ -62,6 +63,14 @@ class ScannedResultAdapter(
 
         scannedResultText.text = scannedResult.scannedString
         scannedResultTimeStamp.text = dateString
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClickListener?.let { click ->
+                click(scannedResult)
+            }
+            return@setOnLongClickListener true
+        }
+
         when(scannedResult.scannedCodeType){
             TYPE_QR_CODE ->{
                 scannedResultImg.background = ContextCompat.getDrawable(context,R.drawable.q_code)
@@ -88,4 +97,9 @@ class ScannedResultAdapter(
     override fun getItemCount(): Int {
         return scannedResults.size
     }
+
+    fun setOnItemLongClickListener(onItemLongClick: (ScannedResult) -> Unit) {
+        this.onItemLongClickListener = onItemLongClick
+    }
+
 }
