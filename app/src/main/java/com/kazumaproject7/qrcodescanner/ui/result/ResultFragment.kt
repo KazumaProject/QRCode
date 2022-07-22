@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -46,8 +45,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
-import java.util.UUID
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -62,6 +59,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         changeStatusBarColor()
+        AppPreferences.init(requireContext())
     }
 
     override fun onCreateView(
@@ -98,7 +96,14 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 when(it){
                     is ScannedStringType.Url ->{
                         binding.urlParent.visibility = View.VISIBLE
-
+                        if (AppPreferences.isUrlOpen){
+                            arguments?.clear()
+                            val intent =
+                                Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                            val chooser =
+                                Intent.createChooser(intent, "Open $scannedString")
+                            requireActivity().startActivity(chooser)
+                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
                                 scannedString = scannedString,
@@ -130,6 +135,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         setURLTitleLogo(scannedString)
 
                         binding.openDefaultBrowserBtn.setOnClickListener {
+                            arguments?.clear()
                             toggleButtonColor(binding.openDefaultBrowserBtn)
                             val intent =
                                 Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
