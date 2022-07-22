@@ -55,6 +55,7 @@ public class ViewfinderView extends View {
     protected static final int CURRENT_POINT_OPACITY = 0xA0;
     protected static final int MAX_RESULT_POINTS = 20;
     protected static final int POINT_SIZE = 6;
+    protected boolean maskVisibility;
 
     protected final Paint paint;
     protected Bitmap resultBitmap;
@@ -95,6 +96,7 @@ public class ViewfinderView extends View {
                 resources.getColor(R.color.zxing_possible_result_points));
         this.laserVisibility = attributes.getBoolean(R.styleable.zxing_finder_zxing_viewfinder_laser_visibility,
                 true);
+        this.maskVisibility = true;
 
         attributes.recycle();
 
@@ -163,11 +165,7 @@ public class ViewfinderView extends View {
         final int height = getHeight();
         final float margin = 50f;
 
-        paint.setColor(resultBitmap != null ? resultColor : maskColor);
-        canvas.drawRect(0, 0, width, frame.top, paint);
-        canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-        canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+
 
         // Draw the exterior (i.e. outside the framing rect) darkened
         // paint.setColor(resultBitmap != null ? resultColor : maskColor);
@@ -183,18 +181,13 @@ public class ViewfinderView extends View {
             canvas.drawBitmap(resultBitmap, null, frame, paint);
         } else {
             // If wanted, draw a red "laser scanner" line through the middle to show decoding is active
-//            if (laserVisibility) {
-//                paint.setColor(laserColor);
-//
-//                paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
-//                scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
-//
-//                final int middle = frame.height() / 2 + frame.top;
-//
-//                canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
-//            }
-
-
+            if (maskVisibility){
+                paint.setColor(maskColor);
+                canvas.drawRect(0, 0, width, frame.top, paint);
+                canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
+                canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
+                canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+            }
 
             final float scaleX = this.getWidth() / (float) previewSize.width;
             final float scaleY = this.getHeight() / (float) previewSize.height;

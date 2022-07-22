@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_captureFragment_to_historyFragment"
             app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_captureFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/generateFragment"
@@ -33,4 +36,8 @@
         android:name="com.kazumaproject7.qrcodescanner.ui.history.HistoryFragment"
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.setting.SettingsFragment"
+        android:label="SettingsFragment" />
 </navigation>

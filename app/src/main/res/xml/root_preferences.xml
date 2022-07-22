@@ -1,0 +1,31 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Camera">
+
+        <SwitchPreference
+            app:key="camera_mask_key"
+            app:title="Mask visibility"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Result">
+        <SwitchPreference
+            app:key="result_open_url_by_default_key"
+            app:title="Open default browser when URL is detected"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="About">
+        <Preference
+            app:key="@string/license_preference_key"
+            app:defaultValue="true"
+            app:title="Open-source licenses"
+            app:summary="License details for open-source software"/>
+
+        <Preference
+            app:key="@string/about_version_key"
+            app:defaultValue="false"
+            app:title="QR Code Scanner version"
+            app:summary="Version:"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

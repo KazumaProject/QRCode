@@ -21,11 +21,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
-import com.journeyapps.barcodescanner.BarcodeCallback
-import com.journeyapps.barcodescanner.BarcodeResult
-import com.journeyapps.barcodescanner.DefaultDecoderFactory
+import com.journeyapps.barcodescanner.*
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
+import com.kazumaproject7.qrcodescanner.other.AppPreferences
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
@@ -49,6 +48,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         returnStatusBarColor()
+        AppPreferences.init(requireContext())
     }
 
     override fun onCreateView(
@@ -61,6 +61,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //disableLaser(binding.barcodeView)
+
         val formats = listOf(
             BarcodeFormat.QR_CODE,
             BarcodeFormat.AZTEC,
@@ -152,7 +155,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 toggleImageButtonColor(binding.settingBtn)
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(100)
-
+                    findNavController().navigate(
+                        CaptureFragmentDirections.actionCaptureFragmentToSettingsFragment()
+                    )
                 }
             }
         }
@@ -173,6 +178,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun disableMask(decoratedBarcodeView: DecoratedBarcodeView) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("maskVisibility")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, false)
     }
 
     private val startSelectImageFromURI = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
