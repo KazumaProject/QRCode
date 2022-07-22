@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_app_settings_alt_24.xml" value="0.183" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_content_copy_24.xml" value="0.1715" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_flashlight_off_24.xml" value="0.192" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_flashlight_on_24.xml" value="0.192" />
@@ -10,6 +11,7 @@
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_history_24.xml" value="0.175" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_ios_share_24.xml" value="0.1715" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_open_in_browser_24.xml" value="0.1715" />
+        <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable-v24/baseline_settings_24.xml" value="0.183" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/drawable/btn_selector.xml" value="0.1715" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/layout-land/fragment_capture_fragment.xml" value="0.17604166666666668" />
         <entry key="..\:/Users/Kazum/AndroidStudioProjects/QRCode/app/src/main/res/layout-v23/fragment_result.xml" value="0.22826086956521738" />
