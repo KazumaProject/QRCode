@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -71,6 +72,8 @@ class ScannedResultAdapter(
         val scannedResultText = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_text)
         val scannedResultTimeStamp = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_time_stamp_text)
         val scannedResultImg = holder.itemView.findViewById<ShapeableImageView>(R.id.scanned_result_img)
+        val urlImgProgress = holder.itemView.findViewById<ProgressBar>(R.id.url_result_img2_progress)
+        val urlTitleProgress = holder.itemView.findViewById<ProgressBar>(R.id.url_result_text2_progress)
         val urlImg = holder.itemView.findViewById<ShapeableImageView>(R.id.url_result_img2)
         val urlText = holder.itemView.findViewById<MaterialTextView>(R.id.url_result_text2)
         val dateFormat = SimpleDateFormat("MMMM.dd.yyyy, HH:mm", Locale.getDefault())
@@ -80,8 +83,8 @@ class ScannedResultAdapter(
             urlImg.visibility = View.VISIBLE
             urlText.visibility = View.VISIBLE
             scannedResultText.setTextColor(Color.parseColor("#5e6fed"))
-            setURLTitle(scannedResult.scannedString,urlText)
-            setURLTitleLogo(scannedResult.scannedString,urlImg)
+            setURLTitle(scannedResult.scannedString,urlText,urlTitleProgress)
+            setURLTitleLogo(scannedResult.scannedString,urlImg,urlImgProgress)
         }
 
         scannedResultText.text = scannedResult.scannedString
@@ -140,15 +143,23 @@ class ScannedResultAdapter(
     }
 
 
-    private fun setURLTitle(scannedString: String, textView: MaterialTextView){
+    private fun setURLTitle(
+        scannedString: String,
+        textView: MaterialTextView,
+        progress: ProgressBar
+    ){
         CoroutineScope(Dispatchers.Main).launch {
+            progress.visibility = View.VISIBLE
             getURLTitle(scannedString).let {
                 textView.text = it
             }
+            progress.visibility = View.GONE
         }
     }
 
-    private suspend fun getURLogo(scannedString: String): Bitmap? = withContext(Dispatchers.IO) {
+    private suspend fun getURLogo(
+        scannedString: String
+    ): Bitmap? = withContext(Dispatchers.IO) {
         try {
             val document = Jsoup.connect(scannedString).get()
             val img = document.select("img").first()
@@ -165,11 +176,17 @@ class ScannedResultAdapter(
         return@withContext null
     }
 
-    private fun setURLTitleLogo(scannedString: String, imageView: ShapeableImageView){
+    private fun setURLTitleLogo(
+        scannedString: String,
+        imageView: ShapeableImageView,
+        progress: ProgressBar
+    ){
         CoroutineScope(Dispatchers.Main).launch {
+            progress.visibility = View.VISIBLE
             getURLogo(scannedString)?.let { bitmap ->
                 imageView.setImageBitmap(bitmap)
             }
+            progress.visibility = View.GONE
         }
     }
 

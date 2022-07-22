@@ -30,6 +30,15 @@
         app:layout_constraintStart_toEndOf="@+id/scanned_result_img"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/url_result_img2_progress"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/scanned_result_text"
+        app:layout_constraintStart_toStartOf="@+id/scanned_result_text"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/url_result_img2"
         android:layout_width="16dp"
@@ -38,6 +47,16 @@
         app:layout_constraintBottom_toTopOf="@+id/scanned_result_text"
         app:layout_constraintStart_toStartOf="@+id/scanned_result_text"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/url_result_text2_progress"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/scanned_result_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/url_result_img2"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/url_result_text2"
