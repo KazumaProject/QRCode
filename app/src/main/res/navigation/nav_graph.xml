@@ -13,13 +13,25 @@
         <action
             android:id="@+id/action_captureFragment_to_resultFragment"
             app:destination="@id/resultFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"
             />
         <action
             android:id="@+id/action_captureFragment_to_historyFragment"
-            app:destination="@id/historyFragment" />
+            app:destination="@id/historyFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"/>
         <action
             android:id="@+id/action_captureFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"/>
     </fragment>
     <fragment
         android:id="@+id/generateFragment"
@@ -39,5 +51,18 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.kazumaproject7.qrcodescanner.ui.setting.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_openSourceLicenseFragment"
+            app:destination="@id/openSourceLicenseFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"/>
+    </fragment>
+    <fragment
+        android:id="@+id/openSourceLicenseFragment"
+        android:name="com.kazumaproject7.qrcodescanner.ui.opensource.OpenSourceLicenseFragment"
+        android:label="fragment_open_sorce_license"
+        tools:layout="@layout/fragment_open_sorce_license" />
 </navigation>

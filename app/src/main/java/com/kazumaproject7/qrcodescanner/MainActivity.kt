@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomBar.setupWithNavController(menu,navController)
         navController.addOnDestinationChangedListener{_,destination,_ ->
             when(destination.id){
-                R.id.resultFragment, R.id.historyFragment, R.id.settingsFragment ->{
+                R.id.resultFragment, R.id.historyFragment, R.id.settingsFragment, R.id.openSourceLicenseFragment ->{
                     binding.bottomBar.visibility = View.GONE
                 }
                 else ->{

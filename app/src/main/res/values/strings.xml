@@ -4,4 +4,6 @@
     <string name="result_open_url_by_default_key" translatable="false">result_open_url_by_default_key</string>
     <string name="license_preference_key" translatable="false">license_preference_key</string>
     <string name="about_version_key" translatable="false">about_version_key</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
