@@ -87,10 +87,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             }
         }
 
-        viewModel.scannedType.value?.let {
-            binding.textCodeType.text = it.replace("_"," ")
-        }
-
         viewModel.scannedString.value?.let { scannedString ->
             viewModel.scannedStringType.value?.let {
                 when(it){
