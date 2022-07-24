@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import com.kazumaproject7.qrcodescanner.R
-import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 
 class OpenSourceAdapter: RecyclerView.Adapter<OpenSourceAdapter.OpenSourceViewHolder>() {
 
