@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/captureFragment"
-        android:title="Scan"
+        android:title=""
         android:icon="@drawable/qr_code_scan"/>
 
     <item
         android:id="@+id/generateFragment"
-        android:title="Generate"
+        android:title=""
         android:icon="@drawable/qr_code_generate"/>
 </menu>
