@@ -12,6 +12,7 @@
         android:layout_height="match_parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar_capture"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/black"
@@ -19,17 +20,17 @@
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/folder_open"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_marginEnd="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/history_btn"/>
+            app:layout_constraintEnd_toStartOf="@+id/history_btn"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/flash_btn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_marginEnd="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/folder_open"
@@ -37,8 +38,8 @@
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/history_btn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_marginEnd="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/setting_btn"
@@ -46,8 +47,8 @@
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/setting_btn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_marginEnd="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

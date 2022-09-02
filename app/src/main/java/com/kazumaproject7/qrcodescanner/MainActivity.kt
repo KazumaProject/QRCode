@@ -3,9 +3,12 @@ package com.kazumaproject7.qrcodescanner
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
+import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -13,6 +16,8 @@ class MainActivity : AppCompatActivity() {
 
     private var _binding : ActivityMainBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel: ScanViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,11 +35,17 @@ class MainActivity : AppCompatActivity() {
                 R.id.resultFragment, R.id.historyFragment, R.id.settingsFragment, R.id.openSourceLicenseFragment ->{
                     binding.bottomBar.visibility = View.GONE
                 }
-                else ->{
-                    binding.bottomBar.visibility = View.VISIBLE
-                }
             }
         }
+
+        viewModel.isActionAndBottomBarShow.observe(this){
+            if (it){
+                binding.bottomBar.visibility = View.VISIBLE
+            } else {
+                binding.bottomBar.visibility = View.GONE
+            }
+        }
+
     }
 
     override fun onDestroy() {

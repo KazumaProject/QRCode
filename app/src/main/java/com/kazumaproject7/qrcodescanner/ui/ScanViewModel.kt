@@ -16,6 +16,15 @@ import javax.inject.Inject
 class ScanViewModel @Inject constructor(
     private val repository: ScannedResultRepository
 ) : ViewModel() {
+
+    val isActionAndBottomBarShow: LiveData<Boolean>
+        get() = _isActionAndBottomBarShow
+    private val _isActionAndBottomBarShow = MutableLiveData(false)
+
+    fun updateIsActionAndBottomBarShow(value: Boolean){
+        _isActionAndBottomBarShow.value = value
+    }
+
     val scannedString: LiveData<String>
         get() = _scannedString
     private val _scannedString = MutableLiveData("")

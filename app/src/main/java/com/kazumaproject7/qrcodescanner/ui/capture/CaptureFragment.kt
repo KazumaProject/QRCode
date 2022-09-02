@@ -125,6 +125,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
+        viewModel.isActionAndBottomBarShow.observe(viewLifecycleOwner){
+            if (it){
+                binding.toolbarCapture.visibility = View.VISIBLE
+            } else {
+                binding.toolbarCapture.visibility = View.GONE
+            }
+        }
+
         binding.folderOpen.apply {
             background = ContextCompat.getDrawable(requireContext(),R.drawable.image)
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
