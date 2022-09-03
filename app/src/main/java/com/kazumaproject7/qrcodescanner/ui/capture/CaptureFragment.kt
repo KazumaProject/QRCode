@@ -173,6 +173,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             setOnClickListener {
                 toggleImageButtonColor(binding.folderOpen)
                 selectFileByUri()
+                viewModel.updateIsActionAndBottomBarShow(false)
             }
         }
 
@@ -212,12 +213,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
                 toggleImageButtonColor(binding.historyBtn)
-                CoroutineScope(Dispatchers.Main).launch {
-                    delay(100)
-                    findNavController().navigate(
-                        CaptureFragmentDirections.actionCaptureFragmentToHistoryFragment()
-                    )
-                }
+                findNavController().navigate(
+                    CaptureFragmentDirections.actionCaptureFragmentToHistoryFragment()
+                )
+                viewModel.updateIsActionAndBottomBarShow(false)
             }
         }
 
@@ -226,12 +225,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
                 toggleImageButtonColor(binding.settingBtn)
-                CoroutineScope(Dispatchers.Main).launch {
-                    delay(100)
-                    findNavController().navigate(
-                        CaptureFragmentDirections.actionCaptureFragmentToSettingsFragment()
-                    )
-                }
+                findNavController().navigate(
+                    CaptureFragmentDirections.actionCaptureFragmentToSettingsFragment()
+                )
+                viewModel.updateIsActionAndBottomBarShow(false)
             }
         }
 
