@@ -73,7 +73,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
+        var barcodeBitmap: Bitmap? = null
+
+        try {
+            barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
+        }catch (e: Exception){
+            showSnackBar("Failed to retrieve bitmap.")
+        }
 
         barcodeBitmap?.let { b ->
             binding.barcodeImg.apply {

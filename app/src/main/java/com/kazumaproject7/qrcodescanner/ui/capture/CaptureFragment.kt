@@ -7,25 +7,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.DisplayMetrics
 import android.view.*
-import android.view.ViewGroup.LayoutParams
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
-import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.AppPreferences
@@ -48,8 +42,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private val viewModel: ScanViewModel by activityViewModels()
 
     private var lastText: String = ""
-
-
 
     companion object{
         private const val REQUEST_CODE_PERMISSIONS = 77
@@ -272,22 +264,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 requireActivity().finish()
             }
         }
-    }
-
-    private val scaleGestureDetector by lazy {
-        ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            private var scale = 1f
-            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
-                scale = 1f
-                return super.onScaleBegin(detector)
-            }
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                val deltaScale = detector.scaleFactor / scale
-                scale = detector.scaleFactor
-                binding.barcodeView.barcodeView.scaleX = scale
-                return super.onScale(detector)
-            }
-        })
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
