@@ -1,6 +1,7 @@
 package com.kazumaproject7.qrcodescanner.ui.capture
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,15 +11,13 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.DisplayMetrics
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.ViewGroup.LayoutParams
-import android.view.WindowInsets
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -50,6 +49,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private var lastText: String = ""
 
+
+
     companion object{
         private const val REQUEST_CODE_PERMISSIONS = 77
         private val REQUIRED_PERMISSIONS = arrayOf(
@@ -71,6 +72,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -116,6 +118,46 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         )
         binding.barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
         binding.barcodeView.decodeContinuous(callback)
+
+        val detector = GestureDetectorCompat(requireContext(),object : GestureDetector.SimpleOnGestureListener(){
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                viewModel.isActionAndBottomBarShow.value?.let {
+                    viewModel.updateIsActionAndBottomBarShow(!it)
+                }
+                return true
+            }
+        })
+
+        val scaleDetector = ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener(){
+            private var delta = 0f
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                if (delta == 0f){
+                    val deltaScale = detector.scaleFactor
+                    if (deltaScale >= 1f){
+                        binding.barcodeView.barcodeView.scaleX = deltaScale
+                        binding.barcodeView.barcodeView.scaleY = deltaScale
+                        delta = deltaScale
+                    }
+                } else {
+                    val deltaScale = delta + (detector.scaleFactor - 1f)
+                    Timber.d("Scaled: $deltaScale")
+                    if (deltaScale >= 1f){
+                        binding.barcodeView.barcodeView.scaleX = deltaScale
+                        binding.barcodeView.barcodeView.scaleY = deltaScale
+                        delta = deltaScale
+                    }
+                }
+
+                return super.onScale(detector)
+            }
+
+        })
+
+        binding.barcodeView.setOnTouchListener { _, event ->
+            detector.onTouchEvent(event)
+            scaleDetector.onTouchEvent(event)
+            return@setOnTouchListener true
+        }
 
         viewModel.flashStatus.observe(viewLifecycleOwner){
             if (it){
@@ -230,6 +272,22 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 requireActivity().finish()
             }
         }
+    }
+
+    private val scaleGestureDetector by lazy {
+        ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            private var scale = 1f
+            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                scale = 1f
+                return super.onScaleBegin(detector)
+            }
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val deltaScale = detector.scaleFactor / scale
+                scale = detector.scaleFactor
+                binding.barcodeView.barcodeView.scaleX = scale
+                return super.onScale(detector)
+            }
+        })
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
