@@ -325,9 +325,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         viewModel.updateScannedString(resultText)
                         viewModel.updateScannedType(barcodeFormat)
 
-                        val bundle = Bundle()
-                        bundle.putParcelable("barcodeImage",bitmap)
-                        findNavController().navigate(R.id.resultFragment,bundle)
+                        viewModel.updateScannedBitmap(bitmap)
+                        findNavController().navigate(R.id.resultFragment)
                     } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
 
                         val resultText = readQrcode(bitmap)[0]
@@ -363,10 +362,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                             }
                         }
                         viewModel.updateScannedString(resultText)
-
-                        val bundle = Bundle()
-                        bundle.putParcelable("barcodeImage",bitmap)
-                        findNavController().navigate(R.id.resultFragment,bundle)
+                        viewModel.updateScannedBitmap(bitmap)
+                        findNavController().navigate(R.id.resultFragment)
                     }
 
                 }catch (e: Exception){
