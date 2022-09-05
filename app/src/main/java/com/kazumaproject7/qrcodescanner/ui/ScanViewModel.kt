@@ -1,19 +1,25 @@
 package com.kazumaproject7.qrcodescanner.ui
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.repository.ScannedResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
+    @ApplicationContext mContext: Context,
     private val repository: ScannedResultRepository
 ) : ViewModel() {
 
@@ -47,6 +53,14 @@ class ScanViewModel @Inject constructor(
 
     fun updateScannedStringType(value: ScannedStringType){
         _scannedStringType.value = value
+    }
+
+    val scannedBitmap: LiveData<Bitmap>
+        get() = _scannedBitmap
+    private val _scannedBitmap = MutableLiveData(BitmapFactory.decodeResource(mContext.resources, R.drawable.q_code))
+
+    fun updateScannedBitmap(value: Bitmap){
+        _scannedBitmap.value = value
     }
 
     val flashStatus: LiveData<Boolean>

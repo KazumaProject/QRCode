@@ -1,7 +1,11 @@
 package com.kazumaproject7.qrcodescanner.ui.history
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
+import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -52,6 +57,17 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                 adapter = a
                 layoutManager = LinearLayoutManager(requireContext())
                 ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
+                a.setOnItemClickListener {
+                    if (it.scannedStringType == "type_url"){
+                        val intent =
+                            Intent(Intent.ACTION_VIEW, Uri.parse(it.scannedString))
+                        val chooser =
+                            Intent.createChooser(intent, "Open ${it.scannedString}")
+                        requireActivity().startActivity(chooser)
+                    } else {
+                        textCopyThenPost(it.scannedString)
+                    }
+                }
                 a.setOnItemLongClickListener {
                     shareText(it.scannedString)
                 }
@@ -102,6 +118,15 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
         intent.putExtra(Intent.EXTRA_TEXT, text)
         val chooser = Intent.createChooser(intent, text)
         requireActivity().startActivity(chooser)
+    }
+
+    private fun textCopyThenPost(textCopied:String) {
+        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        // When setting the clip board text.
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
+        // Only show a toast for Android 12 and lower.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            showSnackBar("Copied $textCopied")
     }
 
 }

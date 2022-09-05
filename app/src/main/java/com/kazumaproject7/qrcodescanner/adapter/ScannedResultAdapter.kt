@@ -90,6 +90,12 @@ class ScannedResultAdapter(
         scannedResultText.text = scannedResult.scannedString
         scannedResultTimeStamp.text = dateString
 
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.let { click ->
+                click(scannedResult)
+            }
+        }
+
         holder.itemView.setOnLongClickListener {
             onItemLongClickListener?.let { click ->
                 click(scannedResult)
@@ -122,6 +128,10 @@ class ScannedResultAdapter(
 
     override fun getItemCount(): Int {
         return scannedResults.size
+    }
+
+    fun setOnItemClickListener(onItemClick: (ScannedResult) -> Unit){
+        this.onItemClickListener = onItemClick
     }
 
     fun setOnItemLongClickListener(onItemLongClick: (ScannedResult) -> Unit) {

@@ -607,9 +607,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     result.bitmap
                 }
             }
-            val bundle = Bundle()
-            bundle.putParcelable("barcodeImage",croppedBitmap)
-            findNavController().navigate(R.id.resultFragment,bundle)
+            viewModel.updateScannedBitmap(croppedBitmap)
+            findNavController().navigate(R.id.resultFragment)
         }catch (e: Exception){
             showSnackBar("Something went wrong.")
         }

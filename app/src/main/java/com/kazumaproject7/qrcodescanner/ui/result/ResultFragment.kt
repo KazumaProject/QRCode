@@ -74,11 +74,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         super.onViewCreated(view, savedInstanceState)
 
         var barcodeBitmap: Bitmap? = null
-
-        try {
-            barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
-        }catch (e: Exception){
-            showSnackBar("Failed to retrieve bitmap.")
+        //barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
+        viewModel.scannedBitmap.value?.let {
+            barcodeBitmap = it
         }
 
         barcodeBitmap?.let { b ->
@@ -457,6 +455,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.black)
         viewModel.updateScannedString("")
         viewModel.updateScannedType("")
+        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources,R.drawable.q_code))
         _binding = null
     }
 
