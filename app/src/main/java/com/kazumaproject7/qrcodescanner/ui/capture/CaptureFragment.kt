@@ -168,7 +168,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         }
 
         binding.folderOpen.apply {
-            background = ContextCompat.getDrawable(requireContext(),R.drawable.image)
+            background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_photo_24)
             backgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
                 toggleImageButtonColor(binding.folderOpen)
@@ -182,11 +182,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             setOnClickListener {
                 viewModel.flashStatus.value?.let {
                     if (it){
-                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flashoff)
+                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
                         binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
                         viewModel.updateFlashStatus(false)
                     }else{
-                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.flash)
+                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
                         binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
                         viewModel.updateFlashStatus(true)
                     }
@@ -197,12 +197,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         viewModel.flashStatus.value?.let {
             if (it){
                 binding.flashBtn.apply {
-                    background = ContextCompat.getDrawable(requireContext(),R.drawable.flash)
+                    background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
                     supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
                 }
             }else{
                 binding.flashBtn.apply {
-                    background = ContextCompat.getDrawable(requireContext(),R.drawable.flashoff)
+                    background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
                     supportImageTintList = requireContext().getColorStateList(android.R.color.white)
                 }
             }

@@ -57,11 +57,6 @@ android {
     }
 
     // This is bad practice - we should fix the warnings instead.
-    lintOptions {
-        // Android warns about the he and id locale folders. he -> iw is already handled with a
-        // symlink. TODO: what about id?
-        disable 'LocaleFolder'
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -84,6 +79,9 @@ android {
         release {
             resValue "string", "app_version", "${defaultConfig.versionName}"
         }
+    }
+    lint {
+        disable 'LocaleFolder'
     }
 }
 
