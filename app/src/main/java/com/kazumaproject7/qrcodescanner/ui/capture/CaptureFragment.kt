@@ -7,11 +7,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
@@ -64,7 +66,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         return binding.root
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("ClickableViewAccessibility", "RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -159,10 +162,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
+        binding.toolbarCapture.visibility = View.GONE
         viewModel.isActionAndBottomBarShow.observe(viewLifecycleOwner){
             if (it){
+                binding.toolbarCapture.animate().alpha(1f).duration = 500
                 binding.toolbarCapture.visibility = View.VISIBLE
             } else {
+                binding.toolbarCapture.animate().alpha(0f).duration = 500
                 binding.toolbarCapture.visibility = View.GONE
             }
         }

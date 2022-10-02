@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +14,11 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
-import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -59,11 +58,20 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                 ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
                 a.setOnItemClickListener {
                     if (it.scannedStringType == "type_url"){
-                        val intent =
-                            Intent(Intent.ACTION_VIEW, Uri.parse(it.scannedString))
-                        val chooser =
-                            Intent.createChooser(intent, "Open ${it.scannedString}")
-                        requireActivity().startActivity(chooser)
+                        MaterialAlertDialogBuilder(requireContext(),R.style.CustomAlertDialog)
+                            .setTitle("Open Web Site")
+                            .setMessage("URL: ${it.scannedString}")
+                            .setPositiveButton("Open"){
+                                    _, _ ->
+                                val intent =
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(it.scannedString))
+                                val chooser =
+                                    Intent.createChooser(intent, "Open ${it.scannedString}")
+                                requireActivity().startActivity(chooser)
+                            }
+                            .setNegativeButton("Cancel"
+                            ) { p0, _ -> p0?.dismiss() }
+                            .show()
                     } else {
                         textCopyThenPost(it.scannedString)
                     }

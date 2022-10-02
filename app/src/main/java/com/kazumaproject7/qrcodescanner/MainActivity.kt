@@ -5,11 +5,14 @@ import android.view.View
 import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -40,8 +43,10 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.isActionAndBottomBarShow.observe(this){
             if (it){
+                binding.bottomBar.animate().alpha(1f).duration = 500
                 binding.bottomBar.visibility = View.VISIBLE
             } else {
+                binding.bottomBar.animate().alpha(0f).duration = 500
                 binding.bottomBar.visibility = View.GONE
             }
         }
