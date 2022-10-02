@@ -1,0 +1,39 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:17:1-27:12
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:17:1-27:12
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:17:1-27:12
+	package
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:17:70-111
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:17:11-69
+application
+ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:19:3-25:17
+activity#com.journeyapps.barcodescanner.CaptureActivity
+ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:20:7-24:66
+	android:clearTaskOnLaunch
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:21:17-49
+	android:stateNotNeeded
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:22:17-46
+	android:windowSoftInputMode
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:24:17-64
+	android:theme
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:23:17-58
+	android:name
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml:20:17-78
+uses-sdk
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+		ADDED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
+		INJECTED from C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
