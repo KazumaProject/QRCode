@@ -172,7 +172,7 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
         var uri: Uri? = null
         try {
             imagesFolder.mkdirs()
-            val file = File(imagesFolder, "qr_code_scanner_code.png")
+            val file = File(imagesFolder, "qr_android_code.png")
             val stream = FileOutputStream(file)
             image.compress(Bitmap.CompressFormat.PNG, 90, stream)
             stream.flush()
