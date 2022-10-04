@@ -13,6 +13,10 @@ import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
 import com.kazumaproject7.qrcodescanner.other.parcelable
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.net.URI
 
 @AndroidEntryPoint
@@ -63,8 +67,11 @@ class MainActivity : AppCompatActivity() {
                     if (type.startsWith("image/")){
                         val receiveUri = receivedIntent.parcelable<Uri>(Intent.EXTRA_STREAM)
                         receiveUri?.let { uri ->
-                            viewModel.updateReceivingUri(uri)
-                            viewModel.updateIsReceivingImage(true)
+                            CoroutineScope(Dispatchers.Main).launch {
+                                viewModel.updateReceivingUri(uri)
+                                delay(100)
+                                viewModel.updateIsReceivingImage(true)
+                            }
                         }
                     }
                 }
