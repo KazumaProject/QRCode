@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -170,6 +171,99 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             } else {
                 binding.toolbarCapture.animate().alpha(0f).duration = 500
                 binding.toolbarCapture.visibility = View.GONE
+            }
+        }
+
+        viewModel.isReceivingImage.observe(viewLifecycleOwner){
+            if (it){
+                try {
+                    viewModel.receivingUri.value?.let { uri ->
+                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
+                        if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
+                            val resultText = readQrcode(bitmap)[0]
+                            val barcodeFormat = readQrcode(bitmap)[1]
+
+                            if (URLUtil.isValidUrl(resultText)){
+                                viewModel.updateScannedStringType(ScannedStringType.Url)
+                            }else{
+                                when{
+                                    resultText.contains("MATMSG") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                    }
+                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                    }
+                                    resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                    }
+                                    resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                                    }
+                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                            lastText.contains("xrp:")
+                                    ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                    }
+                                    else ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                                    }
+                                }
+                            }
+                            viewModel.updateScannedString(resultText)
+                            viewModel.updateScannedType(barcodeFormat)
+
+                            viewModel.updateScannedBitmap(bitmap)
+                            findNavController().navigate(R.id.resultFragment)
+                            viewModel.updateIsReceivingImage(false)
+                            viewModel.updateReceivingUri(Uri.EMPTY)
+                        } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
+
+                            val resultText = readQrcode(bitmap)[0]
+
+                            if (URLUtil.isValidUrl(resultText)){
+                                viewModel.updateScannedStringType(ScannedStringType.Url)
+                            }else{
+                                when{
+                                    resultText.contains("MATMSG") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
+                                    }
+                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
+                                    }
+                                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
+                                    }
+                                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
+                                    }
+                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
+                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
+                                            lastText.contains("xrp:")
+                                    ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
+                                    }
+                                    lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.VCard)
+                                    }
+                                    else ->{
+                                        viewModel.updateScannedStringType(ScannedStringType.Text)
+                                    }
+                                }
+                            }
+                            viewModel.updateScannedString(resultText)
+                            viewModel.updateScannedBitmap(bitmap)
+                            findNavController().navigate(R.id.resultFragment)
+                            viewModel.updateIsReceivingImage(false)
+                            viewModel.updateReceivingUri(Uri.EMPTY)
+                        }
+                    }
+
+
+                }catch (e: Exception){
+                    Timber.e(e.localizedMessage)
+                    showSnackBar("Could not read qr code. Please try again.")
+                }
             }
         }
 

@@ -1,5 +1,8 @@
 package com.kazumaproject7.qrcodescanner
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
@@ -7,12 +10,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
+import com.kazumaproject7.qrcodescanner.other.parcelable
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import java.net.URI
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -48,6 +49,25 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.bottomBar.animate().alpha(0f).duration = 500
                 binding.bottomBar.visibility = View.GONE
+            }
+        }
+
+        // Receive image from other app
+        val receivedIntent = intent
+        val receivedAction = receivedIntent.action
+        val receivedType = receivedIntent.type
+
+        receivedAction?.let { action ->
+            receivedType?.let { type ->
+                if (action == Intent.ACTION_SEND){
+                    if (type.startsWith("image/")){
+                        val receiveUri = receivedIntent.parcelable<Uri>(Intent.EXTRA_STREAM)
+                        receiveUri?.let { uri ->
+                            viewModel.updateReceivingUri(uri)
+                            viewModel.updateIsReceivingImage(true)
+                        }
+                    }
+                }
             }
         }
 

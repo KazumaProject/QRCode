@@ -3,6 +3,7 @@ package com.kazumaproject7.qrcodescanner.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -82,5 +83,22 @@ class ScanViewModel @Inject constructor(
     fun deleteScannedResult(scannedResultID: String) = viewModelScope.launch {
         repository.deleteScannedResult(scannedResultID)
     }
+
+    val isReceivingImage: LiveData<Boolean>
+        get() = _isReceivingImage
+    private val _isReceivingImage = MutableLiveData(false)
+
+    fun updateIsReceivingImage(value: Boolean){
+        _isReceivingImage.value = value
+    }
+
+    val receivingUri: LiveData<Uri>
+        get() = _receivingUri
+    private val _receivingUri = MutableLiveData(Uri.EMPTY)
+
+    fun updateReceivingUri(value: Uri){
+        _receivingUri.value = value
+    }
+
 
 }
