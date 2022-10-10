@@ -40,6 +40,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        val navController = findNavController(R.id.fragmentHostView)
+        val popMenu = PopupMenu(this,null)
+        popMenu.inflate(R.menu.bottom_menu)
+        val menu = popMenu.menu
+        binding.bottomBar.setupWithNavController(menu,navController)
+        navController.addOnDestinationChangedListener{_,destination,_ ->
+            when(destination.id){
+                R.id.resultFragment, R.id.historyFragment, R.id.settingsFragment, R.id.openSourceLicenseFragment ->{
+                    binding.bottomBar.visibility = View.GONE
+                }
+            }
+        }
+
         viewModel.isActionAndBottomBarShow.observe(this){
             if (it){
                 binding.bottomBar.animate().alpha(1f).duration = 500

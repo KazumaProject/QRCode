@@ -2,6 +2,7 @@ package com.journeyapps.barcodescanner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -78,6 +79,16 @@ public class DecoratedBarcodeView extends FrameLayout {
         initialize(attrs);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+            setTargetViewSize();
+        }else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            setTargetViewSize();
+        }
+    }
+
     /**
      * Initialize the view with the xml configuration based on styleable attributes.
      *
@@ -126,11 +137,21 @@ public class DecoratedBarcodeView extends FrameLayout {
             Display display = wm.getDefaultDisplay();
             DisplayMetrics metrics = new DisplayMetrics();
             display.getMetrics(metrics);
-            int width = metrics.widthPixels / 2;
-            int height = metrics.heightPixels / 4;
-            ViewGroup.LayoutParams params = targetView.getLayoutParams();
-            params.width = width;
-            params.height = height;
+
+            if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+                int width = (int) (metrics.widthPixels / 1.5);
+                int height = metrics.heightPixels / 3;
+                ViewGroup.LayoutParams params = targetView.getLayoutParams();
+                params.width = width;
+                params.height = height;
+            } else if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+                int width = (int) (metrics.widthPixels / 1.5);
+                int height = (int) (metrics.heightPixels / 1.5);
+                ViewGroup.LayoutParams params = targetView.getLayoutParams();
+                params.width = width;
+                params.height = height;
+            }
+
         }
     }
 
