@@ -10,7 +10,9 @@ object AppPreferences {
     private val MASK_VISIBILITY = Pair("camera_mask_key",false)
     private val CENTER_CROSS_VISIBILITY = Pair("camera_cross_visibility_key",false)
     private val HORIZONTAL_LINE_VISIBILITY = Pair("camera_horizontal_line_visibility_key",true)
-    private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",false)
+    private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",true)
+    private val OPEN_RESULT_SCREEN = Pair("result_open_result_screen",false)
+    private val SHOW_SHARE = Pair("result_open_browser_in_capture",false)
 
     fun init(context: Context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -48,6 +50,20 @@ object AppPreferences {
 
         set(value) = preferences.edit {
             it.putBoolean(OPEN_URL_BY_DEFAULT.first, value)
+        }
+
+    var isResultScreenOpen: Boolean
+        get() = preferences.getBoolean(OPEN_RESULT_SCREEN.first, OPEN_RESULT_SCREEN.second)
+
+        set(value) = preferences.edit {
+            it.putBoolean(OPEN_RESULT_SCREEN.first,value)
+        }
+
+    var isShowShare: Boolean
+        get() = preferences.getBoolean(SHOW_SHARE.first, SHOW_SHARE.second)
+
+        set(value) = preferences.edit {
+            it.putBoolean(SHOW_SHARE.first,value)
         }
 
 }

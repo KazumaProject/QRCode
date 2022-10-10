@@ -1,10 +1,17 @@
 package com.kazumaproject7.qrcodescanner.ui
 
+import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
-import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
@@ -12,6 +19,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
+import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
+import com.kazumaproject7.qrcodescanner.other.AppPreferences
+import com.kazumaproject7.qrcodescanner.other.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -25,6 +35,95 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
             Snackbar.LENGTH_LONG
         ).show()
     }
+
+    fun showResultSnackBar(text: String, isUrl: Boolean, viewModel: ScanViewModel){
+
+        val snackBar = Snackbar.make(
+            requireActivity().findViewById(R.id.fragmentHostView),
+            text,
+            Snackbar.LENGTH_LONG
+        )
+        snackBar.view.setOnClickListener {
+            snackBar.dismiss()
+        }
+        if (isUrl){
+            if (!AppPreferences.isShowShare){
+                snackBar.setAction("open") {
+                    val intent =
+                        Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                    val chooser =
+                        Intent.createChooser(intent, "Open $text")
+                    requireActivity().startActivity(chooser)
+                    viewModel.insertScannedResult(
+                        ScannedResult(
+                            scannedString = text,
+                            scannedStringType = Constants.TYPE_URL,
+                            scannedCodeType = Constants.TYPE_QR_CODE,
+                            System.currentTimeMillis()
+                        )
+                    )
+                }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
+                    .setDuration(30000).show()
+            } else{
+                snackBar.setAction("share") {
+                   shareText(text)
+                    ScannedResult(
+                        scannedString = text,
+                        scannedStringType = Constants.TYPE_URL,
+                        scannedCodeType = Constants.TYPE_QR_CODE,
+                        System.currentTimeMillis()
+                    )
+                }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
+                    .setDuration(30000).show()
+            }
+        }else{
+            snackBar.setAction("copy") {
+                textCopyThenPost(text)
+                viewModel.scannedType.value?.let { codeType ->
+                    if (codeType.replace("_"," ") == "QR CODE"){
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = text,
+                                scannedStringType = Constants.TYPE_TEXT,
+                                scannedCodeType = Constants.TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
+                    } else {
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = text,
+                                scannedStringType = Constants.TYPE_TEXT,
+                                scannedCodeType = Constants.TYPE_BAR_CODE,
+                                System.currentTimeMillis()
+                            ))
+                    }
+                }
+
+            }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
+                .setDuration(30000).show()
+        }
+
+    }
+
+    private fun shareText(text: String){
+        val intent = Intent(Intent.ACTION_SEND, Uri.parse(text))
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, text)
+        val chooser = Intent.createChooser(intent, text)
+        requireActivity().startActivity(chooser)
+    }
+
+    private fun textCopyThenPost(textCopied:String) {
+        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        // When setting the clip board text.
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
+        // Only show a toast for Android 12 and lower.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            Toast.makeText(requireContext().applicationContext,"Copied $textCopied",Toast.LENGTH_LONG).show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("RestrictedApi")
     fun toggleButtonColor(btn: AppCompatButton){
         CoroutineScope(Dispatchers.Main).launch {
             btn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
@@ -44,6 +143,8 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("RestrictedApi")
     fun toggleImageButtonColor(btn: AppCompatImageButton){
         CoroutineScope(Dispatchers.Main).launch {
             btn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
@@ -107,6 +208,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
     }
 
     inline val Fragment.windowHeight: Int
+        @RequiresApi(Build.VERSION_CODES.M)
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val metrics = requireActivity().windowManager.currentWindowMetrics
@@ -121,6 +223,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         }
 
     inline val Fragment.windowWidth: Int
+        @RequiresApi(Build.VERSION_CODES.M)
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val metrics = requireActivity().windowManager.currentWindowMetrics

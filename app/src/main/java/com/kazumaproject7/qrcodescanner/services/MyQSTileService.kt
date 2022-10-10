@@ -23,7 +23,6 @@ class MyQSTileService : TileService(){
 
     override fun onClick() {
         super.onClick()
-        Toast.makeText(this,"",Toast.LENGTH_LONG).show()
         val intent = Intent(this,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivityAndCollapse(intent)
     }

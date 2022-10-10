@@ -14,8 +14,8 @@ android {
         applicationId "com.kazumaproject7.qrcodescanner"
         minSdk 21
         targetSdk 33
-        versionCode 12
-        versionName "1.0.3"
+        versionCode 13
+        versionName "1.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
