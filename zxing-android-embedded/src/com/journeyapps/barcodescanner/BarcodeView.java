@@ -38,7 +38,6 @@ public class BarcodeView extends CameraPreview {
 
     private DecoderFactory decoderFactory;
 
-
     private Handler resultHandler;
 
     private final Handler.Callback resultCallback = new Handler.Callback() {

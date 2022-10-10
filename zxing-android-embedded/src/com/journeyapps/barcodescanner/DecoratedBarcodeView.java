@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
@@ -113,11 +115,19 @@ public class DecoratedBarcodeView extends FrameLayout {
                 "with the id \"zxing_viewfinder_view\".");
         }
 
+        setTargetViewSize();
+
         viewFinder.setCameraPreview(barcodeView);
     }
 
-    public void setTargetViewSize(int width, int height){
+    public void setTargetViewSize(){
         if (targetView != null){
+            WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            int width = metrics.widthPixels / 2;
+            int height = metrics.heightPixels / 4;
             ViewGroup.LayoutParams params = targetView.getLayoutParams();
             params.width = width;
             params.height = height;

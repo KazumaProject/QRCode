@@ -13,8 +13,8 @@
 
     <com.journeyapps.barcodescanner.TargetView
         android:id="@+id/target_view"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_gravity="center"/>
 
 </merge>
