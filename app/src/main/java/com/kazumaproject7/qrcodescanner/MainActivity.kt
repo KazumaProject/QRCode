@@ -1,16 +1,23 @@
 package com.kazumaproject7.qrcodescanner
 
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.service.quicksettings.TileService
 import android.view.View
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.IconCompat
 import androidx.navigation.findNavController
 import com.kazumaproject7.qrcodescanner.databinding.ActivityMainBinding
 import com.kazumaproject7.qrcodescanner.other.parcelable
+import com.kazumaproject7.qrcodescanner.services.MyQSTileService
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -32,19 +39,6 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
-
-        val navController = findNavController(R.id.fragmentHostView)
-        val popMenu = PopupMenu(this,null)
-        popMenu.inflate(R.menu.bottom_menu)
-        val menu = popMenu.menu
-        binding.bottomBar.setupWithNavController(menu,navController)
-        navController.addOnDestinationChangedListener{_,destination,_ ->
-            when(destination.id){
-                R.id.resultFragment, R.id.historyFragment, R.id.settingsFragment, R.id.openSourceLicenseFragment ->{
-                    binding.bottomBar.visibility = View.GONE
-                }
-            }
-        }
 
         viewModel.isActionAndBottomBarShow.observe(this){
             if (it){
