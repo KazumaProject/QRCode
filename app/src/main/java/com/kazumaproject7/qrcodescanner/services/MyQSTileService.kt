@@ -15,7 +15,7 @@ class MyQSTileService : TileService(){
     override fun onStartListening() {
         super.onStartListening()
         qsTile?.apply {
-            state = Tile.STATE_ACTIVE
+            state = Tile.STATE_INACTIVE
             label = getString(R.string.app_name)
             updateTile()
         }
