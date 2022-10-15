@@ -133,6 +133,7 @@ public class DecoratedBarcodeView extends FrameLayout {
 
     public void setTargetViewSize(){
         if (targetView != null){
+
             WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
             Display display = wm.getDefaultDisplay();
             DisplayMetrics metrics = new DisplayMetrics();
