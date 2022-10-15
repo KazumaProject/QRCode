@@ -51,6 +51,9 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
             if (AppPreferences.isHorizontalLineVisible){
                 barcodeView.viewFinder.setLaserVisibility(true)
             }
+            if (!AppPreferences.isMaskVisible){
+                barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+            }
             barcodeView.targetView.isVisible = true
         }
         snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
@@ -59,6 +62,9 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                 if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) {
                     if (AppPreferences.isHorizontalLineVisible){
                         barcodeView.viewFinder.setLaserVisibility(true)
+                    }
+                    if (!AppPreferences.isMaskVisible){
+                        barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
                 }

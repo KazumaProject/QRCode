@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -174,17 +175,10 @@ public class ViewfinderView extends View {
             canvas.drawBitmap(resultBitmap, null, frame, paint);
         } else {
 
-
-            paint.setColor(maskColor);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
-            }
-
             if (maskVisibility){
                 paint.setColor(maskColor);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-                    canvas.drawRect(0, 0, width, frame.top , paint);
+                    canvas.drawRect(0, 0, width, frame.top, paint);
                     canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
                     canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
                     canvas.drawRect(0, frame.bottom + 1, width, height, paint);
@@ -195,6 +189,14 @@ public class ViewfinderView extends View {
                     canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
                     canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
                     canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+                }
+
+            }else {
+                if (rRectVisibility){
+                    paint.setColor(maskColor);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
+                    }
                 }
 
             }
@@ -289,5 +291,11 @@ public class ViewfinderView extends View {
 
     public void setLaserVisibility(boolean visible) {
         this.laserVisibility2 = visible;
+    }
+
+    private boolean rRectVisibility = true;
+
+    public void shouldRoundRectMaskVisible(boolean visibility){
+        this.rRectVisibility = visibility;
     }
 }

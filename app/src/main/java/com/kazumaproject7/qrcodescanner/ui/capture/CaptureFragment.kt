@@ -715,6 +715,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     }
                     binding.barcodeView.targetView.isVisible = false
                     binding.barcodeView.viewFinder.setLaserVisibility(false)
+                    binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(false)
 
                     showResultSnackBar(result.text, isUrl,viewModel,binding.barcodeView)
                     Timber.d("result points: ${result.resultPoints}")
