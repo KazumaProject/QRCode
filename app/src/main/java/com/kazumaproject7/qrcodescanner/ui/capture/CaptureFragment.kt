@@ -695,7 +695,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 result.bitmap,
                                 (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
                                 (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
-                                ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
+                                ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 60).toInt(),
                                 230
                             )
                         }
@@ -897,7 +897,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     result.bitmap,
                                     (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
                                     (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
-                                    ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
+                                    ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 60).toInt(),
                                     230
                                 )
                             }
