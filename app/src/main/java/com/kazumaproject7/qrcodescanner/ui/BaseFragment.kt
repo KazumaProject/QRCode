@@ -55,6 +55,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                 barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
             }
             barcodeView.targetView.isVisible = true
+            barcodeView.viewFinder.drawResultBitmap(null)
         }
         snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
             override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -67,6 +68,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                         barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
+                    barcodeView.viewFinder.drawResultBitmap(null)
                 }
 
             }
@@ -81,6 +83,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                         barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
+                    barcodeView.viewFinder.drawResultBitmap(null)
 
                     val intent =
                         Intent(Intent.ACTION_VIEW, Uri.parse(text))
@@ -106,6 +109,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                         barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
+                    barcodeView.viewFinder.drawResultBitmap(null)
 
                    shareText(text)
                     ScannedResult(
@@ -126,6 +130,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                     barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                 }
                 barcodeView.targetView.isVisible = true
+                barcodeView.viewFinder.drawResultBitmap(null)
 
                 textCopyThenPost(text)
                 viewModel.scannedType.value?.let { codeType ->

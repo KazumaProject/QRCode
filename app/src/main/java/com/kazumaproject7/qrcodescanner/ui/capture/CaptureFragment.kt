@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +33,10 @@ import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -523,15 +529,220 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private fun startResultFragment(result: BarcodeResult){
         try {
 
-            if (AppPreferences.isResultScreenOpen){
-                val height: Int = windowHeight
-                val width: Int = windowWidth
-                val scaleX = (result.bitmap.width).toDouble() / width.toDouble()
-                val scaleY = (result.bitmap.height).toDouble() / height.toDouble()
-                Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp} ${result.transformedResultPoints.size}")
-                val orientation = requireContext().resources.configuration.orientation
+            val height: Int = windowHeight
+            val width: Int = windowWidth
+            val scaleX = (result.bitmap.width).toDouble() / width.toDouble()
+            val scaleY = (result.bitmap.height).toDouble() / height.toDouble()
+            Timber.d("result Points: ${result.resultPoints} ${result.barcodeFormat} ${result.transformedResultPoints} ${result.timestamp} ${result.transformedResultPoints.size}")
+            val orientation = requireContext().resources.configuration.orientation
 
-                val croppedBitmap = when (result.transformedResultPoints.size) {
+            var croppedBitmap: Bitmap?
+
+            CoroutineScope(Dispatchers.Default).launch {
+                croppedBitmap = when (result.transformedResultPoints.size) {
+
+                // QR Code normal data size
+                4 -> {
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT){
+                        when{
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[3].y > result.transformedResultPoints[1].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[3].y > result.transformedResultPoints[1].y->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX - 150).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 128).toInt(),
+                                    ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[1].y > result.transformedResultPoints[3].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[1].y > result.transformedResultPoints[3].y->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            else ->{
+                                result.bitmap
+                            }
+                        }
+                    } else {
+                        when{
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[3].y > result.transformedResultPoints[1].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX ).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY ).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[3].y > result.transformedResultPoints[1].y->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX ).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 128).toInt(),
+                                    ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[1].y > result.transformedResultPoints[3].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX ).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            result.transformedResultPoints[2].x < result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[1].y > result.transformedResultPoints[3].y->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX ).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY).toInt(),
+                                    ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            else ->{
+                                result.bitmap
+                            }
+                        }
+                    }
+
+
+                }
+                // QR Code smaller data size
+                3 -> {
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT){
+                        when{
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[0].y > result.transformedResultPoints[2].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY ).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 60).toInt()
+                                )
+                            }
+
+                            else ->{
+                                result.bitmap
+                            }
+                        }
+                    }else {
+                        when{
+                            result.transformedResultPoints[2].x > result.transformedResultPoints[0].x &&
+                                    result.transformedResultPoints[0].y > result.transformedResultPoints[2].y ->{
+                                Bitmap.createBitmap(
+                                    result.bitmap,
+                                    (result.transformedResultPoints[0].x * scaleX ).toInt(),
+                                    (result.transformedResultPoints[1].y * scaleY ).toInt(),
+                                    ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
+                                    ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 90).toInt()
+                                )
+                            }
+
+                            else ->{
+                                result.bitmap
+                            }
+                        }
+                    }
+
+
+                }
+                // Barcode
+                2 -> {
+                    when{
+                        result.transformedResultPoints[1].x > result.transformedResultPoints[0].x ->{
+                            Bitmap.createBitmap(
+                                result.bitmap,
+                                (result.transformedResultPoints[0].x * scaleX - 32 ).toInt(),
+                                (result.transformedResultPoints[1].y * scaleY - 50).toInt(),
+                                ((result.transformedResultPoints[1].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 100).toInt(),
+                                230
+                            )
+                        }
+
+                        else ->{
+                            result.bitmap
+                        }
+                    }
+
+                }
+                else -> {
+                    result.bitmap
+                }
+            }
+                withContext(Dispatchers.Main){
+                    if (!AppPreferences.isResultScreenOpen){
+                        viewModel.scannedStringType.value?.let {
+                            val isUrl: Boolean = when(it){
+                                is ScannedStringType.Url ->{
+                                    true
+                                }
+                                else -> {
+                                    false
+                                }
+                            }
+                            binding.barcodeView.targetView.isVisible = false
+                            binding.barcodeView.viewFinder.setLaserVisibility(false)
+                            binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(false)
+
+                            showResultSnackBar(result.text, isUrl,viewModel,binding.barcodeView)
+                            Timber.d("result points: ${result.resultPoints}")
+                            Timber.d("transformed result: ${result.transformedResultPoints}")
+
+
+                            result.transformedResultPoints?.let { points ->
+
+                                binding.barcodeView.viewFinder.drawResultBitmap(croppedBitmap)
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            if (AppPreferences.isResultScreenOpen){
+                croppedBitmap = when (result.transformedResultPoints.size) {
+
                     // QR Code normal data size
                     4 -> {
                         if (orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -543,7 +754,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -554,7 +765,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX - 150).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 128).toInt(),
-                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -565,7 +776,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -576,7 +787,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -593,7 +804,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX ).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY ).toInt(),
                                         ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -604,7 +815,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX ).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 128).toInt(),
-                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[3].y * scaleY) - (result.transformedResultPoints[1].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -615,7 +826,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX ).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -626,7 +837,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX ).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY).toInt(),
                                         ((result.transformedResultPoints[0].x * scaleX) - (result.transformedResultPoints[2].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[1].y * scaleY) - (result.transformedResultPoints[3].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -649,7 +860,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         (result.transformedResultPoints[0].x * scaleX - 32).toInt(),
                                         (result.transformedResultPoints[1].y * scaleY ).toInt(),
                                         ((result.transformedResultPoints[2].x * scaleX) - (result.transformedResultPoints[0].x * scaleX) + 64).toInt(),
-                                        ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 120).toInt()
+                                        ((result.transformedResultPoints[0].y * scaleY) - (result.transformedResultPoints[2].y * scaleY) + 60).toInt()
                                     )
                                 }
 
@@ -701,27 +912,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         result.bitmap
                     }
                 }
-                viewModel.updateScannedBitmap(croppedBitmap)
-                findNavController().navigate(R.id.resultFragment)
-            } else{
-                viewModel.scannedStringType.value?.let {
-                    val isUrl: Boolean = when(it){
-                        is ScannedStringType.Url ->{
-                            true
-                        }
-                        else -> {
-                            false
-                        }
-                    }
-                    binding.barcodeView.targetView.isVisible = false
-                    binding.barcodeView.viewFinder.setLaserVisibility(false)
-                    binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(false)
-
-                    showResultSnackBar(result.text, isUrl,viewModel,binding.barcodeView)
-                    Timber.d("result points: ${result.resultPoints}")
-                    Timber.d("transformed result: ${result.transformedResultPoints}")
+                croppedBitmap?.let {
+                    viewModel.updateScannedBitmap(it)
+                    findNavController().navigate(R.id.resultFragment)
                 }
-
             }
 
         }catch (e: Exception){

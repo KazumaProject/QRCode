@@ -59,7 +59,6 @@ open class TargetView(
         super.onDetachedFromWindow()
         objectAnimator.cancel()
     }
-
     private fun drawLeftTopLine(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
         path.moveTo(margin,0f)

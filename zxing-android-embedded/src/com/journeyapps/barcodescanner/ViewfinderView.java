@@ -30,8 +30,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -77,6 +79,8 @@ public class ViewfinderView extends View {
     // stopped.
     protected Rect framingRect;
     protected Size previewSize;
+
+
 
     // This constructor is used when the class is built from an XML resource.
     public ViewfinderView(Context context, AttributeSet attrs) {
@@ -151,7 +155,6 @@ public class ViewfinderView extends View {
             this.framingRect = framingRect;
             this.previewSize = previewSize;
         }
-
     }
 
 
@@ -172,7 +175,8 @@ public class ViewfinderView extends View {
         if (resultBitmap != null) {
             // Draw the opaque result bitmap over the scanning rectangle
             paint.setAlpha(CURRENT_POINT_OPACITY);
-            canvas.drawBitmap(resultBitmap, null, frame, paint);
+            canvas.drawBitmap(resultBitmap, null, new RectF(frame.left + 180, frame.top + 100, frame.right - 180, frame.bottom - 100), paint);
+
         } else {
 
             if (maskVisibility){
@@ -235,6 +239,7 @@ public class ViewfinderView extends View {
                 possibleResultPoints = lastPossibleResultPoints;
                 lastPossibleResultPoints = temp;
                 possibleResultPoints.clear();
+
             }
 
             // Request another update at the animation interval, but only repaint the laser line,
@@ -264,6 +269,10 @@ public class ViewfinderView extends View {
     public void drawResultBitmap(Bitmap result) {
         resultBitmap = result;
         invalidate();
+    }
+
+    public void drawResultPointsRect(){
+
     }
 
     /**
