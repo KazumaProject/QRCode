@@ -269,6 +269,6 @@ public class ViewfinderView extends View {
     }
 
     public void setLaserVisibility(boolean visible) {
-        this.laserVisibility = visible;
+        this.laserVisibility2 = visible;
     }
 }

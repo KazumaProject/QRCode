@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
@@ -521,8 +522,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun startResultFragment(result: BarcodeResult){
         try {
-//            val displayMetrics = DisplayMetrics()
-//            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
 
             if (AppPreferences.isResultScreenOpen){
                 val height: Int = windowHeight
@@ -714,7 +713,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                             false
                         }
                     }
-                    showResultSnackBar(result.text, isUrl,viewModel)
+                    binding.barcodeView.targetView.isVisible = false
+                    binding.barcodeView.viewFinder.setLaserVisibility(false)
+                    showResultSnackBar(result.text, isUrl,viewModel,binding.barcodeView)
                 }
 
             }

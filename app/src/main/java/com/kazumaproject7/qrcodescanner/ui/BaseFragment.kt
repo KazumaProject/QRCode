@@ -16,8 +16,11 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.other.AppPreferences
@@ -36,7 +39,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         ).show()
     }
 
-    fun showResultSnackBar(text: String, isUrl: Boolean, viewModel: ScanViewModel){
+    fun showResultSnackBar(text: String, isUrl: Boolean, viewModel: ScanViewModel, barcodeView: DecoratedBarcodeView){
 
         val snackBar = Snackbar.make(
             requireActivity().findViewById(R.id.fragmentHostView),
@@ -45,7 +48,23 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         )
         snackBar.view.setOnClickListener {
             snackBar.dismiss()
+            if (AppPreferences.isHorizontalLineVisible){
+                barcodeView.viewFinder.setLaserVisibility(true)
+            }
+            barcodeView.targetView.isVisible = true
         }
+        snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
+            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                super.onDismissed(transientBottomBar, event)
+                if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) {
+                    if (AppPreferences.isHorizontalLineVisible){
+                        barcodeView.viewFinder.setLaserVisibility(true)
+                    }
+                    barcodeView.targetView.isVisible = true
+                }
+
+            }
+        })
         if (isUrl){
             if (!AppPreferences.isShowShare){
                 snackBar.setAction("open") {
