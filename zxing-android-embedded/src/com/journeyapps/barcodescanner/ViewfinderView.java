@@ -177,19 +177,10 @@ public class ViewfinderView extends View {
 
             if (maskVisibility){
                 paint.setColor(maskColor);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    canvas.drawRect(0, 0, width, frame.top, paint);
-                    canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-                    canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);
-                    paint.setColor(Color.TRANSPARENT);
-                    canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
-                }else {
-                    canvas.drawRect(0, 0, width, frame.top, paint);
-                    canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-                    canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);
-                }
+                canvas.drawRect(0, 0, width, frame.top, paint);
+                canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
+                canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
+                canvas.drawRect(0, frame.bottom + 1, width, height, paint);
 
             }else {
                 if (rRectVisibility){
@@ -285,8 +276,8 @@ public class ViewfinderView extends View {
             possibleResultPoints.add(point);
     }
 
-    public void setMaskColor(int maskColor) {
-        this.maskColor = maskColor;
+    public void setMaskVisibility(boolean visibility) {
+        this.maskVisibility = visibility;
     }
 
     public void setLaserVisibility(boolean visible) {

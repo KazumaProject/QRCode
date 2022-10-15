@@ -74,6 +74,14 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         if (isUrl){
             if (!AppPreferences.isShowShare){
                 snackBar.setAction("open") {
+                    if (AppPreferences.isHorizontalLineVisible){
+                        barcodeView.viewFinder.setLaserVisibility(true)
+                    }
+                    if (!AppPreferences.isMaskVisible){
+                        barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                    }
+                    barcodeView.targetView.isVisible = true
+
                     val intent =
                         Intent(Intent.ACTION_VIEW, Uri.parse(text))
                     val chooser =
@@ -91,6 +99,14 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                     .setDuration(30000).show()
             } else{
                 snackBar.setAction("share") {
+                    if (AppPreferences.isHorizontalLineVisible){
+                        barcodeView.viewFinder.setLaserVisibility(true)
+                    }
+                    if (!AppPreferences.isMaskVisible){
+                        barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                    }
+                    barcodeView.targetView.isVisible = true
+
                    shareText(text)
                     ScannedResult(
                         scannedString = text,
@@ -103,6 +119,14 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
             }
         }else{
             snackBar.setAction("copy") {
+                if (AppPreferences.isHorizontalLineVisible){
+                    barcodeView.viewFinder.setLaserVisibility(true)
+                }
+                if (!AppPreferences.isMaskVisible){
+                    barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                }
+                barcodeView.targetView.isVisible = true
+
                 textCopyThenPost(text)
                 viewModel.scannedType.value?.let { codeType ->
                     if (codeType.replace("_"," ") == "QR CODE"){

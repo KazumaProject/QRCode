@@ -5,7 +5,9 @@ import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.CornerPathEffect
 import android.graphics.Paint
+import android.graphics.Path
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
@@ -42,10 +44,10 @@ open class TargetView(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        drawLeftTopLine(canvas, setupPaint())
-        drawLeftBottomLine(canvas, setupPaint())
-        drawRightTopLine(canvas, setupPaint())
-        drawRightBottomLine(canvas, setupPaint())
+        drawLeftTopLine(canvas, setupPaint(),getPath())
+        drawLeftBottomLine(canvas, setupPaint(),getPath())
+        drawRightTopLine(canvas, setupPaint(),getPath())
+        drawRightBottomLine(canvas, setupPaint(),getPath())
         if (isCrossLineVisible){
             drawCrossLine(canvas,setupCrossLinePaint())
         }
@@ -58,24 +60,60 @@ open class TargetView(
         objectAnimator.cancel()
     }
 
-    private fun drawLeftTopLine(canvas: Canvas?, paint: Paint) {
-        canvas?.drawLine(0.0f, 0.0f, margin, 0.0f, paint)
-        canvas?.drawLine(0.0f, 0.0f, 0.0f, margin, paint)
+    private fun drawLeftTopLine(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(margin,0f)
+        path.lineTo(2f,0f)
+        path.lineTo(2f,margin)
+        paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.pathEffect = CornerPathEffect(90f)
+        canvas?.drawPath(path,paint)
+        path.close()
+        /*canvas?.drawLine(0.0f, 0.0f, margin, 0.0f, paint)
+        canvas?.drawLine(0.0f, 0.0f, 0.0f, margin, paint)*/
     }
 
-    private fun drawLeftBottomLine(canvas: Canvas?, paint: Paint) {
-        canvas?.drawLine(0.0f, height.toFloat(), margin, height.toFloat(), paint)
-        canvas?.drawLine(0.0f, height.toFloat() - margin, 0.0f, height.toFloat(), paint)
+    private fun drawLeftBottomLine(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(margin,height.toFloat())
+        path.lineTo(2f,height.toFloat())
+        path.lineTo(2f,height.toFloat() - margin)
+        paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.pathEffect = CornerPathEffect(90f)
+        canvas?.drawPath(path,paint)
+        path.close()
+        /*canvas?.drawLine(0.0f, height.toFloat(), margin, height.toFloat(), paint)
+        canvas?.drawLine(0.0f, height.toFloat() - margin, 0.0f, height.toFloat(), paint)*/
     }
 
-    private fun drawRightTopLine(canvas: Canvas?, paint: Paint) {
-        canvas?.drawLine(width.toFloat() - margin, 0.0f, width.toFloat(), 0.0f, paint)
-        canvas?.drawLine(width.toFloat(), 0.0f, width.toFloat(), margin, paint)
+    private fun drawRightTopLine(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(width.toFloat() - margin,0f)
+        path.lineTo(width.toFloat() - 2f,0f)
+        path.lineTo(width.toFloat() - 2f,margin)
+        paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.pathEffect = CornerPathEffect(90f)
+        canvas?.drawPath(path,paint)
+        path.close()
+        /*canvas?.drawLine(width.toFloat() - margin, 0.0f, width.toFloat(), 0.0f, paint)
+        canvas?.drawLine(width.toFloat(), 0.0f, width.toFloat(), margin, paint)*/
     }
 
-    private fun drawRightBottomLine(canvas: Canvas?, paint: Paint) {
-        canvas?.drawLine(width.toFloat() - margin, height.toFloat(), width.toFloat(), height.toFloat(), paint)
-        canvas?.drawLine(width.toFloat(), height.toFloat() - margin, width.toFloat(), height.toFloat(), paint)
+    private fun drawRightBottomLine(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(width.toFloat() - margin,height.toFloat())
+        path.lineTo(width.toFloat() - 2f,height.toFloat())
+        path.lineTo(width.toFloat() - 2f,height.toFloat() - margin)
+        paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.pathEffect = CornerPathEffect(90f)
+        canvas?.drawPath(path,paint)
+        path.close()
+        /*canvas?.drawLine(width.toFloat() - margin, height.toFloat(), width.toFloat(), height.toFloat(), paint)
+        canvas?.drawLine(width.toFloat(), height.toFloat() - margin, width.toFloat(), height.toFloat(), paint)*/
     }
 
     private fun setupPaint(): Paint {
@@ -84,6 +122,10 @@ open class TargetView(
             color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
             strokeWidth = 16f
         }
+    }
+
+    private fun getPath(): Path{
+        return Path()
     }
 
     private fun expandedAnimation() {
