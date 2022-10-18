@@ -7,8 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,14 +26,19 @@ import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
 import com.kazumaproject7.qrcodescanner.R
+import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.AppPreferences
+import com.kazumaproject7.qrcodescanner.other.Constants
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import org.jsoup.Jsoup
 import timber.log.Timber
+import java.io.InputStream
+import java.net.URL
 
 @AndroidEntryPoint
 class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
@@ -113,11 +117,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         binding.barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
         binding.barcodeView.decodeContinuous(callback)
 
-
-
         val detector = GestureDetectorCompat(requireContext(),object : GestureDetector.SimpleOnGestureListener(){
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-
+                viewModel.isResultBottomBarShow.value?.let {
+                    if (it){
+                        binding.resultDisplayBar.visibility = View.GONE
+                        viewModel.updateIsResultBottomBarShow(false)
+                    }
+                }
                 return true
             }
 
@@ -162,7 +169,18 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         }
 
         viewModel.isResultBottomBarShow.observe(viewLifecycleOwner){
+            if (!it){
+                binding.barcodeView.targetView.isVisible = true
+                binding.barcodeView.viewFinder.setLaserVisibility(true)
+                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+            }
+        }
 
+        binding.resultActionBtn.setOnClickListener {
+            binding.resultDisplayBar.visibility = View.GONE
+            binding.barcodeView.targetView.isVisible = true
+            binding.barcodeView.viewFinder.setLaserVisibility(true)
+            binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
         }
 
         viewModel.flashStatus.observe(viewLifecycleOwner){
@@ -535,6 +553,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
 
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.M)
     private fun startResultFragment(result: BarcodeResult){
         try {
@@ -732,8 +751,76 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 Timber.d("result points: ${result.resultPoints}")
                 Timber.d("transformed result: ${result.transformedResultPoints}")
 
+                binding.resultSubText.text = result.text
+
                 result.transformedResultPoints?.let { points ->
+
+                    viewModel.scannedType.value?.let { codeType ->
+                        viewModel.scannedStringType.value?.let { strType ->
+                            // QR Code
+                            if (codeType.replace("_"," ") == "QR CODE"){
+                                when(strType){
+                                    is ScannedStringType.Url ->{
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            withContext(Dispatchers.Main){
+                                                binding.progressResultTitle.visibility = View.VISIBLE
+                                                binding.resultActionBtn.text = "Open"
+                                            }
+
+                                            try {
+                                                val document = Jsoup.connect(result.text).get()
+                                                val img = document.select("img").first()
+                                                val imgSrc = img.absUrl("src")
+                                                val title = document.title()
+                                                title?.let {
+                                                    withContext(Dispatchers.Main) {
+                                                        binding.resultTitleText.text = it
+                                                        binding.progressResultTitle.visibility = View.GONE
+                                                    }
+                                                }
+
+                                                val input: InputStream =  URL(imgSrc).openStream()
+                                                val bitmap = BitmapFactory.decodeStream(input)
+                                                bitmap?.let {
+                                                    withContext(Dispatchers.Main){
+                                                        binding.resultImgLogo.setImageBitmap(it)
+                                                    }
+                                                }
+                                                if (bitmap == null){
+                                                    withContext(Dispatchers.Main){
+                                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                                        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
+                                                    }
+                                                }
+
+                                            }catch (e: Exception){
+                                                Timber.d("Error Result Fragment: $e")
+                                                withContext(Dispatchers.Main){
+                                                    binding.progressResultTitle.visibility = View.GONE
+                                                }
+                                            }
+
+                                        }
+
+                                    }
+                                    else ->{
+
+                                    }
+                                }
+                            } else {
+                                // Barcode
+                            }
+                        }
+                    }
+
                     CoroutineScope(Dispatchers.Main).launch {
+
+                        withContext(Dispatchers.IO){
+
+                        }
+
+
+
                         binding.barcodeView.viewFinder.drawResultPointsRect(points)
                         binding.resultDisplayBar.visibility = View.VISIBLE
                         viewModel.updateIsResultBottomBarShow(true)

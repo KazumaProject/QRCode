@@ -179,14 +179,24 @@ public class ViewfinderView extends View {
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(10f);
-            //canvas.drawBitmap(resultBitmap, null, new RectF(frame.left + 180, frame.top + 100, frame.right - 180, frame.bottom - 100), paint);
-            @SuppressLint("DrawAllocation") Rect rect = new Rect(
-                    (int)(resultPoints.get(0).getX() - 50),
-                    (int)(resultPoints.get(1).getY() - 30),
-                    (int)(resultPoints.get(2).getX() + 80),
-                    (int)(resultPoints.get(0).getY() + 100)
-                    );
-            canvas.drawRect(rect,paint);
+            if (resultPoints.size() >= 3){
+                @SuppressLint("DrawAllocation") Rect rect = new Rect(
+                        (int)(resultPoints.get(0).getX() - 50),
+                        (int)(resultPoints.get(1).getY() - 30),
+                        (int)(resultPoints.get(2).getX() + 80),
+                        (int)(resultPoints.get(0).getY() + 100)
+                );
+                canvas.drawRect(rect,paint);
+            } else {
+                @SuppressLint("DrawAllocation") Rect rect = new Rect(
+                        (int)(resultPoints.get(0).getX() - 50),
+                        (int)(resultPoints.get(1).getY() - 30),
+                        (int)(resultPoints.get(1).getX() + 80),
+                        (int)(resultPoints.get(0).getY() + 100)
+                );
+                canvas.drawRect(rect,paint);
+            }
+
         } else {
 
             paint.setStyle(Paint.Style.FILL);
