@@ -12,6 +12,17 @@
         android:layout_height="match_parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/result_display_bar"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:layout_gravity="bottom"
+        android:background="@color/dark_gray2"
+        android:elevation="4dp"
+        android:visibility="gone">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/toolbar_capture"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"

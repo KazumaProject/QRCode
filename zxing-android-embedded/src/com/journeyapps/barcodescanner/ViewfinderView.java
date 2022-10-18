@@ -21,6 +21,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -172,15 +173,28 @@ public class ViewfinderView extends View {
         final int width = getWidth();
         final int height = getHeight();
 
-        if (resultBitmap != null) {
+        if (resultPoints != null) {
             // Draw the opaque result bitmap over the scanning rectangle
+            paint.setColor(laserColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
-            canvas.drawBitmap(resultBitmap, null, new RectF(frame.left + 180, frame.top + 100, frame.right - 180, frame.bottom - 100), paint);
-
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(10f);
+            //canvas.drawBitmap(resultBitmap, null, new RectF(frame.left + 180, frame.top + 100, frame.right - 180, frame.bottom - 100), paint);
+            @SuppressLint("DrawAllocation") Rect rect = new Rect(
+                    (int)(resultPoints.get(0).getX() - 50),
+                    (int)(resultPoints.get(1).getY() - 30),
+                    (int)(resultPoints.get(2).getX() + 80),
+                    (int)(resultPoints.get(0).getY() + 100)
+                    );
+            canvas.drawRect(rect,paint);
         } else {
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setStrokeWidth(6f);
 
             if (maskVisibility){
                 paint.setColor(maskColor);
+
                 canvas.drawRect(0, 0, width, frame.top, paint);
                 canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
                 canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
@@ -253,11 +267,7 @@ public class ViewfinderView extends View {
     }
 
     public void drawViewfinder() {
-        Bitmap resultBitmap = this.resultBitmap;
-        this.resultBitmap = null;
-        if (resultBitmap != null) {
-            resultBitmap.recycle();
-        }
+        this.resultPoints = null;
         invalidate();
     }
 
@@ -271,7 +281,19 @@ public class ViewfinderView extends View {
         invalidate();
     }
 
-    public void drawResultPointsRect(){
+    private List<ResultPoint> resultPoints;
+
+    public void drawResultPointsRect(List<ResultPoint> points){
+        if (points == null){
+            resultPoints = null;
+            invalidate();
+        }else {
+            if (resultPoints == null){
+                resultPoints = points;
+                invalidate();
+            }
+
+        }
 
     }
 

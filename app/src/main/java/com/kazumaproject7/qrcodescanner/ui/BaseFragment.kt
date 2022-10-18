@@ -55,7 +55,7 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                 barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
             }
             barcodeView.targetView.isVisible = true
-            barcodeView.viewFinder.drawResultBitmap(null)
+            barcodeView.viewFinder.drawResultPointsRect(null)
         }
         snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
             override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -68,40 +68,62 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                         barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
-                    barcodeView.viewFinder.drawResultBitmap(null)
+                    barcodeView.viewFinder.drawResultPointsRect(null)
                 }
 
             }
         })
-        if (isUrl){
-            if (!AppPreferences.isShowShare){
-                snackBar.setAction("open") {
-                    if (AppPreferences.isHorizontalLineVisible){
-                        barcodeView.viewFinder.setLaserVisibility(true)
-                    }
-                    if (!AppPreferences.isMaskVisible){
-                        barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                    }
-                    barcodeView.targetView.isVisible = true
-                    barcodeView.viewFinder.drawResultBitmap(null)
+        if (!snackBar.isShown){
+            if (isUrl){
+                if (!AppPreferences.isShowShare){
+                    snackBar.setAction("open") {
+                        if (AppPreferences.isHorizontalLineVisible){
+                            barcodeView.viewFinder.setLaserVisibility(true)
+                        }
+                        if (!AppPreferences.isMaskVisible){
+                            barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                        }
+                        barcodeView.targetView.isVisible = true
+                        barcodeView.viewFinder.drawResultPointsRect(null)
 
-                    val intent =
-                        Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                    val chooser =
-                        Intent.createChooser(intent, "Open $text")
-                    requireActivity().startActivity(chooser)
-                    viewModel.insertScannedResult(
+                        val intent =
+                            Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                        val chooser =
+                            Intent.createChooser(intent, "Open $text")
+                        requireActivity().startActivity(chooser)
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = text,
+                                scannedStringType = Constants.TYPE_URL,
+                                scannedCodeType = Constants.TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            )
+                        )
+                    }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
+                        .setDuration(30000).show()
+                } else{
+                    snackBar.setAction("share") {
+                        if (AppPreferences.isHorizontalLineVisible){
+                            barcodeView.viewFinder.setLaserVisibility(true)
+                        }
+                        if (!AppPreferences.isMaskVisible){
+                            barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                        }
+                        barcodeView.targetView.isVisible = true
+                        barcodeView.viewFinder.drawResultPointsRect(null)
+
+                        shareText(text)
                         ScannedResult(
                             scannedString = text,
                             scannedStringType = Constants.TYPE_URL,
                             scannedCodeType = Constants.TYPE_QR_CODE,
                             System.currentTimeMillis()
                         )
-                    )
-                }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
-                    .setDuration(30000).show()
-            } else{
-                snackBar.setAction("share") {
+                    }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
+                        .setDuration(30000).show()
+                }
+            }else{
+                snackBar.setAction("copy") {
                     if (AppPreferences.isHorizontalLineVisible){
                         barcodeView.viewFinder.setLaserVisibility(true)
                     }
@@ -109,53 +131,34 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
                         barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                     }
                     barcodeView.targetView.isVisible = true
-                    barcodeView.viewFinder.drawResultBitmap(null)
+                    barcodeView.viewFinder.drawResultPointsRect(null)
 
-                   shareText(text)
-                    ScannedResult(
-                        scannedString = text,
-                        scannedStringType = Constants.TYPE_URL,
-                        scannedCodeType = Constants.TYPE_QR_CODE,
-                        System.currentTimeMillis()
-                    )
+                    textCopyThenPost(text)
+                    viewModel.scannedType.value?.let { codeType ->
+                        if (codeType.replace("_"," ") == "QR CODE"){
+                            viewModel.insertScannedResult(
+                                ScannedResult(
+                                    scannedString = text,
+                                    scannedStringType = Constants.TYPE_TEXT,
+                                    scannedCodeType = Constants.TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                ))
+                        } else {
+                            viewModel.insertScannedResult(
+                                ScannedResult(
+                                    scannedString = text,
+                                    scannedStringType = Constants.TYPE_TEXT,
+                                    scannedCodeType = Constants.TYPE_BAR_CODE,
+                                    System.currentTimeMillis()
+                                ))
+                        }
+                    }
+
                 }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
                     .setDuration(30000).show()
             }
-        }else{
-            snackBar.setAction("copy") {
-                if (AppPreferences.isHorizontalLineVisible){
-                    barcodeView.viewFinder.setLaserVisibility(true)
-                }
-                if (!AppPreferences.isMaskVisible){
-                    barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                }
-                barcodeView.targetView.isVisible = true
-                barcodeView.viewFinder.drawResultBitmap(null)
-
-                textCopyThenPost(text)
-                viewModel.scannedType.value?.let { codeType ->
-                    if (codeType.replace("_"," ") == "QR CODE"){
-                        viewModel.insertScannedResult(
-                            ScannedResult(
-                                scannedString = text,
-                                scannedStringType = Constants.TYPE_TEXT,
-                                scannedCodeType = Constants.TYPE_QR_CODE,
-                                System.currentTimeMillis()
-                            ))
-                    } else {
-                        viewModel.insertScannedResult(
-                            ScannedResult(
-                                scannedString = text,
-                                scannedStringType = Constants.TYPE_TEXT,
-                                scannedCodeType = Constants.TYPE_BAR_CODE,
-                                System.currentTimeMillis()
-                            ))
-                    }
-                }
-
-            }.setActionTextColor(ContextCompat.getColor(requireContext(),android.R.color.holo_green_dark))
-                .setDuration(30000).show()
         }
+
 
     }
 
