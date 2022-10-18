@@ -3,11 +3,16 @@ package com.kazumaproject7.qrcodescanner.ui.capture
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -125,6 +130,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         viewModel.updateIsResultBottomBarShow(false)
                     }
                 }
+
+
                 return true
             }
 
@@ -174,13 +181,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.barcodeView.viewFinder.setLaserVisibility(true)
                 binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
             }
-        }
-
-        binding.resultActionBtn.setOnClickListener {
-            binding.resultDisplayBar.visibility = View.GONE
-            binding.barcodeView.targetView.isVisible = true
-            binding.barcodeView.viewFinder.setLaserVisibility(true)
-            binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
         }
 
         viewModel.flashStatus.observe(viewLifecycleOwner){
@@ -765,6 +765,29 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             withContext(Dispatchers.Main){
                                                 binding.progressResultTitle.visibility = View.VISIBLE
                                                 binding.resultActionBtn.text = "Open"
+                                                binding.resultActionBtn.setOnClickListener {
+                                                    val intent =
+                                                        Intent(Intent.ACTION_VIEW, Uri.parse(result.text))
+                                                    val chooser =
+                                                        Intent.createChooser(intent, "Open ${result.text}")
+                                                    requireActivity().startActivity(chooser)
+
+                                                    binding.resultDisplayBar.visibility = View.GONE
+                                                    binding.barcodeView.targetView.isVisible = true
+                                                    binding.barcodeView.viewFinder.setLaserVisibility(true)
+                                                    binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                                                    viewModel.updateIsResultBottomBarShow(false)
+                                                }
+                                                binding.resultDisplayBar.setOnClickListener {
+                                                    viewModel.scannedString.value?.let{ text ->
+                                                        textCopyThenPost(text)
+                                                        binding.resultDisplayBar.visibility = View.GONE
+                                                        binding.barcodeView.targetView.isVisible = true
+                                                        binding.barcodeView.viewFinder.setLaserVisibility(true)
+                                                        binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                                                        viewModel.updateIsResultBottomBarShow(false)
+                                                    }
+                                                }
                                             }
 
                                             try {
@@ -775,6 +798,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 title?.let {
                                                     withContext(Dispatchers.Main) {
                                                         binding.resultTitleText.text = it
+                                                        binding.progressResultTitle.visibility = View.GONE
+                                                    }
+                                                }
+
+                                                if (title == null){
+                                                    withContext(Dispatchers.Main) {
+                                                        binding.resultTitleText.text = "QR Code"
                                                         binding.progressResultTitle.visibility = View.GONE
                                                     }
                                                 }
@@ -799,9 +829,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                     binding.progressResultTitle.visibility = View.GONE
                                                 }
                                             }
-
                                         }
-
                                     }
                                     else ->{
 
@@ -814,13 +842,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     }
 
                     CoroutineScope(Dispatchers.Main).launch {
-
-                        withContext(Dispatchers.IO){
-
-                        }
-
-
-
                         binding.barcodeView.viewFinder.drawResultPointsRect(points)
                         binding.resultDisplayBar.visibility = View.VISIBLE
                         viewModel.updateIsResultBottomBarShow(true)
@@ -864,6 +885,15 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             type = "image/*"
         }
         startSelectImageFromURI.launch(intent)
+    }
+
+    private fun textCopyThenPost(textCopied:String) {
+        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        // When setting the clip board text.
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
+        // Only show a toast for Android 12 and lower.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            showSnackBar("Copied $textCopied")
     }
 
 }
