@@ -14,11 +14,68 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/result_display_bar"
         android:layout_width="match_parent"
-        android:layout_height="84dp"
+        android:layout_height="108dp"
         android:layout_gravity="bottom"
         android:background="@color/dark_gray2"
         android:elevation="4dp"
         android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="12">
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/result_img_logo"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:padding="7dp"/>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="7">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/result_title_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:ellipsize="end"
+                    android:maxLength="16"
+                    android:maxLines="1"
+                    android:gravity="bottom"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/materialTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/gray"
+                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:maxLength="28"
+                    android:maxLines="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintTop_toBottomOf="@+id/result_title_text" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/result_action_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:backgroundTint="@color/blue"
+                android:layout_marginVertical="24dp"
+                android:layout_marginHorizontal="8dp"
+                android:textColor="@color/dark_gray2"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

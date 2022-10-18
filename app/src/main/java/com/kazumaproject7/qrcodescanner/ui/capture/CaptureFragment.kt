@@ -113,12 +113,20 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         binding.barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
         binding.barcodeView.decodeContinuous(callback)
 
+
+
         val detector = GestureDetectorCompat(requireContext(),object : GestureDetector.SimpleOnGestureListener(){
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+
+                return true
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
                 viewModel.isActionAndBottomBarShow.value?.let {
                     viewModel.updateIsActionAndBottomBarShow(!it)
                 }
-                return true
+                return super.onDoubleTap(e)
+
             }
         })
 
@@ -151,6 +159,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             detector.onTouchEvent(event)
             scaleDetector.onTouchEvent(event)
             return@setOnTouchListener true
+        }
+
+        viewModel.isResultBottomBarShow.observe(viewLifecycleOwner){
+
         }
 
         viewModel.flashStatus.observe(viewLifecycleOwner){
@@ -724,6 +736,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     CoroutineScope(Dispatchers.Main).launch {
                         binding.barcodeView.viewFinder.drawResultPointsRect(points)
                         binding.resultDisplayBar.visibility = View.VISIBLE
+                        viewModel.updateIsResultBottomBarShow(true)
                         delay(100)
                         binding.barcodeView.viewFinder.drawResultPointsRect(null)
                     }

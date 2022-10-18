@@ -32,6 +32,14 @@ class ScanViewModel @Inject constructor(
         _isActionAndBottomBarShow.value = value
     }
 
+    val isResultBottomBarShow: LiveData<Boolean>
+        get() = _isResultBottomBarShow
+    private val _isResultBottomBarShow = MutableLiveData(false)
+
+    fun updateIsResultBottomBarShow(value: Boolean){
+        _isResultBottomBarShow.value = value
+    }
+
     val scannedString: LiveData<String>
         get() = _scannedString
     private val _scannedString = MutableLiveData("")
