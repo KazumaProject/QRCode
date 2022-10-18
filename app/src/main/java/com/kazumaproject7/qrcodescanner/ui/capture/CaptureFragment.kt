@@ -751,8 +751,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 Timber.d("result points: ${result.resultPoints}")
                 Timber.d("transformed result: ${result.transformedResultPoints}")
 
-                binding.resultSubText.text = result.text
-
                 result.transformedResultPoints?.let { points ->
 
                     viewModel.scannedType.value?.let { codeType ->
@@ -765,6 +763,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             withContext(Dispatchers.Main){
                                                 binding.progressResultTitle.visibility = View.VISIBLE
                                                 binding.resultActionBtn.text = "Open"
+                                                binding.resultSubText.text = result.text
                                                 binding.resultActionBtn.setOnClickListener {
                                                     val intent =
                                                         Intent(Intent.ACTION_VIEW, Uri.parse(result.text))
@@ -836,7 +835,26 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         }
                                     }
                                     else ->{
-
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultSubText.text = ""
+                                        binding.resultActionBtn.text = "Share"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
+                                        binding.resultTitleText.text = result.text
+                                        
+                                        binding.resultActionBtn.setOnClickListener {
+                                            shareText(result.text)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+                                            viewModel.scannedString.value?.let{ text ->
+                                                textCopyThenPost(text)
+                                                binding.resultDisplayBar.visibility = View.GONE
+                                                binding.barcodeView.targetView.isVisible = true
+                                                binding.barcodeView.viewFinder.setLaserVisibility(true)
+                                                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                                                viewModel.updateIsResultBottomBarShow(false)
+                                            }
+                                        }
                                     }
                                 }
                             } else {
@@ -898,6 +916,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         // Only show a toast for Android 12 and lower.
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
             showSnackBar("Copied $textCopied")
+    }
+
+    private fun shareText(text: String){
+        val intent = Intent(Intent.ACTION_SEND, Uri.parse(text))
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, text)
+        val chooser = Intent.createChooser(intent, text)
+        requireActivity().startActivity(chooser)
     }
 
 }
