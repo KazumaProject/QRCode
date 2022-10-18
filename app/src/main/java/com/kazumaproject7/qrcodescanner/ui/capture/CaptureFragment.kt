@@ -827,6 +827,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 Timber.d("Error Result Fragment: $e")
                                                 withContext(Dispatchers.Main){
                                                     binding.progressResultTitle.visibility = View.GONE
+                                                    binding.resultTitleText.text = "QR Code"
+                                                    binding.progressResultTitle.visibility = View.GONE
+                                                    binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                                    viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
                                                 }
                                             }
                                         }
