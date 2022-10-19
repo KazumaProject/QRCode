@@ -140,8 +140,8 @@ public class DecoratedBarcodeView extends FrameLayout {
             display.getMetrics(metrics);
 
             if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                int width = (int) (metrics.widthPixels / 1.5);
-                int height = metrics.heightPixels / 3;
+                int width = (int) (metrics.widthPixels / 1.8);
+                int height = (int) (metrics.heightPixels / 3.5);
                 ViewGroup.LayoutParams params = targetView.getLayoutParams();
                 params.width = width;
                 params.height = height;

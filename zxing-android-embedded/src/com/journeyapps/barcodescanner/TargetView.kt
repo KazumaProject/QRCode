@@ -40,7 +40,7 @@ open class TargetView(
         context
     }
 
-    private val margin: Float = 50f
+    private val margin: Float = 120f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -54,33 +54,30 @@ open class TargetView(
     }
 
 
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         objectAnimator.cancel()
     }
     private fun drawLeftTopLine(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(margin,0f)
-        path.lineTo(2f,0f)
-        path.lineTo(2f,margin)
+        path.moveTo(margin,30f)
+        path.lineTo(10f,30f)
+        path.lineTo(10f,margin + 30)
         paint.style = Paint.Style.STROKE
-        paint.strokeCap = Paint.Cap.ROUND
         paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
-        /*canvas?.drawLine(0.0f, 0.0f, margin, 0.0f, paint)
-        canvas?.drawLine(0.0f, 0.0f, 0.0f, margin, paint)*/
     }
 
     private fun drawLeftBottomLine(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(margin,height.toFloat())
-        path.lineTo(2f,height.toFloat())
-        path.lineTo(2f,height.toFloat() - margin)
+        path.moveTo(margin,height.toFloat() - 30f)
+        path.lineTo(10f,height.toFloat() - 30f)
+        path.lineTo(10f,height.toFloat() - margin - 30)
         paint.style = Paint.Style.STROKE
-        paint.strokeCap = Paint.Cap.ROUND
         paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
         /*canvas?.drawLine(0.0f, height.toFloat(), margin, height.toFloat(), paint)
@@ -89,12 +86,12 @@ open class TargetView(
 
     private fun drawRightTopLine(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(width.toFloat() - margin,0f)
-        path.lineTo(width.toFloat() - 2f,0f)
-        path.lineTo(width.toFloat() - 2f,margin)
+        path.moveTo(width.toFloat() - margin ,30f)
+        path.lineTo(width.toFloat() - 10f,30f)
+        path.lineTo(width.toFloat() - 10f,margin + 30)
         paint.style = Paint.Style.STROKE
-        paint.strokeCap = Paint.Cap.ROUND
         paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
         /*canvas?.drawLine(width.toFloat() - margin, 0.0f, width.toFloat(), 0.0f, paint)
@@ -103,12 +100,12 @@ open class TargetView(
 
     private fun drawRightBottomLine(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(width.toFloat() - margin,height.toFloat())
-        path.lineTo(width.toFloat() - 2f,height.toFloat())
-        path.lineTo(width.toFloat() - 2f,height.toFloat() - margin)
+        path.moveTo(width.toFloat() - margin,height.toFloat() - 30f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - 30f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - margin - 30f)
         paint.style = Paint.Style.STROKE
-        paint.strokeCap = Paint.Cap.ROUND
         paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
         /*canvas?.drawLine(width.toFloat() - margin, height.toFloat(), width.toFloat(), height.toFloat(), paint)
@@ -119,7 +116,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
-            strokeWidth = 16f
+            strokeWidth = 8f
         }
     }
 
@@ -128,11 +125,11 @@ open class TargetView(
     }
 
     private fun expandedAnimation() {
-        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 1.05f, 0.98f)
-        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 1.05f, 0.98f)
+        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 1.1f, 0.98f)
+        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 1.1f, 0.98f)
 
         objectAnimator = ObjectAnimator.ofPropertyValuesHolder(this, expandedScaleX, expandedScaleY).apply {
-            duration = 1100
+            duration = 1000
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
         }

@@ -128,6 +128,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     if (it){
                         binding.resultDisplayBar.visibility = View.GONE
                         viewModel.updateIsResultBottomBarShow(false)
+                        binding.barcodeView.viewFinder.isResultShown(false)
                     }
                 }
 
@@ -761,7 +762,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     is ScannedStringType.Url ->{
                                         CoroutineScope(Dispatchers.IO).launch {
                                             withContext(Dispatchers.Main){
+
+                                                binding.barcodeView.viewFinder.isResultShown(true)
+
                                                 binding.progressResultTitle.visibility = View.VISIBLE
+
                                                 binding.resultActionBtn.text = "Open"
                                                 binding.resultSubText.text = result.text
                                                 binding.resultActionBtn.setOnClickListener {
@@ -776,6 +781,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                     binding.barcodeView.viewFinder.setLaserVisibility(true)
                                                     binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                                                     viewModel.updateIsResultBottomBarShow(false)
+                                                    binding.barcodeView.viewFinder.isResultShown(false)
                                                 }
                                                 binding.resultDisplayBar.setOnClickListener {
                                                     viewModel.scannedString.value?.let{ text ->
@@ -785,6 +791,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                         binding.barcodeView.viewFinder.setLaserVisibility(true)
                                                         binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                                                         viewModel.updateIsResultBottomBarShow(false)
+                                                        binding.barcodeView.viewFinder.isResultShown(false)
                                                     }
                                                 }
                                             }
@@ -827,7 +834,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 withContext(Dispatchers.Main){
                                                     binding.progressResultTitle.visibility = View.GONE
                                                     binding.resultTitleText.text = "QR Code"
-                                                    binding.progressResultTitle.visibility = View.GONE
+                                                    binding.barcodeView.viewFinder.isResultShown(true)
                                                     binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
                                                     viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
                                                 }
@@ -841,9 +848,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
                                         viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
                                         binding.resultTitleText.text = result.text
-                                        
+
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
                                         binding.resultActionBtn.setOnClickListener {
                                             shareText(result.text)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
                                             viewModel.scannedString.value?.let{ text ->
@@ -853,6 +863,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 binding.barcodeView.viewFinder.setLaserVisibility(true)
                                                 binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                                                 viewModel.updateIsResultBottomBarShow(false)
+                                                binding.barcodeView.viewFinder.isResultShown(false)
                                             }
                                         }
                                     }

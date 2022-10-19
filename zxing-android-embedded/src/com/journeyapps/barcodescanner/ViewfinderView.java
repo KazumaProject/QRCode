@@ -28,6 +28,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -158,6 +159,39 @@ public class ViewfinderView extends View {
         }
     }
 
+    private void drawSmallTarget(Canvas canvas, Paint paint, Rect rect){
+        Path path = new Path();
+        float margin = 50f;
+        //Left Top
+        path.rewind();
+        path.moveTo((float) (rect.left + margin), (float) (rect.top));
+        path.lineTo((float) (rect.left), (float) (rect.top));
+        path.lineTo((float) (rect.left), (float) (rect.top + margin));
+        canvas.drawPath(path,paint);
+        path.close();
+        // Left Bottom
+        path.rewind();
+        path.moveTo((float) (rect.left + margin), (float) (rect.bottom));
+        path.lineTo((float) (rect.left), (float) (rect.bottom));
+        path.lineTo((float) (rect.left), (float) (rect.bottom - margin));
+        paint.setPathEffect(new CornerPathEffect(90f));
+        canvas.drawPath(path,paint);
+        path.close();
+        //Right Top
+        path.rewind();
+        path.moveTo((float) (rect.right - margin), (float) (rect.top));
+        path.lineTo((float) (rect.right), (float) (rect.top));
+        path.lineTo((float) (rect.right), (float) (rect.top + margin));
+        canvas.drawPath(path,paint);
+        path.close();
+        //Right Bottom
+        path.rewind();
+        path.moveTo((float) (rect.right - margin), (float) (rect.bottom));
+        path.lineTo((float) (rect.right), (float) (rect.bottom));
+        path.lineTo((float) (rect.right), (float) (rect.bottom - margin));
+        canvas.drawPath(path,paint);
+        path.close();
+    }
 
 
     @Override
@@ -178,7 +212,7 @@ public class ViewfinderView extends View {
             paint.setColor(laserColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(10f);
+            paint.setStrokeWidth(6f);
             if (resultPoints.size() >= 3){
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
                         (int)(resultPoints.get(0).getX() - 50),
@@ -186,7 +220,9 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(2).getX() + 80),
                         (int)(resultPoints.get(0).getY() + 100)
                 );
-                canvas.drawRect(rect,paint);
+
+                //canvas.drawRect(rect,paint);
+                drawSmallTarget(canvas,paint,rect);
             } else {
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
                         (int)(resultPoints.get(0).getX() - 50),
@@ -194,8 +230,10 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(1).getX() + 80),
                         (int)(resultPoints.get(0).getY() + 100)
                 );
-                canvas.drawRect(rect,paint);
+                //canvas.drawRect(rect,paint);
+                drawSmallTarget(canvas,paint,rect);
             }
+
 
         } else {
 
@@ -203,15 +241,17 @@ public class ViewfinderView extends View {
             paint.setStrokeWidth(6f);
 
             if (maskVisibility){
-                paint.setColor(maskColor);
-
-                canvas.drawRect(0, 0, width, frame.top, paint);
-                canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-                canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-                canvas.drawRect(0, frame.bottom + 1, width, height, paint);
-
+                if (!isShow){
+                    paint.setPathEffect(null);
+                    paint.setColor(maskColor);
+                    canvas.drawRect(0, 0, width, frame.top, paint);
+                    canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
+                    canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
+                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+                }
             }else {
                 if (rRectVisibility){
+                    paint.setPathEffect(null);
                     paint.setColor(maskColor);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
@@ -330,4 +370,11 @@ public class ViewfinderView extends View {
     public void shouldRoundRectMaskVisible(boolean visibility){
         this.rRectVisibility = visibility;
     }
+
+    private Boolean isShow = false;
+
+    public void isResultShown(boolean isShow){
+        this.isShow = isShow;
+    }
+
 }
