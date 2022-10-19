@@ -35,6 +35,10 @@ import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
 import com.kazumaproject7.qrcodescanner.other.AppPreferences
 import com.kazumaproject7.qrcodescanner.other.Constants
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
@@ -80,6 +84,30 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     @SuppressLint("ClickableViewAccessibility", "RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val window = requireActivity().window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        when (context?.resources?.configuration?.uiMode?.and(
+            Configuration.UI_MODE_NIGHT_MASK)) {
+            Configuration.UI_MODE_NIGHT_YES -> {
+                binding.resultDisplayBar.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
+                binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+                binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.gray))
+                binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
+            }
+            Configuration.UI_MODE_NIGHT_NO -> {
+                binding.resultDisplayBar.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+                binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
+                binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray))
+                binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+            }
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                binding.resultDisplayBar.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+                binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
+                binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray))
+                binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+            }
+        }
 
         if (!allPermissionsGranted()){
             ActivityCompat.requestPermissions(requireActivity(),
@@ -782,6 +810,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                     binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                                                     viewModel.updateIsResultBottomBarShow(false)
                                                     binding.barcodeView.viewFinder.isResultShown(false)
+
+                                                    val scannedResult = ScannedResult(
+                                                        scannedString = result.text,
+                                                        scannedStringType = TYPE_URL,
+                                                        scannedCodeType = TYPE_QR_CODE,
+                                                        System.currentTimeMillis()
+                                                    )
+                                                    viewModel.insertScannedResult(scannedResult)
                                                 }
                                                 binding.resultDisplayBar.setOnClickListener {
                                                     viewModel.scannedString.value?.let{ text ->
@@ -854,6 +890,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         binding.resultActionBtn.setOnClickListener {
                                             shareText(result.text)
                                             binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = result.text,
+                                                scannedStringType = TYPE_TEXT,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
                                             viewModel.scannedString.value?.let{ text ->
@@ -870,6 +914,38 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 }
                             } else {
                                 // Barcode
+                                binding.progressResultTitle.visibility = View.GONE
+                                binding.resultSubText.text = ""
+                                binding.resultActionBtn.text = "Share"
+                                binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.barcode))
+                                viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.barcode))
+                                binding.resultTitleText.text = result.text
+
+                                binding.barcodeView.viewFinder.isResultShown(true)
+
+                                binding.resultActionBtn.setOnClickListener {
+                                    shareText(result.text)
+                                    binding.barcodeView.viewFinder.isResultShown(false)
+
+                                    val scannedResult = ScannedResult(
+                                        scannedString = result.text,
+                                        scannedStringType = TYPE_TEXT,
+                                        scannedCodeType = TYPE_BAR_CODE,
+                                        System.currentTimeMillis()
+                                    )
+                                    viewModel.insertScannedResult(scannedResult)
+                                }
+                                binding.resultDisplayBar.setOnClickListener {
+                                    viewModel.scannedString.value?.let{ text ->
+                                        textCopyThenPost(text)
+                                        binding.resultDisplayBar.visibility = View.GONE
+                                        binding.barcodeView.targetView.isVisible = true
+                                        binding.barcodeView.viewFinder.setLaserVisibility(true)
+                                        binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                                        viewModel.updateIsResultBottomBarShow(false)
+                                        binding.barcodeView.viewFinder.isResultShown(false)
+                                    }
+                                }
                             }
                         }
                     }
