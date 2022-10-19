@@ -94,18 +94,21 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
                 binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.gray))
                 binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
+                binding.resultImgLogo.backgroundTintList =ContextCompat.getColorStateList(requireContext(), R.color.off_white)
             }
             Configuration.UI_MODE_NIGHT_NO -> {
                 binding.resultDisplayBar.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.off_white))
                 binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
                 binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray))
                 binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+                binding.resultImgLogo.backgroundTintList =ContextCompat.getColorStateList(requireContext(), R.color.dark_gray2)
             }
             Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                 binding.resultDisplayBar.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.off_white))
                 binding.resultTitleText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray2))
                 binding.resultSubText.setTextColor(ContextCompat.getColor(requireContext(),R.color.dark_gray))
                 binding.resultActionBtn.setTextColor(ContextCompat.getColor(requireContext(),R.color.off_white))
+                binding.resultImgLogo.backgroundTintList =ContextCompat.getColorStateList(requireContext(), R.color.dark_gray2)
             }
         }
 
@@ -820,15 +823,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                     viewModel.insertScannedResult(scannedResult)
                                                 }
                                                 binding.resultDisplayBar.setOnClickListener {
-                                                    viewModel.scannedString.value?.let{ text ->
-                                                        textCopyThenPost(text)
-                                                        binding.resultDisplayBar.visibility = View.GONE
-                                                        binding.barcodeView.targetView.isVisible = true
-                                                        binding.barcodeView.viewFinder.setLaserVisibility(true)
-                                                        binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                                                        viewModel.updateIsResultBottomBarShow(false)
-                                                        binding.barcodeView.viewFinder.isResultShown(false)
-                                                    }
+
                                                 }
                                             }
 
@@ -880,15 +875,15 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     else ->{
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultSubText.text = ""
-                                        binding.resultActionBtn.text = "Share"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
-                                        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        //viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.baseline_content_copy_24))
                                         binding.resultTitleText.text = result.text
 
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
                                         binding.resultActionBtn.setOnClickListener {
-                                            shareText(result.text)
+                                            textCopyThenPost(result.text)
                                             binding.barcodeView.viewFinder.isResultShown(false)
 
                                             val scannedResult = ScannedResult(
@@ -900,15 +895,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             viewModel.insertScannedResult(scannedResult)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-                                            viewModel.scannedString.value?.let{ text ->
-                                                textCopyThenPost(text)
-                                                binding.resultDisplayBar.visibility = View.GONE
-                                                binding.barcodeView.targetView.isVisible = true
-                                                binding.barcodeView.viewFinder.setLaserVisibility(true)
-                                                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                                                viewModel.updateIsResultBottomBarShow(false)
-                                                binding.barcodeView.viewFinder.isResultShown(false)
-                                            }
+
                                         }
                                     }
                                 }
@@ -916,15 +903,15 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 // Barcode
                                 binding.progressResultTitle.visibility = View.GONE
                                 binding.resultSubText.text = ""
-                                binding.resultActionBtn.text = "Share"
-                                binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.barcode))
-                                viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.barcode))
+                                binding.resultActionBtn.text = "Copy"
+                                binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                //viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.baseline_content_copy_24))
                                 binding.resultTitleText.text = result.text
 
                                 binding.barcodeView.viewFinder.isResultShown(true)
 
                                 binding.resultActionBtn.setOnClickListener {
-                                    shareText(result.text)
+                                    textCopyThenPost(result.text)
                                     binding.barcodeView.viewFinder.isResultShown(false)
 
                                     val scannedResult = ScannedResult(
@@ -936,15 +923,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     viewModel.insertScannedResult(scannedResult)
                                 }
                                 binding.resultDisplayBar.setOnClickListener {
-                                    viewModel.scannedString.value?.let{ text ->
-                                        textCopyThenPost(text)
-                                        binding.resultDisplayBar.visibility = View.GONE
-                                        binding.barcodeView.targetView.isVisible = true
-                                        binding.barcodeView.viewFinder.setLaserVisibility(true)
-                                        binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                                        viewModel.updateIsResultBottomBarShow(false)
-                                        binding.barcodeView.viewFinder.isResultShown(false)
-                                    }
+
                                 }
                             }
                         }
