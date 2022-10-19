@@ -884,6 +884,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             textCopyThenPost(result.text)
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
                                             binding.barcodeView.viewFinder.isResultShown(false)
 
                                             val scannedResult = ScannedResult(
@@ -912,6 +914,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                 binding.resultActionBtn.setOnClickListener {
                                     textCopyThenPost(result.text)
+                                    binding.resultDisplayBar.visibility = View.GONE
+                                    viewModel.updateIsResultBottomBarShow(false)
                                     binding.barcodeView.viewFinder.isResultShown(false)
 
                                     val scannedResult = ScannedResult(
