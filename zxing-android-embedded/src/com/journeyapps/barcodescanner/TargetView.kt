@@ -40,7 +40,7 @@ open class TargetView(
         context
     }
 
-    private val margin: Float = 120f
+    private val margin: Float = 150f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -116,7 +116,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
-            strokeWidth = 8f
+            strokeWidth = 12f
         }
     }
 
@@ -125,8 +125,8 @@ open class TargetView(
     }
 
     private fun expandedAnimation() {
-        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 1.1f, 0.98f)
-        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 1.1f, 0.98f)
+        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 1.03f, 0.98f)
+        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 1.03f, 0.98f)
 
         objectAnimator = ObjectAnimator.ofPropertyValuesHolder(this, expandedScaleX, expandedScaleY).apply {
             duration = 1000

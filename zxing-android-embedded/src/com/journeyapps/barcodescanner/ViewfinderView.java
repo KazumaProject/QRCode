@@ -212,7 +212,8 @@ public class ViewfinderView extends View {
             paint.setColor(laserColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(6f);
+            paint.setPathEffect(new CornerPathEffect(90));
+            paint.setStrokeWidth(10f);
             if (resultPoints.size() >= 3){
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
                         (int)(resultPoints.get(0).getX() - 50),
@@ -223,6 +224,15 @@ public class ViewfinderView extends View {
 
                 //canvas.drawRect(rect,paint);
                 drawSmallTarget(canvas,paint,rect);
+
+                paint.setColor(maskColor);
+                paint.setStyle(Paint.Style.FILL);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    paint.setPathEffect(null);
+                    canvas.drawRoundRect(rect.left + 10,rect.top + 10,rect.right - 10,rect.bottom - 10,20f,20f,paint);
+                }
+
             } else {
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
                         (int)(resultPoints.get(0).getX() - 50),
@@ -232,6 +242,14 @@ public class ViewfinderView extends View {
                 );
                 //canvas.drawRect(rect,paint);
                 drawSmallTarget(canvas,paint,rect);
+
+                paint.setColor(maskColor);
+                paint.setStyle(Paint.Style.FILL);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    paint.setPathEffect(null);
+                    canvas.drawRoundRect(rect.left,rect.top,rect.right,rect.bottom,20f,20f,paint);
+                }
             }
 
 

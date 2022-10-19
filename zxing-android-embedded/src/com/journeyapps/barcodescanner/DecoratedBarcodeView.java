@@ -140,14 +140,14 @@ public class DecoratedBarcodeView extends FrameLayout {
             display.getMetrics(metrics);
 
             if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                int width = (int) (metrics.widthPixels / 1.8);
-                int height = (int) (metrics.heightPixels / 3.5);
+                int width = (int) (metrics.widthPixels / 1.1);
+                int height = (int) (metrics.heightPixels / 2.1);
                 ViewGroup.LayoutParams params = targetView.getLayoutParams();
                 params.width = width;
                 params.height = height;
             } else if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-                int width = (int) (metrics.widthPixels / 1.5);
-                int height = (int) (metrics.heightPixels / 1.5);
+                int width = (int) (metrics.widthPixels / 1.05);
+                int height = (int) (metrics.heightPixels / 1.12);
                 ViewGroup.LayoutParams params = targetView.getLayoutParams();
                 params.width = width;
                 params.height = height;
