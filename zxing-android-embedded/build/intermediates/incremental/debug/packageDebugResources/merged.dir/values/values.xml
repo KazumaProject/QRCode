@@ -4,6 +4,8 @@
     <color name="zxing_custom_result_view">#b0000000</color>
     <color name="zxing_custom_viewfinder_laser">#1976D2</color>
     <color name="zxing_custom_viewfinder_mask">#60000000</color>
+    <color name="zxing_laser">#D84339</color>
+    <color name="zxing_off_white">#f2f0f4</color>
     <color name="zxing_possible_result_points">#c0ffbd21</color>
     <color name="zxing_result_view">#b0000000</color>
     <color name="zxing_status_text">#ffffffff</color>

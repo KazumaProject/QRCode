@@ -70,6 +70,9 @@ public class ViewfinderView extends View {
     protected int maskColor;
     protected final int resultColor;
     protected final int laserColor;
+
+    protected final int targetColor;
+
     protected final int resultPointColor;
     protected boolean laserVisibility;
     protected int scannerAlpha;
@@ -101,7 +104,9 @@ public class ViewfinderView extends View {
         this.resultColor = attributes.getColor(R.styleable.zxing_finder_zxing_result_view,
                 resources.getColor(R.color.zxing_result_view));
         this.laserColor = attributes.getColor(R.styleable.zxing_finder_zxing_viewfinder_laser,
-                resources.getColor(R.color.zxing_viewfinder_laser));
+                resources.getColor(R.color.zxing_laser));
+        this.targetColor = attributes.getColor(R.styleable.zxing_finder_zxing_viewfinder_laser,
+                resources.getColor(R.color.zxing_off_white));
         this.resultPointColor = attributes.getColor(R.styleable.zxing_finder_zxing_possible_result_points,
                 resources.getColor(R.color.zxing_possible_result_points));
         this.laserVisibility = attributes.getBoolean(R.styleable.zxing_finder_zxing_viewfinder_laser_visibility,
@@ -209,7 +214,7 @@ public class ViewfinderView extends View {
 
         if (resultPoints != null) {
             // Draw the opaque result bitmap over the scanning rectangle
-            paint.setColor(laserColor);
+            paint.setColor(targetColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
             paint.setPathEffect(new CornerPathEffect(90));
@@ -238,7 +243,7 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(0).getX() - 50),
                         (int)(resultPoints.get(1).getY() - 30),
                         (int)(resultPoints.get(1).getX() + 80),
-                        (int)(resultPoints.get(0).getY() + 100)
+                        (int)(resultPoints.get(0).getY() + 128)
                 );
                 //canvas.drawRect(rect,paint);
                 drawSmallTarget(canvas,paint,rect);
@@ -260,12 +265,18 @@ public class ViewfinderView extends View {
 
             if (maskVisibility){
                 if (!isShow){
-                    paint.setPathEffect(null);
-                    paint.setColor(maskColor);
-                    canvas.drawRect(0, 0, width, frame.top, paint);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        Path path2 = new Path();
+                        paint.setPathEffect(null);
+                        path2.addRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,Path.Direction.CW);
+                        path2.setFillType(Path.FillType.INVERSE_WINDING);
+                        paint.setColor(maskColor);
+                        canvas.drawPath(path2,paint);
+                    }
+                    /*canvas.drawRect(0, 0, width, frame.top, paint);
                     canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
                     canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);*/
                 }
             }else {
                 if (rRectVisibility){

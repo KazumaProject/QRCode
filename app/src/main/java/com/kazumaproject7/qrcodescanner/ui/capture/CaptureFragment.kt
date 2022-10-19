@@ -210,8 +210,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         viewModel.isResultBottomBarShow.observe(viewLifecycleOwner){
             if (!it){
                 binding.barcodeView.targetView.isVisible = true
-                binding.barcodeView.viewFinder.setLaserVisibility(true)
                 binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                if (AppPreferences.isHorizontalLineVisible){
+                    binding.barcodeView.viewFinder.setLaserVisibility(true)
+                }
             }
         }
 
@@ -809,7 +811,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                                     binding.resultDisplayBar.visibility = View.GONE
                                                     binding.barcodeView.targetView.isVisible = true
-                                                    binding.barcodeView.viewFinder.setLaserVisibility(true)
+
                                                     binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                                                     viewModel.updateIsResultBottomBarShow(false)
                                                     binding.barcodeView.viewFinder.isResultShown(false)

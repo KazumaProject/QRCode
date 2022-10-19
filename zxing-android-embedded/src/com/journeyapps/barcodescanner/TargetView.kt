@@ -13,6 +13,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.google.zxing.client.android.R
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 open class TargetView(
@@ -115,7 +116,7 @@ open class TargetView(
     private fun setupPaint(): Paint {
         return Paint().apply {
             isAntiAlias = true
-            color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
+            color = ContextCompat.getColor(c, R.color.zxing_off_white)
             strokeWidth = 12f
         }
     }
