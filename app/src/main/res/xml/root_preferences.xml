@@ -15,7 +15,7 @@
         <SwitchPreference
             app:key="camera_horizontal_line_visibility_key"
             app:title="Horizontal line visibility"
-            app:defaultValue="true"/>
+            app:defaultValue="false"/>
 
     </PreferenceCategory>
 

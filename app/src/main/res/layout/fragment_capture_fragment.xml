@@ -41,7 +41,8 @@
                     android:layout_height="50dp"
                     app:layout_constraintBottom_toBottomOf="@+id/result_title_text"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:indeterminateTint="@color/blue"/>
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/result_title_text"
