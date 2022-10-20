@@ -30,6 +30,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
+import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
@@ -131,6 +132,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             showCenterCrossLine(binding.barcodeView)
         }
 
+
+        if (!binding.barcodeView.cameraSettings.isContinuousFocusEnabled){
+            binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.CONTINUOUS
+        }
+
         val formats = listOf(
             BarcodeFormat.QR_CODE,
             BarcodeFormat.AZTEC,
@@ -160,7 +166,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         binding.resultDisplayBar.visibility = View.GONE
                         viewModel.updateIsResultBottomBarShow(false)
                         binding.barcodeView.viewFinder.isResultShown(false)
+                    } else {
+                        if (!binding.barcodeView.cameraSettings.isAutoFocusEnabled || !binding.barcodeView.cameraSettings.isContinuousFocusEnabled){
+                            binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.AUTO
+                        }
+
                     }
+
                 }
 
 

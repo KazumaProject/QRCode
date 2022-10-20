@@ -11,7 +11,7 @@ public class CameraSettings {
     private boolean barcodeSceneModeEnabled = false;
     private boolean meteringEnabled = false;
     private boolean autoFocusEnabled = true;
-    private boolean continuousFocusEnabled = false;
+    private boolean continuousFocusEnabled = true;
     private boolean exposureEnabled = false;
     private boolean autoTorchEnabled = false;
     private FocusMode focusMode = FocusMode.AUTO;
