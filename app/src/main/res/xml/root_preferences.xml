@@ -5,7 +5,7 @@
         <SwitchPreference
             app:key="camera_mask_key"
             app:title="Mask visibility"
-            app:defaultValue="false"/>
+            app:defaultValue="true"/>
 
         <SwitchPreference
             app:key="camera_cross_visibility_key"
