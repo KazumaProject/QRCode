@@ -34,13 +34,12 @@ import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
-import com.kazumaproject7.qrcodescanner.other.AppPreferences
-import com.kazumaproject7.qrcodescanner.other.Constants
+import com.kazumaproject7.qrcodescanner.other.*
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
-import com.kazumaproject7.qrcodescanner.other.ScannedStringType
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -270,7 +269,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
                                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                                     }
-                                    resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
+                                    resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA")->{
                                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
                                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -308,7 +307,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                                     }
-                                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") ->{
                                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
                                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -482,7 +481,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
                                     viewModel.updateScannedStringType(ScannedStringType.SMS)
                                 }
-                                resultText.contains("Wifi:") || resultText.contains("WIFI:")->{
+                                resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA")->{
                                     viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                 }
                                 lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -518,7 +517,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                                     viewModel.updateScannedStringType(ScannedStringType.SMS)
                                 }
-                                lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                                lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA")->{
                                     viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                 }
                                 lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -570,7 +569,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                     }
-                    lastText.contains("Wifi:") || lastText.contains("WIFI:")->{
+                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || lastText.contains("EN:WPA")->{
                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                     }
                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -886,12 +885,44 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             }
                                         }
                                     }
+
+                                    is ScannedStringType.Wifi ->{
+                                        val wifi_string = result.text
+
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        binding.resultTitleText.text = wifi_string.getWifiSSID()
+                                        binding.resultSubText.text = wifi_string.getWifiPassword()
+
+                                        binding.resultActionBtn.setOnClickListener {
+                                            textCopyThenPost(wifi_string.getWifiPassword())
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = "SSID: ${wifi_string.getWifiSSID()}\nPassword: ${wifi_string.getWifiPassword()}",
+                                                scannedStringType = TYPE_WIFI,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+
+                                        }
+
+                                    }
+
                                     else ->{
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultSubText.text = ""
                                         binding.resultActionBtn.text = "Copy"
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
-                                        //viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.baseline_content_copy_24))
+
                                         binding.resultTitleText.text = result.text
 
                                         binding.barcodeView.viewFinder.isResultShown(true)

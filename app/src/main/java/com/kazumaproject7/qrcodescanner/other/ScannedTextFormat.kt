@@ -208,6 +208,9 @@ fun String.getWifiSSID():String{
         6 ->{
             str[3].replace(";P","")
         }
+        5 ->{
+            str[2]
+        }
         else ->{
             ""
         }
@@ -220,8 +223,27 @@ fun String.getWifiPassword():String{
         6 ->{
             str[4].replace(";H","")
         }
+        5 ->{
+            if (str[4].contains(";")){
+                str[4].replace(";","")
+            }else{
+                str[4]
+            }
+        }
         else ->{
             ""
+        }
+    }
+}
+
+fun String.getWifiStringInHistory(): String{
+    val str = this.split(":")
+    return when(str.size){
+        3 ->{
+            str[2]
+        }
+        else ->{
+            this
         }
     }
 }

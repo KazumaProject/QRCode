@@ -19,6 +19,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
+import com.kazumaproject7.qrcodescanner.other.getWifiSSID
+import com.kazumaproject7.qrcodescanner.other.getWifiStringInHistory
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -57,24 +61,33 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                 layoutManager = LinearLayoutManager(requireContext())
                 ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
                 a.setOnItemClickListener {
-                    if (it.scannedStringType == "type_url"){
-                        MaterialAlertDialogBuilder(requireContext(),R.style.CustomAlertDialog)
-                            .setTitle("Open Web Site")
-                            .setMessage("URL: ${it.scannedString}")
-                            .setPositiveButton("Open"){
-                                    _, _ ->
-                                val intent =
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(it.scannedString))
-                                val chooser =
-                                    Intent.createChooser(intent, "Open ${it.scannedString}")
-                                requireActivity().startActivity(chooser)
-                            }
-                            .setNegativeButton("Cancel"
-                            ) { p0, _ -> p0?.dismiss() }
-                            .show()
-                    } else {
-                        textCopyThenPost(it.scannedString)
+                    when(it.scannedStringType){
+                        TYPE_URL ->{
+                            MaterialAlertDialogBuilder(requireContext(),R.style.CustomAlertDialog)
+                                .setTitle("Open Web Site")
+                                .setMessage("URL: ${it.scannedString}")
+                                .setPositiveButton("Open"){
+                                        _, _ ->
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(it.scannedString))
+                                    val chooser =
+                                        Intent.createChooser(intent, "Open ${it.scannedString}")
+                                    requireActivity().startActivity(chooser)
+                                }
+                                .setNegativeButton("Cancel"
+                                ) { p0, _ -> p0?.dismiss() }
+                                .show()
+                        }
+
+                        TYPE_WIFI ->{
+                            textCopyThenPost(it.scannedString.getWifiStringInHistory())
+                        }
+
+                        else ->{
+                            textCopyThenPost(it.scannedString)
+                        }
                     }
+
                 }
                 a.setOnItemLongClickListener {
                     shareText(it.scannedString)
