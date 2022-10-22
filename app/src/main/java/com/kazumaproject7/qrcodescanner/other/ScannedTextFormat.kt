@@ -209,7 +209,11 @@ fun String.getWifiSSID():String{
             str[3].replace(";P","")
         }
         5 ->{
-            str[2]
+            if (str[2].contains(";T")){
+                str[2].replace(";T","")
+            }else {
+                str[2]
+            }
         }
         else ->{
             ""

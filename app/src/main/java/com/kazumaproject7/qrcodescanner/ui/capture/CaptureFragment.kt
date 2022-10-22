@@ -8,11 +8,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -34,12 +32,15 @@ import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
-import com.kazumaproject7.qrcodescanner.other.*
+import com.kazumaproject7.qrcodescanner.other.AppPreferences
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
+import com.kazumaproject7.qrcodescanner.other.ScannedStringType
+import com.kazumaproject7.qrcodescanner.other.getWifiPassword
+import com.kazumaproject7.qrcodescanner.other.getWifiSSID
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -269,7 +270,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
                                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                                     }
-                                    resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA")->{
+                                    resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
                                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
                                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -307,7 +308,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                                     }
-                                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") ->{
+                                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
                                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                     }
                                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -481,7 +482,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
                                     viewModel.updateScannedStringType(ScannedStringType.SMS)
                                 }
-                                resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA")->{
+                                resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
                                     viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                 }
                                 lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -517,7 +518,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                                     viewModel.updateScannedStringType(ScannedStringType.SMS)
                                 }
-                                lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA")->{
+                                lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
                                     viewModel.updateScannedStringType(ScannedStringType.Wifi)
                                 }
                                 lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
@@ -569,7 +570,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
                         viewModel.updateScannedStringType(ScannedStringType.SMS)
                     }
-                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || lastText.contains("EN:WPA")->{
+                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || lastText.contains("EN:WPA") || lastText.contains(":WPA")->{
                         viewModel.updateScannedStringType(ScannedStringType.Wifi)
                     }
                     lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
