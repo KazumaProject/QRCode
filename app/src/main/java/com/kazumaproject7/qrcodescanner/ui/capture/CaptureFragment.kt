@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.hardware.Camera
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +29,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
+import com.journeyapps.barcodescanner.camera.CameraParametersCallback
 import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
@@ -132,7 +134,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             showCenterCrossLine(binding.barcodeView)
         }
 
-
         if (!binding.barcodeView.cameraSettings.isContinuousFocusEnabled){
             binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.CONTINUOUS
         }
@@ -197,18 +198,26 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         binding.barcodeView.barcodeView.scaleX = deltaScale
                         binding.barcodeView.barcodeView.scaleY = deltaScale
                         delta = deltaScale
+
+                        binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
                     }
-                } else {
+                } else  {
                     val deltaScale = delta + (detector.scaleFactor - 1f)
                     Timber.d("Scaled: $deltaScale")
-                    if (deltaScale >= 1f){
+                    if (deltaScale in 1f..8.0f){
                         binding.barcodeView.barcodeView.scaleX = deltaScale
                         binding.barcodeView.barcodeView.scaleY = deltaScale
                         delta = deltaScale
+
+                        binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
                     }
                 }
-
                 return super.onScale(detector)
+            }
+
+            override fun onScaleEnd(detector: ScaleGestureDetector) {
+                super.onScaleEnd(detector)
+
             }
 
         })

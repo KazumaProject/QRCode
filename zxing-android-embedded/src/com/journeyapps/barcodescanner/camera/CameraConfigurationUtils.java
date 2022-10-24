@@ -228,7 +228,7 @@ public final class CameraConfigurationUtils {
         }
     }
 
-    public static void setZoom(Camera.Parameters parameters, double targetZoomRatio) {
+    public static void setZoom(Camera.Parameters parameters, double targetZoomRatio, Camera camera) {
         if (parameters.isZoomSupported()) {
             Integer zoom = indexOfClosestZoom(parameters, targetZoomRatio);
             if (zoom == null) {
@@ -239,6 +239,7 @@ public final class CameraConfigurationUtils {
             } else {
                 Log.i(TAG, "Setting zoom to " + zoom);
                 parameters.setZoom(zoom);
+                camera.setParameters(parameters);
             }
         } else {
             Log.i(TAG, "Zoom is not supported");

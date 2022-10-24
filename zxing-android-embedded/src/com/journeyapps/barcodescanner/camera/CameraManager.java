@@ -477,6 +477,11 @@ public final class CameraManager {
         }
     }
 
+    public void setZoomCamera(double targetZoomRatio, Camera camera){
+        Camera.Parameters parameters = camera.getParameters();
+        CameraConfigurationUtils.setZoom(parameters,targetZoomRatio, camera);
+    }
+
     /**
      * Changes the settings for Camera.
      *

@@ -116,7 +116,6 @@ public class DecoratedBarcodeView extends FrameLayout {
         // Pass on any preview-related attributes
         barcodeView.initializeAttributes(attrs);
 
-
         viewFinder = findViewById(R.id.zxing_viewfinder_view);
         targetView = findViewById(R.id.target_view);
 
@@ -218,7 +217,6 @@ public class DecoratedBarcodeView extends FrameLayout {
     public CameraSettings getCameraSettings() {
         return barcodeView.getCameraSettings();
     }
-
 
     /**
      * @see BarcodeView#pause()
@@ -329,7 +327,6 @@ public class DecoratedBarcodeView extends FrameLayout {
     public void setTorchListener(TorchListener listener) {
         this.torchListener = listener;
     }
-
     /**
      * The Listener to torch/fflashlight events (turn on, turn off).
      */
