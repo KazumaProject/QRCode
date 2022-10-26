@@ -16,6 +16,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
@@ -31,6 +32,8 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.EnumMap
+import java.util.Objects
 
 @AndroidEntryPoint
 class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
@@ -122,27 +125,29 @@ class GenerateFragment : BaseFragment(R.layout.fragment_generate) {
 
                 try {
                     val barcodeEncoder = BarcodeEncoder()
+                    val hint = EnumMap<EncodeHintType, String>(EncodeHintType::class.java)
+                    hint[EncodeHintType.CHARACTER_SET] = "shiftjis"
                     viewModel.spinnerSelectedPosition.value?.let { pos ->
                         Timber.d("generate pos: $pos")
                         when(pos){
-                            0 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.QR_CODE,size,size)
-                            1 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.AZTEC,size,size)
-                            2 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODABAR,size,size)
-                            3 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_39,size,size)
-                            4 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_93,size,size)
-                            5 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_128,size,size)
-                            6 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.DATA_MATRIX,size,size)
-                            7 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.EAN_8,size,size)
-                            8 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.EAN_13,size,size)
-                            9 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.ITF,size,size)
-                            10 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.MAXICODE,size,size)
-                            11 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.PDF_417,size,size)
-                            12 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.RSS_14,size,size)
-                            13 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.RSS_EXPANDED,size,size)
-                            14 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_A,size,size)
-                            15 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_E,size,size)
-                            16 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_EAN_EXTENSION,size,size)
-                            else -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.QR_CODE,size,size)
+                            0 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.QR_CODE,size,size,hint)
+                            1 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.AZTEC,size,size,hint)
+                            2 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODABAR,size,size,hint)
+                            3 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_39,size,size,hint)
+                            4 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_93,size,size,hint)
+                            5 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.CODE_128,size,size,hint)
+                            6 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.DATA_MATRIX,size,size,hint)
+                            7 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.EAN_8,size,size,hint)
+                            8 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.EAN_13,size,size,hint)
+                            9 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.ITF,size,size,hint)
+                            10 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.MAXICODE,size,size,hint)
+                            11 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.PDF_417,size,size,hint)
+                            12 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.RSS_14,size,size,hint)
+                            13 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.RSS_EXPANDED,size,size,hint)
+                            14 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_A,size,size,hint)
+                            15 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_E,size,size,hint)
+                            16 -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.UPC_EAN_EXTENSION,size,size,hint)
+                            else -> bitmap = barcodeEncoder.encodeBitmap(data,BarcodeFormat.QR_CODE,size,size,hint)
                         }
                     }
 
