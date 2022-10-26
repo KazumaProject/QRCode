@@ -52,7 +52,7 @@
 
                </io.github.florent37.shapeofview.shapes.ArcView>
 
-               <io.github.florent37.shapeofview.shapes.RoundRectView
+               <androidx.constraintlayout.widget.ConstraintLayout
                    android:id="@+id/round_rect"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
@@ -278,7 +278,7 @@
                        </LinearLayout>
                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-               </io.github.florent37.shapeofview.shapes.RoundRectView>
+               </androidx.constraintlayout.widget.ConstraintLayout>
 
            </androidx.constraintlayout.widget.ConstraintLayout>
 

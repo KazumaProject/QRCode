@@ -76,7 +76,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         super.onViewCreated(view, savedInstanceState)
 
         var barcodeBitmap: Bitmap? = null
-        //barcodeBitmap = arguments?.getParcelable<Bitmap>("barcodeImage")
         viewModel.scannedBitmap.value?.let {
             barcodeBitmap = it
         }
