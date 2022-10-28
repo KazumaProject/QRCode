@@ -168,9 +168,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         viewModel.updateIsResultBottomBarShow(false)
                         binding.barcodeView.viewFinder.isResultShown(false)
                     } else {
-                        if (!binding.barcodeView.cameraSettings.isAutoFocusEnabled || !binding.barcodeView.cameraSettings.isContinuousFocusEnabled){
-                            binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.AUTO
-                        }
+                        binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.AUTO
 
                     }
 
@@ -195,8 +193,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 if (delta == 0f){
                     val deltaScale = detector.scaleFactor
                     if (deltaScale >= 1f){
-                        binding.barcodeView.barcodeView.scaleX = deltaScale
-                        binding.barcodeView.barcodeView.scaleY = deltaScale
+                        /*binding.barcodeView.barcodeView.scaleX = deltaScale
+                        binding.barcodeView.barcodeView.scaleY = deltaScale*/
                         delta = deltaScale
 
                         binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
@@ -205,8 +203,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     val deltaScale = delta + (detector.scaleFactor - 1f)
                     Timber.d("Scaled: $deltaScale")
                     if (deltaScale in 1f..8.0f){
-                        binding.barcodeView.barcodeView.scaleX = deltaScale
-                        binding.barcodeView.barcodeView.scaleY = deltaScale
+                        /*binding.barcodeView.barcodeView.scaleX = deltaScale
+                        binding.barcodeView.barcodeView.scaleY = deltaScale*/
                         delta = deltaScale
 
                         binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)

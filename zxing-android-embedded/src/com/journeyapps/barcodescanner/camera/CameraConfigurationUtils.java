@@ -237,7 +237,8 @@ public final class CameraConfigurationUtils {
             if (parameters.getZoom() == zoom) {
                 Log.i(TAG, "Zoom is already set to " + zoom);
             } else {
-                Log.i(TAG, "Setting zoom to " + zoom);
+                Log.i(TAG, "Setting zoom to Scaled " + zoom);
+                Log.i(TAG, "Setting zoom to target " + targetZoomRatio);
                 parameters.setZoom(zoom);
                 camera.setParameters(parameters);
             }
