@@ -204,11 +204,16 @@ fun String.getSMSMessage():String{
 
 fun String.getWifiSSID():String{
     val str = this.split(";" ).toTypedArray()
-    for(i in str.indices){
-        if(str[i].contains("S:")){
-            return str[i].replace("S:","")
-        } else if(str[i].contains("SSID")){
-            return str[i].replace("SSID","")
+    if(str.size >= 3){
+        for(i in str.indices){
+            if(str[i].contains("S:")){
+                if(str[i].contains("WIFI:")){
+                    return str[i].replace("WIFI:","").replace("S:","")
+                }
+                return str[i].replace("S:","")
+            } else if(str[i].contains("SSID")){
+                return str[i].replace("SSID","")
+            }
         }
     }
     val str2 = this.split(":" ).toTypedArray()
@@ -219,7 +224,10 @@ fun String.getWifiSSID():String{
         5 ->{
             if (str2[2].contains(";T")){
                 str2[2].replace(";T","")
-            }else {
+            } else if ((str2[2].substring(str2[2].length - 2)) == "EN" && str2[2].length >= 2){
+                str2[2].replace("EN","")
+            }
+            else {
                 str2[2]
             }
         }
@@ -231,14 +239,16 @@ fun String.getWifiSSID():String{
 
 fun String.getWifiPassword():String{
     val str = this.split(";" ).toTypedArray()
-    for(i in str.indices){
-        if(str[i].contains("P:")){
-            return str[i].replace("P:","")
-        } else if(str[i].contains("PASSWORD")){
-            return str[i].replace("PASSWORD","")
+    if(str.size >= 3){
+        for(i in str.indices){
+            if(str[i].contains("P:")){
+                return str[i].replace("P:","")
+            } else if(str[i].contains("PASSWORD")){
+                return str[i].replace("PASSWORD","")
+            }
         }
     }
-    val str2 = this.split("" ).toTypedArray()
+    val str2 = this.split(":" ).toTypedArray()
     return when(str2.size){
         6 ->{
             str2[4].replace(";H","")
