@@ -21,6 +21,7 @@ import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
 import com.kazumaproject7.qrcodescanner.other.*
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_CRYPTOCURRENCY
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL1
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL2
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
@@ -94,6 +95,10 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
 
                         TYPE_SMS ->{
                             textCopyThenPost(it.scannedString.getSMSNumberHistory())
+                        }
+
+                        TYPE_CRYPTOCURRENCY ->{
+                            textCopyThenPost(it.scannedString.getCryptocurrencyAddress())
                         }
 
                         else ->{
@@ -255,6 +260,10 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                             }
                             requireActivity().startActivity(intent)
 
+                        }
+
+                        TYPE_CRYPTOCURRENCY ->{
+                            shareText(it.scannedString.getCryptocurrencyAddress())
                         }
 
                         else ->{

@@ -1175,6 +1175,33 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                     }
 
+                                    is ScannedStringType.Cryptocurrency ->{
+                                        val scannedString = result.text
+
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        binding.resultTitleText.text = scannedString.getCryptocurrencyType()
+                                        binding.resultSubText.text = scannedString.getCryptocurrencyAddress()
+
+                                        binding.resultActionBtn.setOnClickListener {
+                                            textCopyThenPost(scannedString.getCryptocurrencyAddress())
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = scannedString,
+                                                scannedStringType = Constants.TYPE_CRYPTOCURRENCY,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                    }
+
                                     else ->{
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultSubText.text = ""

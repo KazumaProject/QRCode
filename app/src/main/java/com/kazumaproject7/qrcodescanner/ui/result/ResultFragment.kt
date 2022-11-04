@@ -315,7 +315,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                     }
                     is ScannedStringType.Cryptocurrency ->{
-                        Timber.d("Cryptocurrency: $scannedString")
                         binding.swipeToRefreshResult.apply {
                             setOnRefreshListener {
                                 isRefreshing = false
