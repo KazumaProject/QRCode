@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,9 +25,11 @@ import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL1
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL2
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_VCARD
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import ezvcard.Ezvcard
 
 @AndroidEntryPoint
 class HistoryFragment : BaseFragment(R.layout.fragment_history) {
@@ -122,6 +125,136 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                                 it.scannedString.getSMSNumberHistory(),
                                 it.scannedString.getSMSMessageHistory()
                             )
+                        }
+
+                        TYPE_VCARD ->{
+                            val scannedString = it.scannedString
+
+                            val vCard = Ezvcard.parse(scannedString).first()
+                            var vcardName = ""
+                            vCard?.formattedName?.value?.let { name ->
+                                vcardName = name
+                            }
+                            if(vCard?.formattedName == null){
+                                vcardName = scannedString.getVcardName()
+                            }
+                            var vcardNumber = ""
+                            var vcardPhoneNumber = ""
+                            var vcardFax = ""
+                            if(vCard.telephoneNumbers.size >= 1){
+                                for(i in 0 until vCard.telephoneNumbers.size){
+                                    when(vCard.telephoneNumbers[i].parameters.type){
+                                        "CELL" ->{
+                                            vcardNumber = vCard.telephoneNumbers[i].text
+                                        }
+                                        "WORK" ->{
+                                            vcardPhoneNumber = vCard.telephoneNumbers[i].text
+                                        }
+                                        "FAX" ->{
+                                            vcardFax = vCard.telephoneNumbers[i].text
+                                        }
+                                    }
+                                }
+                            }
+                            var vcardEmail = ""
+                            if(vCard.emails.size >= 1){
+                                vCard.emails[0]?.value?.let { email ->
+                                    vcardEmail = email
+                                }
+                            }
+
+                            var vcardStreet = ""
+                            var vcardCity= ""
+                            var vcardState = ""
+                            var vcardCountry = ""
+                            var vcardZip = ""
+
+                            if(vCard.addresses.size >= 1){
+                                vCard.addresses[0]?.let { address ->
+                                    address.streetAddress?.let { street_address ->
+                                        vcardStreet = street_address
+                                    }
+                                    if(address.localities.size >= 1){
+                                        address.localities[0]?.let { city ->
+                                            vcardCity = city
+                                        }
+                                    }
+                                    if(address.regions.size >= 1){
+                                        address.regions[0]?.let { state ->
+                                            vcardState = state
+                                        }
+                                    }
+                                    if(address.countries.size >= 1){
+                                        address.countries[0]?.let { country ->
+                                            vcardCountry = country
+                                        }
+                                    }
+                                    if(address.postalCodes.size >= 1){
+                                        address.postalCodes[0]?.let { postal ->
+                                            vcardZip = postal
+                                        }
+                                    }
+                                }
+                            }
+
+                            var vcardCompany = ""
+
+                            if(vCard.organizations.size >= 1){
+                                vCard.organizations[0]?.let { org ->
+                                    if(org.values.size >= 1){
+                                        org.values[0]?.let { comp_name ->
+                                            vcardCompany = comp_name
+                                        }
+                                    }
+                                }
+                            }
+
+                            var vcardTitle = ""
+
+                            if(vCard.titles.size >= 1){
+                                vCard.titles[0]?.let { title ->
+                                    vcardTitle = title.value
+                                }
+                            }
+
+                            var vcardWebsite = ""
+
+                            if(vCard.urls.size >= 1){
+                                vCard.urls[0]?.let { url ->
+                                    vcardWebsite = url.value
+                                }
+                            }
+
+                            val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                                type = ContactsContract.RawContacts.CONTENT_TYPE
+                                if(vcardName != ""){
+                                    putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
+                                }
+                                if(vcardNumber != ""){
+                                    putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
+                                }
+                                if(vcardPhoneNumber != ""){
+                                    putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
+                                }
+                                if(vcardFax != ""){
+                                    putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
+                                }
+                                if(vcardEmail != ""){
+                                    putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
+                                }
+                                if(vcardCompany != ""){
+                                    putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
+                                }
+                                if(vcardTitle != ""){
+                                    putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
+                                }
+                                putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
+                                if(vcardWebsite != ""){
+                                    putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
+                                }
+                            }
+                            requireActivity().startActivity(intent)
+
                         }
 
                         else ->{

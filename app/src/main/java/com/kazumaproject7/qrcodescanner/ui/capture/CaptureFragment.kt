@@ -15,6 +15,7 @@ import android.hardware.Camera
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.view.*
 import android.webkit.URLUtil
@@ -42,10 +43,12 @@ import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_VCARD
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import ezvcard.Ezvcard
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import timber.log.Timber
@@ -1013,6 +1016,162 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         binding.resultDisplayBar.setOnClickListener {
 
                                         }
+
+                                    }
+
+                                    is ScannedStringType.VCard ->{
+                                        val scannedString = result.text
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Open"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_contacts_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        val vCard = Ezvcard.parse(scannedString).first()
+                                        var vcardName = ""
+                                        vCard?.formattedName?.value?.let { name ->
+                                            vcardName = name
+                                        }
+                                        if(vCard?.formattedName == null){
+                                            vcardName = scannedString.getVcardName()
+                                        }
+                                        var vcardNumber = ""
+                                        var vcardPhoneNumber = ""
+                                        var vcardFax = ""
+                                        if(vCard.telephoneNumbers.size >= 1){
+                                            for(i in 0 until vCard.telephoneNumbers.size){
+                                                when(vCard.telephoneNumbers[i].parameters.type){
+                                                    "CELL" ->{
+                                                        vcardNumber = vCard.telephoneNumbers[i].text
+                                                    }
+                                                    "WORK" ->{
+                                                        vcardPhoneNumber = vCard.telephoneNumbers[i].text
+                                                    }
+                                                    "FAX" ->{
+                                                        vcardFax = vCard.telephoneNumbers[i].text
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        var vcardEmail = ""
+                                        if(vCard.emails.size >= 1){
+                                            vCard.emails[0]?.value?.let { email ->
+                                                vcardEmail = email
+                                            }
+                                        }
+
+                                        var vcardStreet = ""
+                                        var vcardCity= ""
+                                        var vcardState = ""
+                                        var vcardCountry = ""
+                                        var vcardZip = ""
+
+                                        if(vCard.addresses.size >= 1){
+                                            vCard.addresses[0]?.let { address ->
+                                                address.streetAddress?.let { street_address ->
+                                                    vcardStreet = street_address
+                                                }
+                                                if(address.localities.size >= 1){
+                                                    address.localities[0]?.let { city ->
+                                                        vcardCity = city
+                                                    }
+                                                }
+                                                if(address.regions.size >= 1){
+                                                    address.regions[0]?.let { state ->
+                                                        vcardState = state
+                                                    }
+                                                }
+                                                if(address.countries.size >= 1){
+                                                    address.countries[0]?.let { country ->
+                                                        vcardCountry = country
+                                                    }
+                                                }
+                                                if(address.postalCodes.size >= 1){
+                                                    address.postalCodes[0]?.let { postal ->
+                                                        vcardZip = postal
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        var vcardCompany = ""
+
+                                        if(vCard.organizations.size >= 1){
+                                            vCard.organizations[0]?.let { org ->
+                                                if(org.values.size >= 1){
+                                                    org.values[0]?.let { comp_name ->
+                                                        vcardCompany = comp_name
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        var vcardTitle = ""
+
+                                        if(vCard.titles.size >= 1){
+                                            vCard.titles[0]?.let { title ->
+                                                vcardTitle = title.value
+                                            }
+                                        }
+
+                                        var vcardWebsite = ""
+
+                                        if(vCard.urls.size >= 1){
+                                            vCard.urls[0]?.let { url ->
+                                                vcardWebsite = url.value
+                                            }
+                                        }
+
+                                        binding.resultTitleText.text = vcardName
+                                        binding.resultSubText.text = "VCard Version: ${vCard.version.version}"
+
+                                        binding.resultActionBtn.setOnClickListener {
+
+                                            val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                                                type = ContactsContract.RawContacts.CONTENT_TYPE
+                                                if(vcardName != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
+                                                }
+                                                if(vcardNumber != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
+                                                }
+                                                if(vcardPhoneNumber != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
+                                                }
+                                                if(vcardFax != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
+                                                }
+                                                if(vcardEmail != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
+                                                }
+                                                if(vcardCompany != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
+                                                }
+                                                if(vcardTitle != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
+                                                }
+                                                putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
+                                                if(vcardWebsite != ""){
+                                                    putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
+                                                }
+                                            }
+                                            requireActivity().startActivity(intent)
+
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = result.text,
+                                                scannedStringType = TYPE_VCARD,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+
+                                        }
+
 
                                     }
 
