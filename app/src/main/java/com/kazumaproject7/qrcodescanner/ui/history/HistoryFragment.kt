@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -114,7 +115,12 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                         }
 
                         TYPE_WIFI ->{
-                            shareText(it.scannedString.getWifiStringInHistory())
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                textCopyThenPost(it.scannedString.getWifiStringInHistory())
+                                requireContext().startActivity(Intent(Settings.Panel.ACTION_WIFI))
+                            } else {
+                                shareText(it.scannedString.getWifiStringInHistory())
+                            }
                         }
 
                         TYPE_EMAIL1, TYPE_EMAIL2 ->{

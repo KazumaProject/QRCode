@@ -11,12 +11,12 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.hardware.Camera
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.provider.MediaStore
+import android.provider.Settings
 import android.view.*
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,7 +30,6 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
-import com.journeyapps.barcodescanner.camera.CameraParametersCallback
 import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
@@ -171,7 +170,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         viewModel.updateIsResultBottomBarShow(false)
                         binding.barcodeView.viewFinder.isResultShown(false)
                     } else {
-                        binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.AUTO
+                        binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.MACRO
 
                     }
 
@@ -1012,6 +1011,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                                requireContext().startActivity(Intent(Settings.Panel.ACTION_WIFI))
+                                            }
+
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
 
