@@ -50,6 +50,7 @@ class OpenSourceLicenseFragment : BaseFragment(R.layout.fragment_open_sorce_lice
             "org.jsoup:jsoup:1.13.1",
             "com.github.ibrahimsn98:SmoothBottomBar:1.7.9",
             "io.github.florent37:shapeofview:1.4.7",
+            "com.googlecode.ez-vcard:ez-vcard:0.11.3"
         )
 
         const val ZXING_LICENSE = "Copyright (C) 2012-201 ZXing authors, Journey Mobile\n" +
@@ -303,7 +304,36 @@ class OpenSourceLicenseFragment : BaseFragment(R.layout.fragment_open_sorce_lice
                 "   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
                 "   See the License for the specific language governing permissions and\n" +
                 "   limitations under the License."
+
+        const val EZVCARD = "Copyright (c) 2012-2021, Michael Angstadt\n" +
+                "All rights reserved.\n" +
+                "\n" +
+                "Redistribution and use in source and binary forms, with or without\n" +
+                "modification, are permitted provided that the following conditions are met: \n" +
+                "\n" +
+                "1. Redistributions of source code must retain the above copyright notice, this\n" +
+                "   list of conditions and the following disclaimer. \n" +
+                "2. Redistributions in binary form must reproduce the above copyright notice,\n" +
+                "   this list of conditions and the following disclaimer in the documentation\n" +
+                "   and/or other materials provided with the distribution. \n" +
+                "\n" +
+                "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n" +
+                "ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n" +
+                "WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n" +
+                "DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR\n" +
+                "ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n" +
+                "(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n" +
+                "LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n" +
+                "ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n" +
+                "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n" +
+                "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n" +
+                "\n" +
+                "The views and conclusions contained in the software and documentation are those\n" +
+                "of the authors and should not be interpreted as representing official policies, \n" +
+                "either expressed or implied, of the FreeBSD Project."
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -338,6 +368,9 @@ class OpenSourceLicenseFragment : BaseFragment(R.layout.fragment_open_sorce_lice
                     }
                     25 ->{
                         createDialog(SHAPE_OF_VIEW_LICENSE)
+                    }
+                    26 ->{
+                        createDialog(EZVCARD)
                     }
                     else ->{
                         createDialog(APACHE_LICENSE)
