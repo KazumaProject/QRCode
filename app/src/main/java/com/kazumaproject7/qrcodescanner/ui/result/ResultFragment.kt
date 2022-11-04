@@ -257,7 +257,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = "SMS: ${scannedString.getSMSNumber()}\nMessage: ${scannedString.getSMSMessage()}",
                                 scannedStringType = TYPE_SMS,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
