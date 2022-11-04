@@ -448,28 +448,15 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 vcardWebsite = url.value
                             }
                         }
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
 
                         viewModel.insertScannedResult(
                             ScannedResult(
                                 scannedString = scannedString,
-=======
-
-                        viewModel.insertScannedResult(
-                            ScannedResult(
-                                scannedString = "Name: $vcardName\nPhone: $vcardNumber\nCell: $vcardPhoneNumber\nFax: $vcardFax\nEmail: $vcardEmail\n Company: $vcardCompany\nTitle: $vcardTitle\nStreet: $vcardStreet\nCity: $vcardCity\nState: $vcardState\nCountry: $vcardCountry\nZIP: $vcardZip\nWeb: $vcardWebsite",
->>>>>>> c8c8ea036da4f3f91516529f6b641e34b050d9f0
                                 scannedStringType = TYPE_VCARD,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
 
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> c8c8ea036da4f3f91516529f6b641e34b050d9f0
                         binding.vcardParent.vcardNameContent.text = vcardName
                         binding.vcardParent.vcardMobileContent.text = vcardNumber
                         binding.vcardParent.vcardWorkPhoneContent.text = vcardPhoneNumber
