@@ -851,9 +851,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             try {
                                                 val document = Jsoup.connect(result.text).get()
                                                 val img = document.select("img").first()
-                                                val imgSrc = img.absUrl("src")
+                                                val imgSrc = img?.absUrl("src")
                                                 val title = document.title()
-                                                title?.let {
+                                                title.let {
                                                     withContext(Dispatchers.Main) {
                                                         binding.resultTitleText.text = it
                                                         binding.progressResultTitle.visibility = View.GONE

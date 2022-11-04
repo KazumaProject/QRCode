@@ -38,6 +38,7 @@ import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import ezvcard.Ezvcard
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import timber.log.Timber
@@ -359,20 +360,74 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 System.currentTimeMillis()
                             ))
                         binding.vcardParent.vcardParentView.visibility = View.VISIBLE
-                        Timber.d("Vcard Text: $scannedString")
-                        val vcardName = scannedString.getVcardName()
-                        val vcardNumber = scannedString.getVcardMobileNumber()
-                        val vcardPhoneNumber = scannedString.getVcardWorkPhoneNumber()
-                        val vcardFax = scannedString.getVcardFaxNumber()
-                        val vcardEmail = scannedString.getVcardEmail()
-                        val vcardStreet = scannedString.getVcardStreet()
-                        val vcardCity= scannedString.getVcardCity()
-                        val vcardState = scannedString.getVcardState()
-                        val vcardCountry = scannedString.getVcardCountry()
-                        val vcardZip = scannedString.getVcardZip()
-                        val vcardCompany = scannedString.getVcardCompanyName()
-                        val vcardTitle = scannedString.getVcardCompanyTitle()
-                        val vcardWebsite = scannedString.getVcardWebsite()
+                        val vCard = Ezvcard.parse(scannedString).first()
+                        val vcardName = vCard.formattedName.value
+                        var vcardNumber = ""
+                        var vcardPhoneNumber = ""
+                        var vcardFax = ""
+                        for(i in 0 until vCard.telephoneNumbers.size){
+                            when(vCard.telephoneNumbers[i].parameters.type){
+                                "CELL" ->{
+                                    vcardNumber = vCard.telephoneNumbers[i].text
+                                }
+                                "WORK" ->{
+                                    vcardPhoneNumber = vCard.telephoneNumbers[i].text
+                                }
+                                "FAX" ->{
+                                    vcardFax = vCard.telephoneNumbers[i].text
+                                }
+                            }
+                        }
+                        var vcardEmail = ""
+                        vCard.emails[0].value?.let { email ->
+                            vcardEmail = email
+                        }
+
+                        for(i in 0 until vCard.urls.size){
+                            Timber.d("Vcard address $i: ${vCard.urls[i]}")
+                        }
+
+                        var vcardStreet = ""
+                        var vcardCity= ""
+                        var vcardState = ""
+                        var vcardCountry = ""
+                        var vcardZip = ""
+
+                        vCard.addresses[0]?.let { address ->
+                            vcardStreet = address.streetAddress
+                            address.localities[0]?.let { city ->
+                                vcardCity = city
+                            }
+                            address.regions[0]?.let { state ->
+                                vcardState = state
+                            }
+                            address.countries[0]?.let { country ->
+                                vcardCountry = country
+                            }
+                            address.postalCodes[0]?.let { postal ->
+                                vcardZip = postal
+                            }
+                        }
+
+                        var vcardCompany = ""
+
+                        vCard.organizations[0]?.let { org ->
+                            org.values[0]?.let { comp_name ->
+                                vcardCompany = comp_name
+                            }
+                        }
+
+                        var vcardTitle = ""
+
+                        vCard.titles[0]?.let { title ->
+                            vcardTitle = title.value
+                        }
+
+                        var vcardWebsite = ""
+
+                        vCard.urls[0]?.let { url ->
+                            vcardWebsite = url.value
+                        }
                         binding.vcardParent.vcardNameContent.text = vcardName
                         binding.vcardParent.vcardMobileContent.text = vcardNumber
                         binding.vcardParent.vcardWorkPhoneContent.text = vcardPhoneNumber
@@ -466,9 +521,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             try {
                 val document = Jsoup.connect(scannedString).get()
                 val img = document.select("img").first()
-                val imgSrc = img.absUrl("src")
+                val imgSrc = img?.absUrl("src")
                 val title = document.title()
-                title?.let {
+                title.let {
                     withContext(Dispatchers.Main) {
                         binding.textUrlTitleText.text = it
                         binding.urlTitleProgress.visibility = View.GONE
