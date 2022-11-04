@@ -4,11 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.ProgressBar
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -67,6 +69,7 @@ class ScannedResultAdapter(
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onBindViewHolder(holder: ScannedResultViewHolder, position: Int) {
         val scannedResult = scannedResults[position]
         val scannedResultText = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_text)
@@ -173,7 +176,7 @@ class ScannedResultAdapter(
         try {
             val document = Jsoup.connect(scannedString).get()
             val img = document.select("img").first()
-            val imgSrc = img.absUrl("src")
+            val imgSrc = img?.absUrl("src")
             val input: InputStream =  URL(imgSrc).openStream()
             val bitmap = BitmapFactory.decodeStream(input)
             bitmap?.let {
