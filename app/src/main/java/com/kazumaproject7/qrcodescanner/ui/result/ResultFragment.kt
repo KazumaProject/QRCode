@@ -163,7 +163,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = "Email: ${scannedString.getEmailEmailTypeOne()}\nSubject: ${scannedString.getSubjectEmailTypeOne()}\nMessage: ${scannedString.getMessageEmailTypeOne()}",
                                 scannedStringType = TYPE_EMAIL1,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
@@ -212,7 +212,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = "Email: ${scannedString.getEmailEmailTypeTwo()}\nSubject: ${scannedString.getEmailSubjectTypeTwo()}\nMessage: ${scannedString.getEmailMessageTypeTwo()}",
                                 scannedStringType = TYPE_EMAIL2,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
@@ -289,7 +289,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = "SSID: ${scannedString.getWifiSSID()}\nPassword: ${scannedString.getWifiPassword()}",
                                 scannedStringType = TYPE_WIFI,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
