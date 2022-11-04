@@ -34,15 +34,15 @@ import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
-import com.kazumaproject7.qrcodescanner.other.AppPreferences
+import com.kazumaproject7.qrcodescanner.other.*
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL1
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL2
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_TEXT
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
-import com.kazumaproject7.qrcodescanner.other.ScannedStringType
-import com.kazumaproject7.qrcodescanner.other.getWifiPassword
-import com.kazumaproject7.qrcodescanner.other.getWifiSSID
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -892,6 +892,97 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 }
                                             }
                                         }
+                                    }
+
+                                    is ScannedStringType.EMail ->{
+                                        val email_string = result.text
+
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
+                                        binding.resultSubText.text = email_string.getMessageEmailTypeOne()
+
+                                        binding.resultActionBtn.setOnClickListener {
+                                            textCopyThenPost(email_string.getEmailEmailTypeOne())
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = "Email: ${email_string.getEmailEmailTypeOne()}\nSubject: ${email_string.getSubjectEmailTypeOne()}\nMessage: ${email_string.getMessageEmailTypeOne()}",
+                                                scannedStringType = TYPE_EMAIL1,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+
+                                        }
+                                    }
+
+                                    is ScannedStringType.EMail2 ->{
+                                        val email_string = result.text
+
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        binding.resultTitleText.text = email_string.getEmailEmailTypeTwo()
+                                        binding.resultSubText.text = email_string.getEmailMessageTypeTwo()
+
+                                        binding.resultActionBtn.setOnClickListener {
+                                            textCopyThenPost(email_string.getEmailEmailTypeTwo())
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = "Email: ${email_string.getEmailEmailTypeTwo()}\nSubject: ${email_string.getEmailSubjectTypeTwo()}\nMessage: ${email_string.getEmailMessageTypeTwo()}",
+                                                scannedStringType = TYPE_EMAIL2,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+
+                                        }
+                                    }
+
+                                    is ScannedStringType.SMS ->{
+                                        val sms_string = result.text
+
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+
+                                        binding.resultTitleText.text = sms_string.getSMSNumber()
+                                        binding.resultSubText.text = sms_string.getSMSMessage()
+
+                                        binding.resultActionBtn.setOnClickListener {
+                                            textCopyThenPost(sms_string.getSMSNumber())
+                                            binding.resultDisplayBar.visibility = View.GONE
+                                            viewModel.updateIsResultBottomBarShow(false)
+                                            binding.barcodeView.viewFinder.isResultShown(false)
+
+                                            val scannedResult = ScannedResult(
+                                                scannedString = "SMS: ${sms_string.getSMSNumber()}\nMessage: ${sms_string.getSMSMessage()}",
+                                                scannedStringType = TYPE_SMS,
+                                                scannedCodeType = TYPE_QR_CODE,
+                                                System.currentTimeMillis()
+                                            )
+                                            viewModel.insertScannedResult(scannedResult)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+
+                                        }
+
                                     }
 
                                     is ScannedStringType.Wifi ->{

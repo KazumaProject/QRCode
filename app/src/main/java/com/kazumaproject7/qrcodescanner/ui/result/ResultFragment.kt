@@ -268,10 +268,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         binding.smsParent.smsTextMessage.text = smsMessage
                         binding.smsParent.openSmsBtn.setOnClickListener {
                             toggleButtonColor(binding.smsParent.openSmsBtn)
-                            val smsIntent = Intent(Intent.ACTION_SENDTO)
-                            smsIntent.data = Uri.fromParts("sms",smsNumber,null)
-                            smsIntent.putExtra(Intent.EXTRA_TEXT,smsMessage)
-                            requireActivity().startActivity(Intent.createChooser(smsIntent, "Send sms message..."))
+                            createSMSIntent(smsNumber, smsMessage)
                         }
                         binding.smsParent.smsShareBtn.setOnClickListener {
                             toggleButtonColor(binding.smsParent.smsShareBtn)
@@ -554,6 +551,16 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         // Only show a toast for Android 12 and lower.
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
             showSnackBar("Copied $textCopied")
+    }
+
+    private fun createSMSIntent(smsNumber: String, message: String){
+        val intent = Intent(
+            Intent.ACTION_VIEW, Uri.parse(
+                "sms:$smsNumber"
+            )
+        )
+        intent.putExtra("sms_body", message)
+        requireActivity().startActivity(intent)
     }
 
 }

@@ -19,10 +19,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.adapter.ScannedResultAdapter
 import com.kazumaproject7.qrcodescanner.databinding.FragmentHistoryBinding
+import com.kazumaproject7.qrcodescanner.other.*
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL1
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_EMAIL2
+import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_SMS
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_URL
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_WIFI
-import com.kazumaproject7.qrcodescanner.other.getWifiSSID
-import com.kazumaproject7.qrcodescanner.other.getWifiStringInHistory
 import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -83,6 +85,14 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
                             textCopyThenPost(it.scannedString.getWifiStringInHistory())
                         }
 
+                        TYPE_EMAIL1, TYPE_EMAIL2 ->{
+                            textCopyThenPost(it.scannedString.getEmailEmailTypeOneHistory())
+                        }
+
+                        TYPE_SMS ->{
+                            textCopyThenPost(it.scannedString.getSMSNumberHistory())
+                        }
+
                         else ->{
                             textCopyThenPost(it.scannedString)
                         }
@@ -90,7 +100,35 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
 
                 }
                 a.setOnItemLongClickListener {
-                    shareText(it.scannedString)
+                    when(it.scannedStringType){
+                        TYPE_URL ->{
+                            shareText(it.scannedString)
+                        }
+
+                        TYPE_WIFI ->{
+                            shareText(it.scannedString.getWifiStringInHistory())
+                        }
+
+                        TYPE_EMAIL1, TYPE_EMAIL2 ->{
+                            createEmailIntent(
+                                it.scannedString.getEmailEmailTypeOneHistory(),
+                                it.scannedString.getEmailSubjectTypeOneHistory(),
+                                it.scannedString.getEmailMessageTypeOneHistory()
+                            )
+                        }
+
+                        TYPE_SMS ->{
+                            createSMSIntent(
+                                it.scannedString.getSMSNumberHistory(),
+                                it.scannedString.getSMSMessageHistory()
+                            )
+                        }
+
+                        else ->{
+                            shareText(it.scannedString)
+                        }
+                    }
+
                 }
             }
         }
@@ -148,6 +186,25 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
         // Only show a toast for Android 12 and lower.
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
             showSnackBar("Copied $textCopied")
+    }
+
+    private fun createEmailIntent(email: String, subject: String, message: String){
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse("mailto:")
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+        emailIntent.putExtra(Intent.EXTRA_TEXT, message)
+        requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+    }
+
+    private fun createSMSIntent(smsNumber: String, message: String){
+        val intent = Intent(
+            Intent.ACTION_VIEW, Uri.parse(
+                "sms:$smsNumber"
+            )
+        )
+        intent.putExtra("sms_body", message)
+        requireActivity().startActivity(intent)
     }
 
 }

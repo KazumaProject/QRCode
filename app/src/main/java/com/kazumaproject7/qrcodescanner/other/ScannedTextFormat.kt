@@ -29,6 +29,21 @@ fun String.getMessageEmailTypeOne(): String {
     }
 }
 
+fun String.getEmailEmailTypeOneHistory(): String {
+    val str = this.split(":" ).toTypedArray()
+    return str[1].replace("Subject","")
+}
+
+fun String.getEmailSubjectTypeOneHistory(): String {
+    val str = this.split(":" ).toTypedArray()
+    return str[2].replace("Message","")
+}
+
+fun String.getEmailMessageTypeOneHistory(): String {
+    val str = this.split(":" ).toTypedArray()
+    return str[3]
+}
+
 fun String.getEmailEmailTypeTwo():String{
     if (this.contains("?body=") || this.contains("&subject=")){
         when{
@@ -201,6 +216,17 @@ fun String.getSMSMessage():String{
         }
     }
 }
+
+fun String.getSMSNumberHistory():String{
+    val str = this.split(":" ).toTypedArray()
+    return str[1].replace("Message","")
+}
+
+fun String.getSMSMessageHistory():String{
+    val str = this.split(":" ).toTypedArray()
+    return str[2]
+}
+
 
 fun String.getWifiSSID():String{
     val str = this.split(";" ).toTypedArray()
