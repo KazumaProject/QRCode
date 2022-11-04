@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -352,39 +353,38 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             }
                             isNestedScrollingEnabled = true
                         }
-                        viewModel.insertScannedResult(
-                            ScannedResult(
-                                scannedString = scannedString,
-                                scannedStringType = TYPE_VCARD,
-                                scannedCodeType = TYPE_QR_CODE,
-                                System.currentTimeMillis()
-                            ))
                         binding.vcardParent.vcardParentView.visibility = View.VISIBLE
                         val vCard = Ezvcard.parse(scannedString).first()
-                        val vcardName = vCard.formattedName.value
+                        var vcardName = ""
+                        vCard?.formattedName?.value?.let { name ->
+                            vcardName = name
+                        }
+                        if(vCard?.formattedName == null){
+                            vcardName = scannedString.getVcardName()
+                        }
                         var vcardNumber = ""
                         var vcardPhoneNumber = ""
                         var vcardFax = ""
-                        for(i in 0 until vCard.telephoneNumbers.size){
-                            when(vCard.telephoneNumbers[i].parameters.type){
-                                "CELL" ->{
-                                    vcardNumber = vCard.telephoneNumbers[i].text
-                                }
-                                "WORK" ->{
-                                    vcardPhoneNumber = vCard.telephoneNumbers[i].text
-                                }
-                                "FAX" ->{
-                                    vcardFax = vCard.telephoneNumbers[i].text
+                        if(vCard.telephoneNumbers.size >= 1){
+                            for(i in 0 until vCard.telephoneNumbers.size){
+                                when(vCard.telephoneNumbers[i].parameters.type){
+                                    "CELL" ->{
+                                        vcardNumber = vCard.telephoneNumbers[i].text
+                                    }
+                                    "WORK" ->{
+                                        vcardPhoneNumber = vCard.telephoneNumbers[i].text
+                                    }
+                                    "FAX" ->{
+                                        vcardFax = vCard.telephoneNumbers[i].text
+                                    }
                                 }
                             }
                         }
                         var vcardEmail = ""
-                        vCard.emails[0].value?.let { email ->
-                            vcardEmail = email
-                        }
-
-                        for(i in 0 until vCard.urls.size){
-                            Timber.d("Vcard address $i: ${vCard.urls[i]}")
+                        if(vCard.emails.size >= 1){
+                            vCard.emails[0]?.value?.let { email ->
+                                vcardEmail = email
+                            }
                         }
 
                         var vcardStreet = ""
@@ -393,53 +393,83 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         var vcardCountry = ""
                         var vcardZip = ""
 
-                        vCard.addresses[0]?.let { address ->
-                            vcardStreet = address.streetAddress
-                            address.localities[0]?.let { city ->
-                                vcardCity = city
-                            }
-                            address.regions[0]?.let { state ->
-                                vcardState = state
-                            }
-                            address.countries[0]?.let { country ->
-                                vcardCountry = country
-                            }
-                            address.postalCodes[0]?.let { postal ->
-                                vcardZip = postal
+                        if(vCard.addresses.size >= 1){
+                            vCard.addresses[0]?.let { address ->
+                                address.streetAddress?.let { street_address ->
+                                    vcardStreet = street_address
+                                }
+                                if(address.localities.size >= 1){
+                                    address.localities[0]?.let { city ->
+                                        vcardCity = city
+                                    }
+                                }
+                                if(address.regions.size >= 1){
+                                    address.regions[0]?.let { state ->
+                                        vcardState = state
+                                    }
+                                }
+                                if(address.countries.size >= 1){
+                                    address.countries[0]?.let { country ->
+                                        vcardCountry = country
+                                    }
+                                }
+                                if(address.postalCodes.size >= 1){
+                                    address.postalCodes[0]?.let { postal ->
+                                        vcardZip = postal
+                                    }
+                                }
                             }
                         }
 
                         var vcardCompany = ""
 
-                        vCard.organizations[0]?.let { org ->
-                            org.values[0]?.let { comp_name ->
-                                vcardCompany = comp_name
+                        if(vCard.organizations.size >= 1){
+                            vCard.organizations[0]?.let { org ->
+                                if(org.values.size >= 1){
+                                    org.values[0]?.let { comp_name ->
+                                        vcardCompany = comp_name
+                                    }
+                                }
                             }
                         }
 
                         var vcardTitle = ""
 
-                        vCard.titles[0]?.let { title ->
-                            vcardTitle = title.value
+                        if(vCard.titles.size >= 1){
+                            vCard.titles[0]?.let { title ->
+                                vcardTitle = title.value
+                            }
                         }
 
                         var vcardWebsite = ""
 
-                        vCard.urls[0]?.let { url ->
-                            vcardWebsite = url.value
+                        if(vCard.urls.size >= 1){
+                            vCard.urls[0]?.let { url ->
+                                vcardWebsite = url.value
+                            }
                         }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 
                         viewModel.insertScannedResult(
                             ScannedResult(
                                 scannedString = scannedString,
+=======
+
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = "Name: $vcardName\nPhone: $vcardNumber\nCell: $vcardPhoneNumber\nFax: $vcardFax\nEmail: $vcardEmail\n Company: $vcardCompany\nTitle: $vcardTitle\nStreet: $vcardStreet\nCity: $vcardCity\nState: $vcardState\nCountry: $vcardCountry\nZIP: $vcardZip\nWeb: $vcardWebsite",
+>>>>>>> c8c8ea036da4f3f91516529f6b641e34b050d9f0
                                 scannedStringType = TYPE_VCARD,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
 
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> c8c8ea036da4f3f91516529f6b641e34b050d9f0
                         binding.vcardParent.vcardNameContent.text = vcardName
                         binding.vcardParent.vcardMobileContent.text = vcardNumber
                         binding.vcardParent.vcardWorkPhoneContent.text = vcardPhoneNumber
@@ -453,6 +483,37 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         binding.vcardParent.vcardCountryContent.text = vcardCountry
                         binding.vcardParent.vcardZipContent.text = vcardZip
                         binding.vcardParent.vcardWebsiteContent.text = vcardWebsite
+
+                        val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                            type = ContactsContract.RawContacts.CONTENT_TYPE
+                            if(vcardName != ""){
+                                putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
+                            }
+                            if(vcardNumber != ""){
+                                putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
+                            }
+                            if(vcardPhoneNumber != ""){
+                                putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
+                            }
+                            if(vcardFax != ""){
+                                putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
+                            }
+                            if(vcardEmail != ""){
+                                putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
+                            }
+                            if(vcardCompany != ""){
+                                putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
+                            }
+                            if(vcardTitle != ""){
+                                putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
+                            }
+                            putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
+                            if(vcardWebsite != ""){
+                                putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
+                            }
+                        }
+                        requireActivity().startActivity(intent)
+
                     }
                     is ScannedStringType.Text ->{
                         binding.textParent.visibility = View.VISIBLE
