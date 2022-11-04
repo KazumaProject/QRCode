@@ -425,10 +425,8 @@ fun String.getVcardName():String {
         .replace("VERSION:3.0","")
         .replace("END:VCARD","")
         .replace(" ","")
-    Timber.d("Vcard Text1 $str")
     val str2 = str.split("\n").toTypedArray()
     str2.forEach {
-        Timber.d("Vcard text1: $it")
         when{
             it.contains("N:")->{
                 return it.replace("N:","").replace(";"," ")
