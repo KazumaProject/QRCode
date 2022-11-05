@@ -11,7 +11,6 @@ import android.os.Build
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
@@ -179,7 +178,6 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
             Toast.makeText(requireContext().applicationContext,"Copied $textCopied",Toast.LENGTH_LONG).show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("RestrictedApi")
     fun toggleButtonColor(btn: AppCompatButton){
         CoroutineScope(Dispatchers.Main).launch {
@@ -200,7 +198,6 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("RestrictedApi")
     fun toggleImageButtonColor(btn: AppCompatImageButton){
         CoroutineScope(Dispatchers.Main).launch {
@@ -265,7 +262,6 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
     }
 
     inline val Fragment.windowHeight: Int
-        @RequiresApi(Build.VERSION_CODES.M)
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val metrics = requireActivity().windowManager.currentWindowMetrics
@@ -280,7 +276,6 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         }
 
     inline val Fragment.windowWidth: Int
-        @RequiresApi(Build.VERSION_CODES.M)
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val metrics = requireActivity().windowManager.currentWindowMetrics

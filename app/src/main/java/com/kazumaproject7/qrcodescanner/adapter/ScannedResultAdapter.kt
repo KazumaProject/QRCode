@@ -4,13 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.ProgressBar
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -21,17 +19,15 @@ import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_BAR_CODE
 import com.kazumaproject7.qrcodescanner.other.Constants.TYPE_QR_CODE
-import com.kazumaproject7.qrcodescanner.other.getVcardFaxNumber
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
-import timber.log.Timber
 import java.io.InputStream
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Flow
 
 class ScannedResultAdapter(
     private val context: Context,
@@ -69,7 +65,6 @@ class ScannedResultAdapter(
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onBindViewHolder(holder: ScannedResultViewHolder, position: Int) {
         val scannedResult = scannedResults[position]
         val scannedResultText = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_text)

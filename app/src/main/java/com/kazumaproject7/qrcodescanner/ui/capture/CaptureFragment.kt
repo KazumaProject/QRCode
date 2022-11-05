@@ -20,7 +20,6 @@ import android.provider.Settings
 import android.view.*
 import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
@@ -84,8 +83,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         _binding = FragmentCaptureFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
-
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility", "RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -559,7 +556,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private val callback = object : BarcodeCallback {
 
-        @RequiresApi(Build.VERSION_CODES.M)
         override fun barcodeResult(result: BarcodeResult?) {
             if (result?.text == null || result.text == lastText) {
                 return
@@ -609,7 +605,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun startResultFragment(result: BarcodeResult){
         try {
             val height: Int = windowHeight
