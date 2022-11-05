@@ -895,7 +895,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         val email_string = result.text
 
                                         binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultActionBtn.text = "Open"
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
@@ -930,7 +930,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         val email_string = result.text
 
                                         binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultActionBtn.text = "Open"
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
@@ -960,7 +960,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         val sms_string = result.text
 
                                         binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultActionBtn.text = "Open"
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
@@ -992,7 +992,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         val wifi_string = result.text
 
                                         binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Copy"
+                                        binding.resultActionBtn.text = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                                            "OPEN"
+                                        } else {
+                                            "COPY"
+                                        }
                                         binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
