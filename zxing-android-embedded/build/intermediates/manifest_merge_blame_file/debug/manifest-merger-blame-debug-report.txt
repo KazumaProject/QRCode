@@ -18,9 +18,9 @@
 18    package="com.google.zxing.client.android" >
 19
 20    <uses-sdk
-21        android:minSdkVersion="19"
+21        android:minSdkVersion="24"
 21-->C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
-22        android:targetSdkVersion="19" />
+22        android:targetSdkVersion="24" />
 22-->C:\Users\Kazum\AndroidStudioProjects\QRCode\zxing-android-embedded\AndroidManifest.xml
 23
 24    <application>

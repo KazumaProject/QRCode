@@ -1,14 +1,11 @@
 package com.kazumaproject7.qrcodescanner.services
 
 import android.content.Intent
-import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import androidx.annotation.RequiresApi
 import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 
-@RequiresApi(Build.VERSION_CODES.N)
 class MyQSTileService : TileService(){
 
     override fun onStartListening() {

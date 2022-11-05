@@ -8,14 +8,11 @@ import android.graphics.Canvas
 import android.graphics.CornerPathEffect
 import android.graphics.Paint
 import android.graphics.Path
-import android.os.Build
 import android.util.AttributeSet
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.google.zxing.client.android.R
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 open class TargetView(
     context: Context,
     attrs: AttributeSet?,
