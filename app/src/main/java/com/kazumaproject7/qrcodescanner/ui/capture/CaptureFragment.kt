@@ -896,7 +896,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
                                         binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
@@ -931,7 +931,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
                                         binding.resultTitleText.text = email_string.getEmailEmailTypeTwo()
@@ -961,7 +961,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.progressResultTitle.visibility = View.GONE
                                         binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_sms_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
                                         binding.resultTitleText.text = sms_string.getSMSNumber()
@@ -997,7 +997,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         } else {
                                             "COPY"
                                         }
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_wifi_24))
                                         binding.barcodeView.viewFinder.isResultShown(true)
 
                                         binding.resultTitleText.text = wifi_string.getWifiSSID()
