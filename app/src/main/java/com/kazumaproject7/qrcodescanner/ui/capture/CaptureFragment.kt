@@ -903,7 +903,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         binding.resultSubText.text = email_string.getMessageEmailTypeOne()
 
                                         binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(email_string.getEmailEmailTypeOne())
+                                            createEmailIntent(
+                                                email_string.getEmailEmailTypeOne(),
+                                                email_string.getSubjectEmailTypeOne(),
+                                                email_string.getMessageEmailTypeOne()
+                                            )
+                                            //textCopyThenPost(email_string.getEmailEmailTypeOne())
                                             binding.resultDisplayBar.visibility = View.GONE
                                             viewModel.updateIsResultBottomBarShow(false)
                                             binding.barcodeView.viewFinder.isResultShown(false)
@@ -963,7 +968,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         binding.resultSubText.text = sms_string.getSMSMessage()
 
                                         binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(sms_string.getSMSNumber())
+                                            createSMSIntent(sms_string.getSMSNumber(),sms_string.getSMSMessage())
+                                            //textCopyThenPost(sms_string.getSMSNumber())
                                             binding.resultDisplayBar.visibility = View.GONE
                                             viewModel.updateIsResultBottomBarShow(false)
                                             binding.barcodeView.viewFinder.isResultShown(false)
@@ -1323,6 +1329,25 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         intent.putExtra(Intent.EXTRA_TEXT, text)
         val chooser = Intent.createChooser(intent, text)
         requireActivity().startActivity(chooser)
+    }
+
+    private fun createEmailIntent(email: String, subject: String, message: String){
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse("mailto:")
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+        emailIntent.putExtra(Intent.EXTRA_TEXT, message)
+        requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
+    }
+
+    private fun createSMSIntent(smsNumber: String, message: String){
+        val intent = Intent(
+            Intent.ACTION_VIEW, Uri.parse(
+                "sms:$smsNumber"
+            )
+        )
+        intent.putExtra("sms_body", message)
+        requireActivity().startActivity(intent)
     }
 
 }

@@ -18,8 +18,8 @@
     package="com.google.zxing.client.android" >
 
     <uses-sdk
-        android:minSdkVersion="19"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="24"
+        android:targetSdkVersion="24" />
 
     <application>
         <activity

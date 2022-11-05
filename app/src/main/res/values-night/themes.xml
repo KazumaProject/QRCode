@@ -17,8 +17,8 @@
     </style>
 
     <style name="CustomAlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="colorPrimary">@android:color/holo_green_dark</item>
-        <item name="colorPrimaryVariant">@android:color/holo_green_dark</item>
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorPrimaryVariant">@color/blue</item>
     </style>
 
 </resources>
