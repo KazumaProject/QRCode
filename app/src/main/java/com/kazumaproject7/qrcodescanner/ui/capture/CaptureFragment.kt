@@ -133,10 +133,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             showCenterCrossLine(binding.barcodeView)
         }
 
-        if (!binding.barcodeView.cameraSettings.isContinuousFocusEnabled){
-            binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.CONTINUOUS
-        }
-
         val formats = listOf(
             BarcodeFormat.QR_CODE,
             BarcodeFormat.AZTEC,
@@ -166,9 +162,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         binding.resultDisplayBar.visibility = View.GONE
                         viewModel.updateIsResultBottomBarShow(false)
                         binding.barcodeView.viewFinder.isResultShown(false)
-                    } else {
-                        binding.barcodeView.cameraSettings.focusMode = CameraSettings.FocusMode.MACRO
-
                     }
 
                 }

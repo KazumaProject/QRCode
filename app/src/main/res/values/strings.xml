@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">QR Android</string>
+    <string name="app_name" translatable="false">QR Code Scanner</string>
     <string name="camera_mask_key" translatable="false">camera_mask_key</string>
     <string name="result_open_url_by_default_key" translatable="false">result_open_url_by_default_key</string>
     <string name="license_preference_key" translatable="false">license_preference_key</string>

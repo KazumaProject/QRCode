@@ -265,26 +265,18 @@ public class ViewfinderView extends View {
 
             if (maskVisibility){
                 if (!isShow){
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        Path path2 = new Path();
-                        paint.setPathEffect(null);
-                        path2.addRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,Path.Direction.CW);
-                        path2.setFillType(Path.FillType.INVERSE_WINDING);
-                        paint.setColor(maskColor);
-                        canvas.drawPath(path2,paint);
-                    }
-                    /*canvas.drawRect(0, 0, width, frame.top, paint);
-                    canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-                    canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-                    canvas.drawRect(0, frame.bottom + 1, width, height, paint);*/
+                    @SuppressLint("DrawAllocation") Path path2 = new Path();
+                    paint.setPathEffect(null);
+                    path2.addRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,Path.Direction.CW);
+                    path2.setFillType(Path.FillType.INVERSE_WINDING);
+                    paint.setColor(maskColor);
+                    canvas.drawPath(path2,paint);
                 }
             }else {
                 if (rRectVisibility){
                     paint.setPathEffect(null);
                     paint.setColor(maskColor);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
-                    }
+                    canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
                 }
 
             }

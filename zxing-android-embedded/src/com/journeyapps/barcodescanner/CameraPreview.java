@@ -385,7 +385,6 @@ public class CameraPreview extends ViewGroup {
         Rect frameInPreview = new Rect(framingRect);
         frameInPreview.offset(-surfaceRect.left, -surfaceRect.top);
 
-
         previewFramingRect = new Rect(0, 0, previewWidth, previewHeight);
 
         if (previewFramingRect == null || previewFramingRect.width() <= 0 || previewFramingRect.height() <= 0) {

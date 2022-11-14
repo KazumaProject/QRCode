@@ -12,7 +12,7 @@ class MyQSTileService : TileService(){
         super.onStartListening()
         qsTile?.apply {
             state = Tile.STATE_INACTIVE
-            label = getString(R.string.app_name)
+            label = "Scan QR Code"
             updateTile()
         }
     }
