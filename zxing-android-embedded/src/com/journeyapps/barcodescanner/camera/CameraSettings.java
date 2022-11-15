@@ -14,7 +14,7 @@ public class CameraSettings {
     private boolean continuousFocusEnabled = true;
     private boolean exposureEnabled = false;
     private boolean autoTorchEnabled = false;
-    private FocusMode focusMode = FocusMode.MACRO;
+    private FocusMode focusMode = FocusMode.CONTINUOUS;
 
     public enum FocusMode {
         AUTO,

@@ -240,10 +240,10 @@ public class ViewfinderView extends View {
 
             } else {
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
-                        (int)(resultPoints.get(0).getX() - 50),
-                        (int)(resultPoints.get(1).getY() - 30),
-                        (int)(resultPoints.get(1).getX() + 80),
-                        (int)(resultPoints.get(0).getY() + 128)
+                        (int)(resultPoints.get(0).getX()),
+                        (int)(resultPoints.get(1).getY()),
+                        (int)(resultPoints.get(1).getX() ),
+                        (int)(resultPoints.get(0).getY())
                 );
                 //canvas.drawRect(rect,paint);
                 drawSmallTarget(canvas,paint,rect);
