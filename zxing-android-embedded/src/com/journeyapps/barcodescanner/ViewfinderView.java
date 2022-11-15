@@ -166,7 +166,7 @@ public class ViewfinderView extends View {
 
     private void drawSmallTarget(Canvas canvas, Paint paint, Rect rect){
         Path path = new Path();
-        float margin = 50f;
+        float margin = 0f;
         //Left Top
         path.rewind();
         path.moveTo((float) (rect.left + margin), (float) (rect.top));
@@ -240,10 +240,10 @@ public class ViewfinderView extends View {
 
             } else {
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
-                        (int)(resultPoints.get(0).getX()),
-                        (int)(resultPoints.get(1).getY()),
-                        (int)(resultPoints.get(1).getX() ),
-                        (int)(resultPoints.get(0).getY())
+                        (int)(resultPoints.get(0).getX() - 50),
+                        (int)(resultPoints.get(1).getY() - 30),
+                        (int)(resultPoints.get(1).getX() + 80),
+                        (int)(resultPoints.get(0).getY() + 120)
                 );
                 //canvas.drawRect(rect,paint);
                 drawSmallTarget(canvas,paint,rect);
