@@ -31,14 +31,18 @@ import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 
 import androidx.core.content.ContextCompat;
 
@@ -166,7 +170,7 @@ public class ViewfinderView extends View {
 
     private void drawSmallTarget(Canvas canvas, Paint paint, Rect rect){
         Path path = new Path();
-        float margin = 0f;
+        float margin = 40f;
         //Left Top
         path.rewind();
         path.moveTo((float) (rect.left + margin), (float) (rect.top));
@@ -209,15 +213,14 @@ public class ViewfinderView extends View {
         final Rect frame = framingRect;
         final Size previewSize = this.previewSize;
 
-        final int width = getWidth();
-        final int height = getHeight();
 
         if (resultPoints != null) {
             // Draw the opaque result bitmap over the scanning rectangle
+            PathEffect cornerPathEffect = new CornerPathEffect(90);
             paint.setColor(targetColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setPathEffect(new CornerPathEffect(90));
+            paint.setPathEffect(cornerPathEffect);
             paint.setStrokeWidth(10f);
             if (resultPoints.size() >= 3){
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
@@ -227,16 +230,15 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(0).getY() + 100)
                 );
 
-                //canvas.drawRect(rect,paint);
-                drawSmallTarget(canvas,paint,rect);
+                Rect rect1 = new Rect(
+                        rect.left + 10,rect.top + 10,rect.right - 10,rect.bottom - 10
+                );
+                drawSmallTarget(canvas,paint,rect1);
 
                 paint.setColor(maskColor);
                 paint.setStyle(Paint.Style.FILL);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    paint.setPathEffect(null);
-                    canvas.drawRoundRect(rect.left + 10,rect.top + 10,rect.right - 10,rect.bottom - 10,20f,20f,paint);
-                }
+                paint.setPathEffect(null);
+                canvas.drawRoundRect(rect.left + 20,rect.top + 20,rect.right - 20,rect.bottom - 20,20f,20f,paint);
 
             } else {
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
@@ -245,16 +247,18 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(1).getX() + 80),
                         (int)(resultPoints.get(0).getY() + 120)
                 );
-                //canvas.drawRect(rect,paint);
-                drawSmallTarget(canvas,paint,rect);
+
+                Rect rect2 = new Rect(
+                        rect.left,rect.top,rect.right,rect.bottom
+                );
+
+                drawSmallTarget(canvas,paint,
+                        rect2);
 
                 paint.setColor(maskColor);
                 paint.setStyle(Paint.Style.FILL);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    paint.setPathEffect(null);
-                    canvas.drawRoundRect(rect.left,rect.top,rect.right,rect.bottom,20f,20f,paint);
-                }
+                paint.setPathEffect(null);
+                canvas.drawRoundRect(rect.left + 20,rect.top + 20,rect.right- 20,rect.bottom - 20,20f,20f,paint);
             }
 
 
