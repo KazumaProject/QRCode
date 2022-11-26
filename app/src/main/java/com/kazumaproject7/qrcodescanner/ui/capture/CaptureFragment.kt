@@ -121,6 +121,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             )
         }
 
+
         if (AppPreferences.isMaskVisible){
             showMask(binding.barcodeView)
         }
@@ -132,6 +133,16 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         if (AppPreferences.isCenterCrossVisible){
             showCenterCrossLine(binding.barcodeView)
         }
+
+        updateRectangleVisibility(
+            binding.barcodeView,
+            AppPreferences.isMaskVisible
+        )
+
+        updateMaskVisibilityCameraPreviewVisibility(
+            binding.barcodeView,
+            AppPreferences.isMaskVisible
+        )
 
         val formats = listOf(
             BarcodeFormat.QR_CODE,
@@ -457,6 +468,25 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         scannerAlphaField.isAccessible = true
         scannerAlphaField.set(decoratedBarcodeView.targetView, true)
     }
+
+    private fun updateRectangleVisibility(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        visibility: Boolean
+    ) {
+        val scannerAlphaField = TargetView::class.java.getDeclaredField("targetMaskVisibility")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.targetView, visibility)
+    }
+
+    private fun updateMaskVisibilityCameraPreviewVisibility(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        visibility: Boolean
+    ) {
+        val scannerAlphaField = CameraPreview::class.java.getDeclaredField("maskVisibility2")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder.cameraPreview, visibility)
+    }
+
 
     private val startSelectImageFromURI = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {

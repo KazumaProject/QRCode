@@ -89,7 +89,9 @@ public class ViewfinderView extends View {
     protected Rect framingRect;
     protected Size previewSize;
 
-
+    public CameraPreview getCameraPreview(){
+        return this.cameraPreview;
+    }
 
     // This constructor is used when the class is built from an XML resource.
     public ViewfinderView(Context context, AttributeSet attrs) {
@@ -127,6 +129,7 @@ public class ViewfinderView extends View {
 
     public void setCameraPreview(CameraPreview view) {
         this.cameraPreview = view;
+
         view.addStateListener(new CameraPreview.StateListener() {
             @Override
             public void previewSized() {
@@ -280,7 +283,7 @@ public class ViewfinderView extends View {
                 if (rRectVisibility){
                     paint.setPathEffect(null);
                     paint.setColor(maskColor);
-                    canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
+                    //canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
                 }
 
             }

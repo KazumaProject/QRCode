@@ -143,7 +143,8 @@ public class CameraPreview extends ViewGroup {
 
     private boolean torchOn = false;
 
-    @TargetApi(14)
+    public boolean maskVisibility2 = false;
+
     private TextureView.SurfaceTextureListener surfaceTextureListener() {
         // Cannot initialize automatically, since we may be API < 14
         return new TextureView.SurfaceTextureListener() {
@@ -385,7 +386,14 @@ public class CameraPreview extends ViewGroup {
         Rect frameInPreview = new Rect(framingRect);
         frameInPreview.offset(-surfaceRect.left, -surfaceRect.top);
 
-        previewFramingRect = new Rect(0, 0, previewWidth, previewHeight);
+        if (maskVisibility2){
+            previewFramingRect = new Rect(frameInPreview.left * previewWidth / surfaceRect.width(),
+                    frameInPreview.top * previewHeight / surfaceRect.height(),
+                    frameInPreview.right * previewWidth / surfaceRect.width(),
+                    frameInPreview.bottom * previewHeight / surfaceRect.height());
+        }else {
+            previewFramingRect = new Rect(0, 0, previewWidth, previewHeight);
+        }
 
         if (previewFramingRect == null || previewFramingRect.width() <= 0 || previewFramingRect.height() <= 0) {
             previewFramingRect = null;

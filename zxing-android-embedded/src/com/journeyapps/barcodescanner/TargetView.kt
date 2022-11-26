@@ -4,10 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.CornerPathEffect
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -34,6 +31,8 @@ open class TargetView(
 
     var isCrossLineVisible = false
 
+    var targetMaskVisibility = false
+
     private val c: Context by lazy {
         context
     }
@@ -46,8 +45,12 @@ open class TargetView(
         drawLeftBottomLine(canvas, setupPaint(),getPath())
         drawRightTopLine(canvas, setupPaint(),getPath())
         drawRightBottomLine(canvas, setupPaint(),getPath())
-        if (isCrossLineVisible){
+        if (isCrossLineVisible)
             drawCrossLine(canvas,setupCrossLinePaint())
+        if (!targetMaskVisibility){
+            //drawCenterRectangle(canvas,setupPaintRectangle())
+        }else{
+            objectAnimator.cancel()
         }
     }
 
@@ -118,8 +121,31 @@ open class TargetView(
         }
     }
 
+    private fun setupPaintRectangle(): Paint {
+        return Paint().apply {
+            isAntiAlias = true
+            color = ContextCompat.getColor(c, R.color.zxing_viewfinder_mask)
+            strokeWidth = 12f
+        }
+    }
+
     private fun getPath(): Path{
         return Path()
+    }
+
+    private fun drawCenterRectangle(canvas: Canvas?, paint: Paint) {
+        val rect = Rect().apply {
+            set(100, 100, width -100, height -100)
+        }
+        canvas?.drawRoundRect(
+            rect.left.toFloat(),
+            rect.top.toFloat(),
+            rect.right.toFloat(),
+            rect.bottom.toFloat(),
+            32f,
+            32f,
+            paint
+        )
     }
 
     private fun expandedAnimation() {
