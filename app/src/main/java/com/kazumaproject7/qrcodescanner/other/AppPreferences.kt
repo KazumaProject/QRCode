@@ -8,6 +8,7 @@ object AppPreferences {
     private lateinit var preferences: SharedPreferences
 
     private val MASK_VISIBILITY = Pair("camera_mask_key",false)
+    private val CAPTURE_FULL_SCREEN = Pair("capture_full_screen",false)
     private val CENTER_CROSS_VISIBILITY = Pair("camera_cross_visibility_key",false)
     private val HORIZONTAL_LINE_VISIBILITY = Pair("camera_horizontal_line_visibility_key",false)
     private val OPEN_URL_BY_DEFAULT = Pair("result_open_url_by_default_key",true)
@@ -29,6 +30,13 @@ object AppPreferences {
 
         set(value) = preferences.edit {
             it.putBoolean(MASK_VISIBILITY.first, value)
+        }
+
+    var isCaptureFullScreen: Boolean
+        get() = preferences.getBoolean(CAPTURE_FULL_SCREEN.first, CAPTURE_FULL_SCREEN.second)
+
+        set(value) = preferences.edit {
+            it.putBoolean(CAPTURE_FULL_SCREEN.first, value)
         }
 
     var isCenterCrossVisible: Boolean

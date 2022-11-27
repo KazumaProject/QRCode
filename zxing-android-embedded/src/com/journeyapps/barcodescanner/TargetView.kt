@@ -48,7 +48,7 @@ open class TargetView(
         if (isCrossLineVisible)
             drawCrossLine(canvas,setupCrossLinePaint())
         if (!targetMaskVisibility){
-            //drawCenterRectangle(canvas,setupPaintRectangle())
+            drawCenterRectangle(canvas,setupPaintRectangle())
         }else{
             objectAnimator.cancel()
         }
@@ -125,6 +125,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, R.color.zxing_viewfinder_mask)
+            alpha = 60
             strokeWidth = 12f
         }
     }
@@ -135,15 +136,15 @@ open class TargetView(
 
     private fun drawCenterRectangle(canvas: Canvas?, paint: Paint) {
         val rect = Rect().apply {
-            set(100, 100, width -100, height -100)
+            set(60, 60, width -60, height -60)
         }
         canvas?.drawRoundRect(
             rect.left.toFloat(),
             rect.top.toFloat(),
             rect.right.toFloat(),
             rect.bottom.toFloat(),
-            32f,
-            32f,
+            40f,
+            40f,
             paint
         )
     }

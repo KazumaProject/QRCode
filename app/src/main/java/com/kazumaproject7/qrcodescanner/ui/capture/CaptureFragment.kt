@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
@@ -48,6 +50,7 @@ import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import ezvcard.Ezvcard
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 import org.jsoup.Jsoup
 import timber.log.Timber
 import java.io.InputStream
@@ -62,6 +65,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private val viewModel: ScanViewModel by activityViewModels()
 
     private var lastText: String = ""
+
+    var isZoom = false
+    private var delta = 0f
 
     companion object{
         private const val REQUEST_CODE_PERMISSIONS = 77
@@ -141,8 +147,51 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
         updateMaskVisibilityCameraPreviewVisibility(
             binding.barcodeView,
-            AppPreferences.isMaskVisible
+            !AppPreferences.isCaptureFullScreen
         )
+
+        binding.captureToggleSettings.setOnClickListener {
+            viewModel.isActionAndBottomBarShow.value?.let {
+                viewModel.updateIsActionAndBottomBarShow(!it)
+            }
+        }
+
+        collectLatestLifecycleFlow(viewModel.scaleDelta){ delta2 ->
+            binding.barcodeView.barcodeView.cameraInstance?.cameraManager?.setZoomCamera(delta2,binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
+            Timber.d("Scaled delta: $delta")
+            delta = delta2.toFloat()
+            isZoom = when (delta2) {
+                in 0.0..1.1 -> {
+                    false
+                }
+                else -> {
+                    true
+                }
+            }
+        }
+
+        collectLatestLifecycleFlow(viewModel.isResultShow) { resultShow ->
+            if (resultShow){
+                binding.barcodeView.pause()
+                binding.captureToggleSettings.isVisible = false
+                binding.resultDisplayBar.visibility = View.VISIBLE
+                viewModel.updateIsActionAndBottomBarShow(false)
+
+            }else{
+                binding.barcodeView.resume()
+                binding.barcodeView.viewFinder.drawResultPointsRect(null)
+                binding.captureToggleSettings.isVisible = true
+                binding.resultDisplayBar.visibility = View.GONE
+
+                binding.barcodeView.viewFinder.isResultShown(false)
+
+                binding.barcodeView.targetView.isVisible = true
+                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
+                if (AppPreferences.isHorizontalLineVisible){
+                    binding.barcodeView.viewFinder.setLaserVisibility(true)
+                }
+            }
+        }
 
         val formats = listOf(
             BarcodeFormat.QR_CODE,
@@ -168,49 +217,43 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
         val detector = GestureDetectorCompat(requireContext(),object : GestureDetector.SimpleOnGestureListener(){
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                viewModel.isResultBottomBarShow.value?.let {
-                    if (it){
-                        binding.resultDisplayBar.visibility = View.GONE
-                        viewModel.updateIsResultBottomBarShow(false)
-                        binding.barcodeView.viewFinder.isResultShown(false)
-                    }
-
+                if (viewModel.isResultShow.value){
+                    viewModel.updateIsResultShow(false)
                 }
-
-
                 return true
             }
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                viewModel.isActionAndBottomBarShow.value?.let {
-                    viewModel.updateIsActionAndBottomBarShow(!it)
+
+                isZoom = if (!isZoom){
+                    viewModel.updateScaleDelta(3.0)
+                    true
+                }else{
+                    viewModel.updateScaleDelta(0.0)
+                    false
                 }
                 return super.onDoubleTap(e)
 
             }
         })
 
+
         val scaleDetector = ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener(){
-            private var delta = 0f
+
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 if (delta == 0f){
                     val deltaScale = detector.scaleFactor
                     if (deltaScale >= 1f){
-                        /*binding.barcodeView.barcodeView.scaleX = deltaScale
-                        binding.barcodeView.barcodeView.scaleY = deltaScale*/
                         delta = deltaScale
-
-                        binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
+                        viewModel.updateScaleDelta(delta.toDouble())
+                        //binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
                     }
                 } else  {
                     val deltaScale = delta + (detector.scaleFactor - 1f)
-                    Timber.d("Scaled: $deltaScale")
                     if (deltaScale in 1f..8.0f){
-                        /*binding.barcodeView.barcodeView.scaleX = deltaScale
-                        binding.barcodeView.barcodeView.scaleY = deltaScale*/
                         delta = deltaScale
-
-                        binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
+                        viewModel.updateScaleDelta(delta.toDouble())
+                        //binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
                     }
                 }
                 return super.onScale(detector)
@@ -218,7 +261,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
             override fun onScaleEnd(detector: ScaleGestureDetector) {
                 super.onScaleEnd(detector)
-
             }
 
         })
@@ -227,16 +269,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             detector.onTouchEvent(event)
             scaleDetector.onTouchEvent(event)
             return@setOnTouchListener true
-        }
-
-        viewModel.isResultBottomBarShow.observe(viewLifecycleOwner){
-            if (!it){
-                binding.barcodeView.targetView.isVisible = true
-                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                if (AppPreferences.isHorizontalLineVisible){
-                    binding.barcodeView.viewFinder.setLaserVisibility(true)
-                }
-            }
         }
 
         viewModel.flashStatus.observe(viewLifecycleOwner){
@@ -252,9 +284,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             if (it){
                 binding.toolbarCapture.animate().alpha(1f).duration = 500
                 binding.toolbarCapture.visibility = View.VISIBLE
+                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_up_24))
             } else {
                 binding.toolbarCapture.animate().alpha(0f).duration = 500
                 binding.toolbarCapture.visibility = View.GONE
+                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_down_24))
             }
         }
 
@@ -420,8 +454,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     override fun onResume() {
         super.onResume()
-        binding.barcodeView.resume()
         returnStatusBarColor()
+        viewModel.updateIsResultShow(false)
     }
 
     override fun onPause() {
@@ -619,6 +653,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             viewModel.updateScannedType(result.barcodeFormat.name)
             startResultFragment(result)
             lastText = ""
+            viewModel.updateIsResultShow(true)
         }
         override fun possibleResultPoints(resultPoints: MutableList<ResultPoint>?) {
 
@@ -835,8 +870,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         CoroutineScope(Dispatchers.IO).launch {
                                             withContext(Dispatchers.Main){
 
-                                                binding.barcodeView.viewFinder.isResultShown(true)
-
                                                 binding.progressResultTitle.visibility = View.VISIBLE
 
                                                 binding.resultActionBtn.text = "Open"
@@ -848,13 +881,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                         Intent.createChooser(intent, "Open ${result.text}")
                                                     requireActivity().startActivity(chooser)
 
-                                                    binding.resultDisplayBar.visibility = View.GONE
-                                                    binding.barcodeView.targetView.isVisible = true
-
-                                                    binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
-                                                    viewModel.updateIsResultBottomBarShow(false)
-                                                    binding.barcodeView.viewFinder.isResultShown(false)
-
                                                     val scannedResult = ScannedResult(
                                                         scannedString = result.text,
                                                         scannedStringType = TYPE_URL,
@@ -862,9 +888,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                         System.currentTimeMillis()
                                                     )
                                                     viewModel.insertScannedResult(scannedResult)
+                                                    viewModel.updateIsResultShow(false)
                                                 }
                                                 binding.resultDisplayBar.setOnClickListener {
-
+                                                    textCopyThenPost(result.text)
                                                 }
                                             }
 
@@ -931,11 +958,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 email_string.getSubjectEmailTypeOne(),
                                                 email_string.getMessageEmailTypeOne()
                                             )
-                                            //textCopyThenPost(email_string.getEmailEmailTypeOne())
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
-
                                             val scannedResult = ScannedResult(
                                                 scannedString = "Email: ${email_string.getEmailEmailTypeOne()}\nSubject: ${email_string.getSubjectEmailTypeOne()}\nMessage: ${email_string.getMessageEmailTypeOne()}",
                                                 scannedStringType = TYPE_EMAIL1,
@@ -943,9 +965,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-
+                                            textCopyThenPost(result.text)
                                         }
                                     }
 
@@ -962,9 +985,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             textCopyThenPost(email_string.getEmailEmailTypeTwo())
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
 
                                             val scannedResult = ScannedResult(
                                                 scannedString = "Email: ${email_string.getEmailEmailTypeTwo()}\nSubject: ${email_string.getEmailSubjectTypeTwo()}\nMessage: ${email_string.getEmailMessageTypeTwo()}",
@@ -973,9 +993,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-
+                                            textCopyThenPost(result.text)
                                         }
                                     }
 
@@ -992,11 +1013,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             createSMSIntent(sms_string.getSMSNumber(),sms_string.getSMSMessage())
-                                            //textCopyThenPost(sms_string.getSMSNumber())
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
-
                                             val scannedResult = ScannedResult(
                                                 scannedString = "SMS: ${sms_string.getSMSNumber()}\nMessage: ${sms_string.getSMSMessage()}",
                                                 scannedStringType = TYPE_SMS,
@@ -1004,9 +1020,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-
+                                            textCopyThenPost(result.text)
                                         }
 
                                     }
@@ -1028,10 +1045,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             textCopyThenPost(wifi_string.getWifiPassword())
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
-
                                             val scannedResult = ScannedResult(
                                                 scannedString = "SSID: ${wifi_string.getWifiSSID()}\nPassword: ${wifi_string.getWifiPassword()}",
                                                 scannedStringType = TYPE_WIFI,
@@ -1043,10 +1056,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                                 requireContext().startActivity(Intent(Settings.Panel.ACTION_WIFI))
                                             }
-
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-
+                                            textCopyThenPost(result.text)
                                         }
 
                                     }
@@ -1188,10 +1201,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                             }
                                             requireActivity().startActivity(intent)
 
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
-
                                             val scannedResult = ScannedResult(
                                                 scannedString = result.text,
                                                 scannedStringType = TYPE_VCARD,
@@ -1199,11 +1208,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
-
+                                            textCopyThenPost(result.text)
                                         }
-
 
                                     }
 
@@ -1220,10 +1229,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             textCopyThenPost(scannedString.getCryptocurrencyAddress())
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
-
                                             val scannedResult = ScannedResult(
                                                 scannedString = scannedString,
                                                 scannedStringType = Constants.TYPE_CRYPTOCURRENCY,
@@ -1231,6 +1236,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
+                                        }
+                                        binding.resultDisplayBar.setOnClickListener {
+                                            textCopyThenPost(result.text)
                                         }
                                     }
 
@@ -1246,9 +1255,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                         binding.resultActionBtn.setOnClickListener {
                                             textCopyThenPost(result.text)
-                                            binding.resultDisplayBar.visibility = View.GONE
-                                            viewModel.updateIsResultBottomBarShow(false)
-                                            binding.barcodeView.viewFinder.isResultShown(false)
 
                                             val scannedResult = ScannedResult(
                                                 scannedString = result.text,
@@ -1257,6 +1263,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                                 System.currentTimeMillis()
                                             )
                                             viewModel.insertScannedResult(scannedResult)
+                                            viewModel.updateIsResultShow(false)
                                         }
                                         binding.resultDisplayBar.setOnClickListener {
 
@@ -1276,9 +1283,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                                 binding.resultActionBtn.setOnClickListener {
                                     textCopyThenPost(result.text)
-                                    binding.resultDisplayBar.visibility = View.GONE
-                                    viewModel.updateIsResultBottomBarShow(false)
-                                    binding.barcodeView.viewFinder.isResultShown(false)
 
                                     val scannedResult = ScannedResult(
                                         scannedString = result.text,
@@ -1287,6 +1291,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                         System.currentTimeMillis()
                                     )
                                     viewModel.insertScannedResult(scannedResult)
+                                    viewModel.updateIsResultShow(false)
                                 }
                                 binding.resultDisplayBar.setOnClickListener {
 
@@ -1298,9 +1303,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     CoroutineScope(Dispatchers.Main).launch {
                         binding.barcodeView.viewFinder.drawResultPointsRect(points)
                         binding.resultDisplayBar.visibility = View.VISIBLE
-                        viewModel.updateIsResultBottomBarShow(true)
-                        delay(100)
-                        binding.barcodeView.viewFinder.drawResultPointsRect(null)
+                        viewModel.updateIsResultShow(true)
                     }
                 }
 

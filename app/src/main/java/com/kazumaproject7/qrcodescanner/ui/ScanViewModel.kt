@@ -15,6 +15,8 @@ import com.kazumaproject7.qrcodescanner.repository.ScannedResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,20 +26,24 @@ class ScanViewModel @Inject constructor(
     private val repository: ScannedResultRepository
 ) : ViewModel() {
 
+    private val _scaleDelta = MutableStateFlow(0.0)
+    val scaleDelta = _scaleDelta.asStateFlow()
+    fun updateScaleDelta(value: Double){
+        _scaleDelta.value = value
+    }
+
+    private val _isResultShow = MutableStateFlow(false)
+    val isResultShow = _isResultShow.asStateFlow()
+    fun updateIsResultShow(value: Boolean){
+        _isResultShow.value = value
+    }
+
     val isActionAndBottomBarShow: LiveData<Boolean>
         get() = _isActionAndBottomBarShow
     private val _isActionAndBottomBarShow = MutableLiveData(false)
 
     fun updateIsActionAndBottomBarShow(value: Boolean){
         _isActionAndBottomBarShow.value = value
-    }
-
-    val isResultBottomBarShow: LiveData<Boolean>
-        get() = _isResultBottomBarShow
-    private val _isResultBottomBarShow = MutableLiveData(false)
-
-    fun updateIsResultBottomBarShow(value: Boolean){
-        _isResultBottomBarShow.value = value
     }
 
     val scannedString: LiveData<String>
