@@ -178,7 +178,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 viewModel.updateIsActionAndBottomBarShow(false)
 
             }else{
-                binding.barcodeView.resume()
                 binding.barcodeView.viewFinder.drawResultPointsRect(null)
                 binding.captureToggleSettings.isVisible = true
                 binding.resultDisplayBar.visibility = View.GONE
@@ -189,6 +188,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                 if (AppPreferences.isHorizontalLineVisible){
                     binding.barcodeView.viewFinder.setLaserVisibility(true)
+                }
+                CoroutineScope(Dispatchers.Main).launch {
+                    delay(100)
+                    binding.barcodeView.resume()
                 }
             }
         }
