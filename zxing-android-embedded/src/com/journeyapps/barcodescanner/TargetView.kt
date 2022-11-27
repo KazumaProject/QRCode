@@ -37,7 +37,7 @@ open class TargetView(
         context
     }
 
-    private val margin: Float = 150f
+    private val margin: Float = 200f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -117,7 +117,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, R.color.zxing_off_white)
-            strokeWidth = 12f
+            strokeWidth = 8f
         }
     }
 
@@ -136,7 +136,7 @@ open class TargetView(
 
     private fun drawCenterRectangle(canvas: Canvas?, paint: Paint) {
         val rect = Rect().apply {
-            set(60, 60, width -60, height -60)
+            set(64, 64, width - 64, height - 64)
         }
         canvas?.drawRoundRect(
             rect.left.toFloat(),
@@ -172,7 +172,7 @@ open class TargetView(
     private fun setupCrossLinePaint(): Paint {
         return Paint().apply {
             isAntiAlias = true
-            color = ContextCompat.getColor(c, android.R.color.holo_green_dark)
+            color = ContextCompat.getColor(c, android.R.color.holo_orange_light)
             strokeWidth = 2f
         }
     }

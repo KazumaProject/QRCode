@@ -32,6 +32,9 @@
             app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
             app:exitAnim="@anim/nav_zoom_exit_anim"
             app:popExitAnim="@anim/nav_zoom_pop_exit_anim"/>
+        <action
+            android:id="@+id/action_captureFragment_to_generateFragment"
+            app:destination="@id/generateFragment" />
     </fragment>
     <fragment
         android:id="@+id/generateFragment"

@@ -15,4 +15,3 @@ dependencyResolutionManagement {
 rootProject.name = "QRCodeScanner"
 include ':app'
 include ':zxing-android-embedded'
-include ':smoothbottombar'

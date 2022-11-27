@@ -144,9 +144,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         )
 
         binding.captureToggleSettings.setOnClickListener {
-            viewModel.isActionAndBottomBarShow.value?.let {
-                viewModel.updateIsActionAndBottomBarShow(!it)
-            }
+            viewModel.updateIsCaptureShow(!viewModel.isCaptureMenuShow.value)
         }
 
         collectLatestLifecycleFlow(viewModel.scaleDelta){ delta2 ->
@@ -168,7 +166,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.barcodeView.pause()
                 binding.captureToggleSettings.isVisible = false
                 binding.resultDisplayBar.visibility = View.VISIBLE
-                viewModel.updateIsActionAndBottomBarShow(false)
+                viewModel.updateIsCaptureShow(false)
 
             }else{
                 binding.barcodeView.viewFinder.drawResultPointsRect(null)
@@ -186,6 +184,41 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     delay(100)
                     binding.barcodeView.resume()
                 }
+            }
+        }
+
+        collectLatestLifecycleFlow(viewModel.isCaptureMenuShow){ isMenuShow ->
+            if(isMenuShow){
+                binding.captureMenuContainer.animate().alpha(1f).duration = 500
+                binding.captureMenuContainer.visibility = View.VISIBLE
+                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_up_24))
+                if(!AppPreferences.isMaskVisible){
+                    binding.barcodeView.targetView.visibility = View.GONE
+                }
+                binding.captureMenuContainer.setOnClickListener {
+
+                }
+            }else{
+                binding.captureMenuContainer.animate().alpha(0f).duration = 500
+                binding.captureMenuContainer.visibility = View.GONE
+                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_down_24))
+                if(!AppPreferences.isMaskVisible){
+                    binding.barcodeView.targetView.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        collectLatestLifecycleFlow(viewModel.isFlashOn){ isFlashOn ->
+            if(isFlashOn){
+                binding.barcodeView.setTorchOn()
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
+                binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+                binding.captureMenuFlashStateText.text = "On"
+            }else{
+                binding.barcodeView.setTorchOff()
+                binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
+                binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
+                binding.captureMenuFlashStateText.text = "Off"
             }
         }
 
@@ -215,6 +248,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 if (viewModel.isResultShow.value){
                     viewModel.updateIsResultShow(false)
+                }
+                if(viewModel.isCaptureMenuShow.value){
+                    viewModel.updateIsCaptureShow(false)
                 }
                 return true
             }
@@ -265,27 +301,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             detector.onTouchEvent(event)
             scaleDetector.onTouchEvent(event)
             return@setOnTouchListener true
-        }
-
-        viewModel.flashStatus.observe(viewLifecycleOwner){
-            if (it){
-                binding.barcodeView.setTorchOn()
-            }else{
-                binding.barcodeView.setTorchOff()
-            }
-        }
-
-        binding.toolbarCapture.visibility = View.GONE
-        viewModel.isActionAndBottomBarShow.observe(viewLifecycleOwner){
-            if (it){
-                binding.toolbarCapture.animate().alpha(1f).duration = 500
-                binding.toolbarCapture.visibility = View.VISIBLE
-                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_up_24))
-            } else {
-                binding.toolbarCapture.animate().alpha(0f).duration = 500
-                binding.toolbarCapture.visibility = View.GONE
-                binding.captureToggleSettings.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_keyboard_arrow_down_24))
-            }
         }
 
         viewModel.isReceivingImage.observe(viewLifecycleOwner){
@@ -381,68 +396,48 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
-        binding.folderOpen.apply {
-            background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_photo_24)
-            backgroundTintList = requireContext().getColorStateList(android.R.color.white)
+        binding.folderOpenContainer.apply {
             setOnClickListener {
-                toggleImageButtonColor(binding.folderOpen)
                 selectFileByUri()
-                viewModel.updateIsActionAndBottomBarShow(false)
+                viewModel.updateIsCaptureShow(false)
             }
+        }
+
+        binding.flashMenuContainer.setOnClickListener {
+            viewModel.updateIsFlashOn(!viewModel.isFlashOn.value)
         }
 
         binding.flashBtn.apply {
             supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
             setOnClickListener {
-                viewModel.flashStatus.value?.let {
-                    if (it){
-                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
-                        binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
-                        viewModel.updateFlashStatus(false)
-                    }else{
-                        binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
-                        binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                        viewModel.updateFlashStatus(true)
-                    }
-                }
+                viewModel.updateIsFlashOn(!viewModel.isFlashOn.value)
             }
         }
 
-        viewModel.flashStatus.value?.let {
-            if (it){
-                binding.flashBtn.apply {
-                    background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
-                    supportImageTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
-                }
-            }else{
-                binding.flashBtn.apply {
-                    background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
-                    supportImageTintList = requireContext().getColorStateList(android.R.color.white)
-                }
-            }
-        }
-
-        binding.historyBtn.apply {
-            background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_history_24)
-            backgroundTintList = requireContext().getColorStateList(android.R.color.white)
+        binding.historyOpenContainer.apply {
             setOnClickListener {
-                toggleImageButtonColor(binding.historyBtn)
                 findNavController().navigate(
                     CaptureFragmentDirections.actionCaptureFragmentToHistoryFragment()
                 )
-                viewModel.updateIsActionAndBottomBarShow(false)
+                viewModel.updateIsCaptureShow(false)
             }
         }
 
-        binding.settingBtn.apply {
-            background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_settings_24)
-            backgroundTintList = requireContext().getColorStateList(android.R.color.white)
+        binding.generateOpenContainer.apply {
             setOnClickListener {
-                toggleImageButtonColor(binding.settingBtn)
+                findNavController().navigate(
+                    CaptureFragmentDirections.actionCaptureFragmentToGenerateFragment()
+                )
+                viewModel.updateIsCaptureShow(false)
+            }
+        }
+
+        binding.settingOpenContainer.apply {
+            setOnClickListener {
                 findNavController().navigate(
                     CaptureFragmentDirections.actionCaptureFragmentToSettingsFragment()
                 )
-                viewModel.updateIsActionAndBottomBarShow(false)
+                viewModel.updateIsCaptureShow(false)
             }
         }
 
@@ -457,6 +452,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     override fun onPause() {
         super.onPause()
         binding.barcodeView.pause()
+        viewModel.updateIsFlashOn(false)
     }
 
     override fun onDestroyView() {
@@ -575,7 +571,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         viewModel.updateScannedType(barcodeFormat)
 
                         viewModel.updateScannedBitmap(bitmap)
-                        findNavController().navigate(R.id.resultFragment)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            delay(500)
+                            findNavController().navigate(R.id.resultFragment)
+                        }
                     } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
 
                         val resultText = readQrcode(bitmap)[0]
@@ -612,7 +611,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         }
                         viewModel.updateScannedString(resultText)
                         viewModel.updateScannedBitmap(bitmap)
-                        findNavController().navigate(R.id.resultFragment)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            delay(500)
+                            findNavController().navigate(R.id.resultFragment)
+                        }
+                    } else {
+
                     }
 
                 }catch (e: Exception){
@@ -626,7 +630,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private val callback = object : BarcodeCallback {
 
         override fun barcodeResult(result: BarcodeResult?) {
-            if (result?.text == null || result.text == lastText) {
+            if (result?.text == null || result.text == lastText || viewModel.isCaptureMenuShow.value) {
                 return
             }
             lastText = result.text

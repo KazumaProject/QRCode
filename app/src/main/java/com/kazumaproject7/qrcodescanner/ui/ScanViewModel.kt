@@ -14,7 +14,6 @@ import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.repository.ScannedResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -38,12 +37,16 @@ class ScanViewModel @Inject constructor(
         _isResultShow.value = value
     }
 
-    val isActionAndBottomBarShow: LiveData<Boolean>
-        get() = _isActionAndBottomBarShow
-    private val _isActionAndBottomBarShow = MutableLiveData(false)
+    private val _isCaptureMenuShow = MutableStateFlow(false)
+    val isCaptureMenuShow = _isCaptureMenuShow.asStateFlow()
+    fun updateIsCaptureShow(value: Boolean){
+        _isCaptureMenuShow.value = value
+    }
 
-    fun updateIsActionAndBottomBarShow(value: Boolean){
-        _isActionAndBottomBarShow.value = value
+    private val _isFlashOn = MutableStateFlow(false)
+    val isFlashOn = _isFlashOn.asStateFlow()
+    fun updateIsFlashOn(value: Boolean){
+        _isFlashOn.value = value
     }
 
     val scannedString: LiveData<String>
@@ -76,14 +79,6 @@ class ScanViewModel @Inject constructor(
 
     fun updateScannedBitmap(value: Bitmap){
         _scannedBitmap.value = value
-    }
-
-    val flashStatus: LiveData<Boolean>
-        get() = _flashStatus
-    private val _flashStatus = MutableLiveData(false)
-
-    fun updateFlashStatus(value: Boolean){
-        _flashStatus.value = value
     }
 
     fun insertScannedResult(scannedResult: ScannedResult) =viewModelScope.launch {

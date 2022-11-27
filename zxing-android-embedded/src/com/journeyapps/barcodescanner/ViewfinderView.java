@@ -205,7 +205,6 @@ public class ViewfinderView extends View {
         path.close();
     }
 
-
     @Override
     public void onDraw(Canvas canvas) {
         refreshSizes();
