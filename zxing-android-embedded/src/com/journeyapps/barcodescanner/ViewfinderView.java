@@ -257,26 +257,20 @@ public class ViewfinderView extends View {
                         (int)(resultPoints.get(0).getY() + 120)
                 );
 
-                Rect rect2 = new Rect(
-                        rect.left,rect.top,rect.right,rect.bottom
+                paint.setColor(Color.WHITE);
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setPathEffect(null);
+                paint.setStrokeWidth(8f);
+                canvas.drawRoundRect(
+                        rect.left + 2,rect.top + 2,rect.right - 2,rect.bottom - 2,20f,20f,paint
                 );
-
-                if (maskVisibility){
-                    @SuppressLint("DrawAllocation") Path path4 = new Path();
-                    paint.setPathEffect(null);
-                    paint.setStyle(Paint.Style.FILL);
-                    path4.addRoundRect(rect2.left,rect2.top,rect2.right,rect2.bottom,20f,20f,Path.Direction.CW);
-                    path4.setFillType(Path.FillType.INVERSE_WINDING);
-                    paint.setColor(maskColor);
-                    canvas.drawPath(path4,paint);
-                }else {
-                    drawSmallTarget(canvas,paint,
-                            rect2);
-                    paint.setColor(maskColor);
-                    paint.setStyle(Paint.Style.FILL);
-                    paint.setPathEffect(null);
-                    canvas.drawRoundRect(rect.left + 20,rect.top + 20,rect.right- 20,rect.bottom - 20,20f,20f,paint);
-                }
+                @SuppressLint("DrawAllocation") Path path4 = new Path();
+                paint.setPathEffect(null);
+                paint.setStyle(Paint.Style.FILL);
+                path4.addRoundRect(rect.left,rect.top,rect.right,rect.bottom,20f,20f,Path.Direction.CW);
+                path4.setFillType(Path.FillType.INVERSE_WINDING);
+                paint.setColor(maskColor);
+                canvas.drawPath(path4,paint);
             }
 
 
