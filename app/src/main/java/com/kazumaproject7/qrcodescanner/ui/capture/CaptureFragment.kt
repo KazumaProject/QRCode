@@ -3,6 +3,7 @@ package com.kazumaproject7.qrcodescanner.ui.capture
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,7 +12,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,12 +26,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
-import com.journeyapps.barcodescanner.camera.CameraSettings
+import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.databinding.FragmentCaptureFragmentBinding
@@ -50,7 +49,6 @@ import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import ezvcard.Ezvcard
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
 import org.jsoup.Jsoup
 import timber.log.Timber
 import java.io.InputStream
@@ -120,13 +118,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
-        if (!allPermissionsGranted()){
-            ActivityCompat.requestPermissions(requireActivity(),
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
-        }
-
+        if(!allPermissionsGranted())
+            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
 
         if (AppPreferences.isMaskVisible){
             showMask(binding.barcodeView)
@@ -471,16 +464,32 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         _binding = null
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS){
-            if (!allPermissionsGranted()) {
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { granted ->
+        val notPermission = granted.filter {
+            !it.value
+        }.size
+        if (notPermission != 0) {
+            val cameraRationale = ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.CAMERA)
+            if(!cameraRationale){
+                AlertDialog.Builder(requireContext(),R.style.CustomAlertDialog)
+                    .setMessage("Please Grant Camera Permission in Device Setting")
+                    .setPositiveButton("Go Setting") { _, _ ->
+                        requireContext().startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", requireContext().packageName, null)
+                        })
+                    }
+                    .create().show()
+            } else {
                 requireActivity().finish()
             }
+
+        } else {
+            requireActivity().finish()
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            requireContext().startActivity(intent)
         }
     }
 

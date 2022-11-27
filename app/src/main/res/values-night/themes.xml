@@ -17,8 +17,14 @@
     </style>
 
     <style name="CustomAlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="colorPrimary">@color/blue</item>
-        <item name="colorPrimaryVariant">@color/blue</item>
+        <item name="buttonBarPositiveButtonStyle">@style/alertDialogPositiveStyle</item>
+        <item name="android:background">@color/dark_gray</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+
+
+    <style name="alertDialogPositiveStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/blue</item>
     </style>
 
 </resources>
