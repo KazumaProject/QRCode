@@ -15,6 +15,7 @@ fun String.convertToScannedStringType(): ScannedStringType{
         this.contains("bitcoin:") || this.contains("ethereum:") ||
         this.contains("bitcoincash:") || this.contains("litecoin:") ||
         this.contains("xrp:") -> ScannedStringType.Cryptocurrency
+        this.contains("BEGIN:VCARD") -> ScannedStringType.VCard
         else -> ScannedStringType.Text
     }
 }

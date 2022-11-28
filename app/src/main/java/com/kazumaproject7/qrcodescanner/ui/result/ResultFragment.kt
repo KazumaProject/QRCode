@@ -121,8 +121,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                             requireActivity().startActivity(chooser)
                         }
 
-                        binding.resultMinResultText.text = state.resultText
-                        binding.resultMinResultText.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                        binding.resultMinResultText.text = state.resultText.getURLSpannable(requireContext())
 
                         binding.resultUrlContainer.visibility = View.VISIBLE
                         setURLTitleLogo(state.resultText)

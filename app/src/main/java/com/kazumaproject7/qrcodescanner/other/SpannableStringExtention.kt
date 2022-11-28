@@ -9,6 +9,21 @@ import android.text.style.UnderlineSpan
 import androidx.core.content.ContextCompat
 import com.kazumaproject7.qrcodescanner.R
 
+fun String.getURLSpannable(
+    context: Context
+): SpannableString{
+    val spannable = SpannableString("url:\n$this").apply {
+        setSpan(
+            ForegroundColorSpan(ContextCompat.getColor( context, R.color.gray)),
+            0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( RelativeSizeSpan(0.6f),
+            0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( UnderlineSpan(),
+            0, 3 , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+    return spannable
+}
+
 fun String.getSmsNumberSpannable(
     context: Context
 ): SpannableString{
