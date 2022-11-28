@@ -8,7 +8,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -597,13 +599,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     }
                                 }
 
-                                if (title == null){
-                                    withContext(Dispatchers.Main) {
-                                        binding.resultTitleText.text = "QR Code"
-                                        binding.progressResultTitle.visibility = View.GONE
-                                    }
-                                }
-
                                 val input: InputStream =  URL(imgSrc).openStream()
                                 val bitmap = BitmapFactory.decodeStream(input)
                                 bitmap?.let {
@@ -613,7 +608,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 }
                                 if (bitmap == null){
                                     withContext(Dispatchers.Main){
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                        getDefaultBrowser()?.let {
+                                            binding.resultImgLogo.setImageDrawable(requireActivity().packageManager.getApplicationIcon(it.applicationInfo))
+                                        }
                                     }
                                 }
 
@@ -621,9 +618,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                 Timber.d("Error Result Fragment: $e")
                                 withContext(Dispatchers.Main){
                                     binding.progressResultTitle.visibility = View.GONE
-                                    binding.resultTitleText.text = "QR Code"
                                     binding.barcodeView.viewFinder.isResultShown(true)
-                                    binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                    binding.resultTitleText.text = "Open in browser"
+                                    getDefaultBrowser()?.let {
+                                        binding.resultTitleText.text = "Open with ${requireActivity().packageManager.getApplicationLabel(it.applicationInfo)}"
+                                        binding.resultImgLogo.setImageDrawable(requireActivity().packageManager.getApplicationIcon(it.applicationInfo))
+                                    }
+
                                 }
                             }
                         }
@@ -634,11 +635,17 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                         binding.progressResultTitle.visibility = View.GONE
                         binding.resultActionBtn.text = "Open"
-                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                        getDefaultMail()?.let {
+                            binding.resultTitleText.text = "Open with ${requireActivity().packageManager.getApplicationLabel(it.applicationInfo)}"
+                            binding.resultImgLogo.setImageDrawable(requireActivity().packageManager.getApplicationIcon(it.applicationInfo))
+                            binding.resultSubText.text = email_string.getEmailEmailTypeOne()
+                        }
+                        if (getDefaultMail() == null){
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                            binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
+                            binding.resultSubText.text = email_string.getMessageEmailTypeOne()
+                        }
                         binding.barcodeView.viewFinder.isResultShown(true)
-
-                        binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
-                        binding.resultSubText.text = email_string.getMessageEmailTypeOne()
 
                         binding.resultActionBtn.setOnClickListener {
                             createEmailIntent(
@@ -665,11 +672,17 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                         binding.progressResultTitle.visibility = View.GONE
                         binding.resultActionBtn.text = "Open"
-                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                        getDefaultMail()?.let {
+                            binding.resultTitleText.text = "Open with ${requireActivity().packageManager.getApplicationLabel(it.applicationInfo)}"
+                            binding.resultImgLogo.setImageDrawable(requireActivity().packageManager.getApplicationIcon(it.applicationInfo))
+                            binding.resultSubText.text = email_string.getEmailEmailTypeOne()
+                        }
+                        if (getDefaultMail() == null){
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                            binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
+                            binding.resultSubText.text = email_string.getMessageEmailTypeOne()
+                        }
                         binding.barcodeView.viewFinder.isResultShown(true)
-
-                        binding.resultTitleText.text = email_string.getEmailEmailTypeTwo()
-                        binding.resultSubText.text = email_string.getEmailMessageTypeTwo()
 
                         binding.resultActionBtn.setOnClickListener {
                             textCopyThenPost(email_string.getEmailEmailTypeTwo())
@@ -998,6 +1011,33 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     }
 
+    private fun getDefaultBrowser(): ActivityInfo?{
+        val browserIntent =
+            Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
+        val resolveInfo: ResolveInfo? =
+            requireActivity().packageManager.resolveActivity(
+                browserIntent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
+        val info: ActivityInfo? = resolveInfo?.activityInfo
+        return info
+    }
+
+    private fun getDefaultMail(): ActivityInfo?{
+        val emailIntent =
+            Intent(Intent.ACTION_MAIN)
+        emailIntent.addCategory(
+            Intent.CATEGORY_APP_EMAIL
+        )
+        val resolveInfo: ResolveInfo? =
+            requireActivity().packageManager.resolveActivity(
+                emailIntent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
+        val info: ActivityInfo? = resolveInfo?.activityInfo
+        return info
+    }
+
     private fun readQrcode(bitmap: Bitmap): List<String> {
         val width = bitmap.width
         val height = bitmap.height
@@ -1031,9 +1071,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         // When setting the clip board text.
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
-        // Only show a toast for Android 12 and lower.
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
-            showSnackBar("Copied $textCopied")
+
+        showSnackBar("Copied $textCopied")
     }
 
     private fun shareText(text: String){

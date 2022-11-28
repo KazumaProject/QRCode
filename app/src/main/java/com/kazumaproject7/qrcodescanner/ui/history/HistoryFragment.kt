@@ -329,11 +329,8 @@ class HistoryFragment : BaseFragment(R.layout.fragment_history) {
 
     private fun textCopyThenPost(textCopied:String) {
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        // When setting the clip board text.
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
-        // Only show a toast for Android 12 and lower.
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
-            showSnackBar("Copied $textCopied")
+        showSnackBar("Copied $textCopied")
     }
 
     private fun createEmailIntent(email: String, subject: String, message: String){
