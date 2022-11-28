@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -43,10 +44,17 @@ import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import ezvcard.Ezvcard
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jsoup.Jsoup
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.net.URL
 
 @AndroidEntryPoint
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -90,7 +98,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             if (state.scannedType.replace("_"," ") == "QR CODE"){
                 when(state.scannedStringType){
                     is ScannedStringType.Url ->{
-                        binding.resultCodeTypeText.text = "URL"
                         binding.resultActionImg.apply {
                             visibility = View.VISIBLE
                             setOnClickListener {
@@ -121,6 +128,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         binding.resultMinResultText.text = state.resultText
                         binding.resultMinResultText.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
 
+                        binding.resultUrlContainer.visibility = View.VISIBLE
+                        setURLTitleLogo(state.resultText)
+
                         viewModel.insertScannedResult(
                             ScannedResult(
                                 scannedString = state.resultText,
@@ -137,7 +147,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        binding.resultCodeTypeText.text = "Email"
+
                         binding.resultActionImg.visibility = View.VISIBLE
                         val email = state.resultText.getEmailEmailTypeOne()
                         val subject = state.resultText.getSubjectEmailTypeOne()
@@ -165,7 +175,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        binding.resultCodeTypeText.text = "Email"
+
                         binding.resultActionImg.visibility = View.VISIBLE
                         val email = state.resultText.getEmailEmailTypeTwo()
                         val subject = state.resultText.getEmailSubjectTypeTwo()
@@ -195,7 +205,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        binding.resultCodeTypeText.text = "SMS"
+
                         binding.resultActionImg.visibility = View.VISIBLE
                         val smsNumber = state.resultText.getSMSNumber()
                         val smsMessage = state.resultText.getSMSMessage()
@@ -225,7 +235,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val wifiPassword = state.resultText.getWifiPassword()
                         val wifiEncryptionType = state.resultText.getWifiEncryptionType()
                         val wifiIsHidden = state.resultText.getWifiIsHidden()
-                        binding.resultCodeTypeText.text = "Wifi"
+
 
                         binding.resultMinResultText.text = "ssid: $wifiSSID" +
                                 "\npassword: $wifiPassword"
@@ -249,7 +259,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val cryptocurrencyAddress = state.resultText.getCryptocurrencyAddress()
                         val cryptocurrencyAmount = state.resultText.getCryptocurrencyAmount()
                         val cryptocurrencyOptionalMessage = state.resultText.getCryptocurrencyMessage()
-                        binding.resultCodeTypeText.text = "Crypto Currency"
+
                         binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(cryptocurrencyAddress)
                         }
@@ -259,7 +269,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
                     is ScannedStringType.VCard ->{
                         binding.resultActionImg.visibility = View.VISIBLE
-                        binding.resultCodeTypeText.text = "VCard"
 
                         val vCard = Ezvcard.parse(state.resultText).first()
                         var vcardName = ""
@@ -364,6 +373,8 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                                 System.currentTimeMillis()
                             ))
 
+                        binding.resultMinResultText.text = state.resultText
+
                         binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(state.resultText)
                         }
@@ -404,7 +415,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                     }
                     is ScannedStringType.Text ->{
-                        binding.resultCodeTypeText.text = "Text"
+
                         binding.resultMinResultText.text = state.resultText
                         viewModel.insertScannedResult(
                             ScannedResult(
@@ -429,7 +440,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     isNestedScrollingEnabled = true
                 }
             }else{
-                binding.resultCodeTypeText.text = "Barcode"
+
                 binding.resultMinResultText.text = state.resultText
 
                 viewModel.insertScannedResult(
@@ -471,6 +482,33 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources,R.drawable.q_code))
         _binding = null
     }
+
+    private fun setURLTitleLogo(scannedString: String){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val document = Jsoup.connect(scannedString).get()
+                val img = document.select("img").first()
+                val imgSrc = img?.absUrl("src")
+                val title = document.title()
+                withContext(Dispatchers.Main){
+                    binding.resultUrlText.text = title
+                }
+
+                val input: InputStream =  URL(imgSrc).openStream()
+                val bitmap = BitmapFactory.decodeStream(input)
+                bitmap?.let {
+                    withContext(Dispatchers.Main){
+                        binding.resultUrlImg.setImageBitmap(bitmap)
+                    }
+                }
+
+            }catch (e: Exception){
+                Timber.d("Error Result Fragment: $e")
+
+            }
+        }
+    }
+
 
     private fun saveImage(image: Bitmap): Uri? {
         val imagesFolder = File(requireActivity().cacheDir, "images")
