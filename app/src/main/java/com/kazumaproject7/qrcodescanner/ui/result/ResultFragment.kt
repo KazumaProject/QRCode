@@ -1,17 +1,20 @@
 package com.kazumaproject7.qrcodescanner.ui.result
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +22,7 @@ import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.kazumaproject7.qrcodescanner.BuildConfig
 import com.kazumaproject7.qrcodescanner.R
@@ -39,17 +43,10 @@ import com.kazumaproject7.qrcodescanner.ui.BaseFragment
 import com.kazumaproject7.qrcodescanner.ui.ScanViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import ezvcard.Ezvcard
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.jsoup.Jsoup
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.net.URL
 
 @AndroidEntryPoint
 class ResultFragment : BaseFragment(R.layout.fragment_result) {
@@ -75,292 +72,202 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var barcodeBitmap: Bitmap? = null
-        viewModel.scannedBitmap.value?.let {
-            barcodeBitmap = it
-        }
+        collectLatestLifecycleFlow(viewModel.resultState){ state ->
+            Timber.d("result state:" +
+                    "\ntext: ${state.resultText}" +
+                    "\ncode type: ${state.scannedType}" +
+                    "\nresult type: ${state.scannedStringType}" +
+                    "\nbitmap: ${state.bitmap}")
 
-        barcodeBitmap?.let { b ->
-            binding.barcodeImg.apply {
-                setImageBitmap(b)
-                setOnLongClickListener {
-                    saveImage(b)?.let { uri ->
-                        shareImageUri(uri)
-                    }
-                    return@setOnLongClickListener true
-                }
+            if (state.resultText.isNullOrBlank() || state.scannedType.isNullOrBlank() || state.bitmap == null){
+                return@collectLatestLifecycleFlow
             }
-        }
 
-        viewModel.scannedString.value?.let { scannedString ->
-            viewModel.scannedStringType.value?.let {
-                when(it){
+            if (state.scannedType.replace("_"," ") == "QR CODE"){
+                when(state.scannedStringType){
                     is ScannedStringType.Url ->{
-                        binding.urlParent.visibility = View.VISIBLE
-                        if (AppPreferences.isUrlOpen){
+                        binding.resultCodeTypeText.text = "URL"
+                        binding.resultActionImg.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener {
+                                arguments?.clear()
+                                val intent =
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(state.resultText))
+                                val chooser =
+                                    Intent.createChooser(intent, "Open $state.resultText")
+                                requireActivity().startActivity(chooser)
+                            }
+                        }
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(state.resultText)
+                        }
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(state.resultText)
+                        }
+                        if (AppPreferences.isUrlOpen && !state.flag){
                             arguments?.clear()
                             val intent =
-                                Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
+                                Intent(Intent.ACTION_VIEW, Uri.parse(state.resultText))
                             val chooser =
-                                Intent.createChooser(intent, "Open $scannedString")
+                                Intent.createChooser(intent, "Open $state.resultText")
+                            viewModel.updateResultFirstFlag(true)
                             requireActivity().startActivity(chooser)
                         }
+
+                        binding.resultMinResultText.text = state.resultText
+                        binding.resultMinResultText.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = state.resultText,
                                 scannedStringType = TYPE_URL,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
-                        ))
-
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                setURLTitleLogo(scannedString)
-                                binding.swipeToRefreshResult.isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
-                        binding.textUrl.apply {
-                            text = scannedString
-                            setTextColor(Color.parseColor("#5e6fed"))
-                            paintFlags = Paint.UNDERLINE_TEXT_FLAG
-                            setOnClickListener {
-                                shareText(scannedString)
-                            }
-                            setOnLongClickListener {
-                                textCopyThenPost(scannedString)
-                                return@setOnLongClickListener true
-                            }
-                        }
-
-                        setURLTitleLogo(scannedString)
-
-                        binding.openDefaultBrowserBtn.setOnClickListener {
-                            arguments?.clear()
-                            toggleButtonColor(binding.openDefaultBrowserBtn)
-                            val intent =
-                                Intent(Intent.ACTION_VIEW, Uri.parse(scannedString))
-                            val chooser =
-                                Intent.createChooser(intent, "Open $scannedString")
-                            requireActivity().startActivity(chooser)
-                        }
-                        binding.shareBtn.setOnClickListener {
-                            toggleButtonColor(binding.shareBtn)
-                            shareText(scannedString)
-                        }
-                        binding.copyBtn.setOnClickListener {
-                            toggleButtonColor(binding.copyBtn)
-                            textCopyThenPost(scannedString)
-                        }
+                            ))
                     }
                     is ScannedStringType.EMail ->{
-                        binding.emailParent.root.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = "Email: ${scannedString.getEmailEmailTypeOne()}\nSubject: ${scannedString.getSubjectEmailTypeOne()}\nMessage: ${scannedString.getMessageEmailTypeOne()}",
+                                scannedString = "Email: ${state.resultText.getEmailEmailTypeOne()}\nSubject: ${state.resultText.getSubjectEmailTypeOne()}\nMessage: ${state.resultText.getMessageEmailTypeOne()}",
                                 scannedStringType = TYPE_EMAIL1,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        val email = scannedString.getEmailEmailTypeOne()
-                        val subject = scannedString.getSubjectEmailTypeOne()
-                        val message = scannedString.getMessageEmailTypeOne()
-                        val str = scannedString.split(":" ).toTypedArray()
-                        binding.emailParent.textEmailContent.text = email
-                        binding.emailParent.textSubjectContent.text = subject
-                        binding.emailParent.textMessage.text = message
-                        binding.emailParent.openEmailBtn.setOnClickListener {
-                            toggleButtonColor(binding.emailParent.openEmailBtn)
+                        binding.resultCodeTypeText.text = "Email"
+                        binding.resultActionImg.visibility = View.VISIBLE
+                        val email = state.resultText.getEmailEmailTypeOne()
+                        val subject = state.resultText.getSubjectEmailTypeOne()
+                        val message = state.resultText.getMessageEmailTypeOne()
+                        val str = state.resultText.split(":" ).toTypedArray()
+
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(email)
+                        }
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(email)
+                        }
+                        binding.resultActionImg.setOnClickListener {
                             createEmailIntent(email,subject, message)
                         }
-                        binding.emailParent.emailShareBtn.setOnClickListener {
-                            toggleButtonColor(binding.emailParent.emailShareBtn)
-                            shareText(email)
-                            binding.emailParent.emailCopyBtn.setOnClickListener {
-                                toggleButtonColor(binding.emailParent.emailCopyBtn)
-                                textCopyThenPost(email)
-                            }
-                        }
                         Timber.d("scanned email size: ${str.size}")
-                        if (str.size != 5) {
-                            binding.emailParent.root.visibility = View.GONE
-                            binding.textParent.visibility = View.VISIBLE
-                            binding.textText.text = scannedString
-                            binding.textShareBtn.setOnClickListener {
-                                toggleButtonColor(binding.textShareBtn)
-                                shareText(scannedString)
-                            }
-                            binding.textCopyBtn.setOnClickListener {
-                                toggleButtonColor(binding.textCopyBtn)
-                                textCopyThenPost(scannedString)
-                                }
-                            }
-                        }
+
+                        binding.resultMinResultText.text = state.resultText
+                    }
                     is ScannedStringType.EMail2 ->{
-                        binding.emailParent.root.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = "Email: ${scannedString.getEmailEmailTypeTwo()}\nSubject: ${scannedString.getEmailSubjectTypeTwo()}\nMessage: ${scannedString.getEmailMessageTypeTwo()}",
+                                scannedString = "Email: ${state.resultText.getEmailEmailTypeTwo()}\nSubject: ${state.resultText.getEmailSubjectTypeTwo()}\nMessage: ${state.resultText.getEmailMessageTypeTwo()}",
                                 scannedStringType = TYPE_EMAIL2,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        val email = scannedString.getEmailEmailTypeTwo()
-                        val subject = scannedString.getEmailSubjectTypeTwo()
-                        val message = scannedString.getEmailMessageTypeTwo()
-                        binding.emailParent.textEmailContent.apply {
-                            text = email
+                        binding.resultCodeTypeText.text = "Email"
+                        binding.resultActionImg.visibility = View.VISIBLE
+                        val email = state.resultText.getEmailEmailTypeTwo()
+                        val subject = state.resultText.getEmailSubjectTypeTwo()
+                        val message = state.resultText.getEmailMessageTypeTwo()
+                        email.changeSizeByPosition(
+                            email,
+                            30
+                        )
+
+                        binding.resultMinResultText.text = state.resultText
+
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(email)
                         }
-                        binding.emailParent.textSubjectContent.apply {
-                            text = subject
-                        }
-                        binding.emailParent.textMessage.apply {
-                            text = message
-                        }
-                        binding.emailParent.openEmailBtn.setOnClickListener {
-                            toggleButtonColor(binding.emailParent.openEmailBtn)
-                            val emailIntent = Intent(Intent.ACTION_SENDTO)
-                            emailIntent.data = Uri.parse("mailto:")
-                            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
-                            emailIntent.putExtra(Intent.EXTRA_SUBJECT,subject)
-                            emailIntent.putExtra(Intent.EXTRA_TEXT, message)
-                            requireActivity().startActivity(Intent.createChooser(emailIntent, "Send email..."))
-                        }
-                        binding.emailParent.emailShareBtn.setOnClickListener {
-                            toggleButtonColor(binding.emailParent.emailShareBtn)
+                        binding.resultShareImg.setOnClickListener {
                             shareText(email)
                         }
-                        binding.emailParent.emailCopyBtn.setOnClickListener {
-                            toggleButtonColor(binding.emailParent.emailCopyBtn)
-                            textCopyThenPost(email)
+                        binding.resultActionImg.setOnClickListener {
+                            createEmailIntent(email,subject, message)
                         }
                     }
                     is ScannedStringType.SMS ->{
-                        binding.smsParent.smsLayoutParentView.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = "SMS: ${scannedString.getSMSNumber()}\nMessage: ${scannedString.getSMSMessage()}",
+                                scannedString = "SMS: ${state.resultText.getSMSNumber()}\nMessage: ${state.resultText.getSMSMessage()}",
                                 scannedStringType = TYPE_SMS,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        val smsNumber = scannedString.getSMSNumber()
-                        val smsMessage = scannedString.getSMSMessage()
-                        binding.smsParent.textSmsContent.text = smsNumber
-                        binding.smsParent.smsTextMessage.text = smsMessage
-                        binding.smsParent.openSmsBtn.setOnClickListener {
-                            toggleButtonColor(binding.smsParent.openSmsBtn)
-                            createSMSIntent(smsNumber, smsMessage)
+                        binding.resultCodeTypeText.text = "SMS"
+                        binding.resultActionImg.visibility = View.VISIBLE
+                        val smsNumber = state.resultText.getSMSNumber()
+                        val smsMessage = state.resultText.getSMSMessage()
+
+                        binding.resultMinResultText.text = "number: $smsNumber" +
+                                "\nmessage: $smsMessage"
+
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(smsNumber)
                         }
-                        binding.smsParent.smsShareBtn.setOnClickListener {
-                            toggleButtonColor(binding.smsParent.smsShareBtn)
+                        binding.resultShareImg.setOnClickListener {
                             shareText(smsNumber)
                         }
-                        binding.smsParent.smsCopyBtn.setOnClickListener {
-                            toggleButtonColor(binding.smsParent.smsCopyBtn)
-                            textCopyThenPost(smsNumber)
+                        binding.resultActionImg.setOnClickListener {
+                            createSMSIntent(smsNumber, smsMessage)
                         }
                     }
                     is ScannedStringType.Wifi ->{
-                        binding.wifiParent.wifiParentView.visibility = View.VISIBLE
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = "SSID: ${scannedString.getWifiSSID()}\nPassword: ${scannedString.getWifiPassword()}",
+                                scannedString = "SSID: ${state.resultText.getWifiSSID()}\nPassword: ${state.resultText.getWifiPassword()}",
                                 scannedStringType = TYPE_WIFI,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        val wifiSSID = scannedString.getWifiSSID()
-                        val wifiPassword = scannedString.getWifiPassword()
-                        val wifiEncryptionType = scannedString.getWifiEncryptionType()
-                        val wifiIsHidden = scannedString.getWifiIsHidden()
-                        binding.wifiParent.textWifiContent.text = wifiSSID
-                        binding.wifiParent.wifiPassTextMessage.text = wifiPassword
-                        binding.wifiParent.wifiEncryptionTypeText.text = wifiEncryptionType
-                        binding.wifiParent.wifiHiddenText.text = wifiIsHidden
-                        binding.wifiParent.shareWifiBtn.setOnClickListener {
-                            toggleButtonColor(binding.wifiParent.shareWifiBtn)
-                            shareText(wifiPassword)
-                        }
-                        binding.wifiParent.copyWifiBtn.setOnClickListener {
-                            toggleButtonColor(binding.wifiParent.copyWifiBtn)
+                        val wifiSSID = state.resultText.getWifiSSID()
+                        val wifiPassword = state.resultText.getWifiPassword()
+                        val wifiEncryptionType = state.resultText.getWifiEncryptionType()
+                        val wifiIsHidden = state.resultText.getWifiIsHidden()
+                        binding.resultCodeTypeText.text = "Wifi"
+
+                        binding.resultMinResultText.text = "ssid: $wifiSSID" +
+                                "\npassword: $wifiPassword"
+
+                        binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(wifiPassword)
                         }
-
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(wifiPassword)
+                        }
                     }
                     is ScannedStringType.Cryptocurrency ->{
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = state.resultText,
                                 scannedStringType = TYPE_CRYPTOCURRENCY,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
-                        binding.cryptocurrencyParent.cryptocurrencyParentView.visibility = View.VISIBLE
-                        val cryptocurrencyType = scannedString.getCryptocurrencyType()
-                        val cryptocurrencyAddress = scannedString.getCryptocurrencyAddress()
-                        val cryptocurrencyAmount = scannedString.getCryptocurrencyAmount()
-                        val cryptocurrencyOptionalMessage = scannedString.getCryptocurrencyMessage()
-                        binding.cryptocurrencyParent.textCryptocurrencyContent.text = cryptocurrencyType
-                        binding.cryptocurrencyParent.cryptocurrencyTitleAddressContent.text = cryptocurrencyAddress
-                        binding.cryptocurrencyParent.cryptocurrencyTextAmount.text = cryptocurrencyAmount
-                        binding.cryptocurrencyParent.cryptocurrencyMessageContent.text = cryptocurrencyOptionalMessage
-                        binding.cryptocurrencyParent.shareCryptoBtn.setOnClickListener {
-                            shareText(cryptocurrencyAddress)
-                        }
-                        binding.cryptocurrencyParent.copyCryptoBtn.setOnClickListener {
-                            toggleButtonColor(binding.cryptocurrencyParent.copyCryptoBtn)
+                        val cryptocurrencyType = state.resultText.getCryptocurrencyType()
+                        val cryptocurrencyAddress = state.resultText.getCryptocurrencyAddress()
+                        val cryptocurrencyAmount = state.resultText.getCryptocurrencyAmount()
+                        val cryptocurrencyOptionalMessage = state.resultText.getCryptocurrencyMessage()
+                        binding.resultCodeTypeText.text = "Crypto Currency"
+                        binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(cryptocurrencyAddress)
+                        }
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(cryptocurrencyAddress)
                         }
                     }
                     is ScannedStringType.VCard ->{
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
-                        }
-                        binding.vcardParent.vcardParentView.visibility = View.VISIBLE
-                        val vCard = Ezvcard.parse(scannedString).first()
+                        binding.resultActionImg.visibility = View.VISIBLE
+                        binding.resultCodeTypeText.text = "VCard"
+
+                        val vCard = Ezvcard.parse(state.resultText).first()
                         var vcardName = ""
                         vCard?.formattedName?.value?.let { name ->
                             vcardName = name
                         }
                         if(vCard?.formattedName == null){
-                            vcardName = scannedString.getVcardName()
+                            vcardName = state.resultText.getVcardName()
                         }
                         var vcardNumber = ""
                         var vcardPhoneNumber = ""
@@ -451,109 +358,102 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
 
                         viewModel.insertScannedResult(
                             ScannedResult(
-                                scannedString = scannedString,
+                                scannedString = state.resultText,
                                 scannedStringType = TYPE_VCARD,
                                 scannedCodeType = TYPE_QR_CODE,
                                 System.currentTimeMillis()
                             ))
 
-                        binding.vcardParent.vcardNameContent.text = vcardName
-                        binding.vcardParent.vcardMobileContent.text = vcardNumber
-                        binding.vcardParent.vcardWorkPhoneContent.text = vcardPhoneNumber
-                        binding.vcardParent.vcardWorkFaxContent.text = vcardFax
-                        binding.vcardParent.vcardEmailContent.text = vcardEmail
-                        binding.vcardParent.vcardCompanyContent.text = vcardCompany
-                        binding.vcardParent.vcardCompanyTitleContent.text = vcardTitle
-                        binding.vcardParent.vcardAddressContent.text = vcardStreet
-                        binding.vcardParent.vcardCityContent.text = vcardCity
-                        binding.vcardParent.vcardStateContent.text = vcardState
-                        binding.vcardParent.vcardCountryContent.text = vcardCountry
-                        binding.vcardParent.vcardZipContent.text = vcardZip
-                        binding.vcardParent.vcardWebsiteContent.text = vcardWebsite
-
-                        val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
-                            type = ContactsContract.RawContacts.CONTENT_TYPE
-                            if(vcardName != ""){
-                                putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
-                            }
-                            if(vcardNumber != ""){
-                                putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
-                            }
-                            if(vcardPhoneNumber != ""){
-                                putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
-                            }
-                            if(vcardFax != ""){
-                                putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
-                            }
-                            if(vcardEmail != ""){
-                                putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
-                            }
-                            if(vcardCompany != ""){
-                                putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
-                            }
-                            if(vcardTitle != ""){
-                                putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
-                            }
-                            putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
-                            if(vcardWebsite != ""){
-                                putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
-                            }
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(state.resultText)
                         }
-                        requireActivity().startActivity(intent)
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(state.resultText)
+                        }
+                        binding.resultActionImg.setOnClickListener {
+                            val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                                type = ContactsContract.RawContacts.CONTENT_TYPE
+                                if(vcardName != ""){
+                                    putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
+                                }
+                                if(vcardNumber != ""){
+                                    putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
+                                }
+                                if(vcardPhoneNumber != ""){
+                                    putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
+                                }
+                                if(vcardFax != ""){
+                                    putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
+                                }
+                                if(vcardEmail != ""){
+                                    putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
+                                }
+                                if(vcardCompany != ""){
+                                    putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
+                                }
+                                if(vcardTitle != ""){
+                                    putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
+                                }
+                                putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
+                                if(vcardWebsite != ""){
+                                    putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
+                                }
+                            }
+                            requireActivity().startActivity(intent)
+                        }
 
                     }
                     is ScannedStringType.Text ->{
-                        binding.textParent.visibility = View.VISIBLE
-                        //shareText(scannedString)
-                        binding.swipeToRefreshResult.apply {
-                            setOnRefreshListener {
-                                isRefreshing = false
-                            }
-                            isNestedScrollingEnabled = true
+                        binding.resultCodeTypeText.text = "Text"
+                        binding.resultMinResultText.text = state.resultText
+                        viewModel.insertScannedResult(
+                            ScannedResult(
+                                scannedString = state.resultText,
+                                scannedStringType = TYPE_TEXT,
+                                scannedCodeType = TYPE_QR_CODE,
+                                System.currentTimeMillis()
+                            ))
+                        binding.resultCopyImg.setOnClickListener {
+                            textCopyThenPost(state.resultText)
                         }
-
-                        viewModel.scannedType.value?.let { codeType ->
-                            if (codeType.replace("_"," ") == "QR CODE"){
-                                viewModel.insertScannedResult(
-                                    ScannedResult(
-                                        scannedString = scannedString,
-                                        scannedStringType = TYPE_TEXT,
-                                        scannedCodeType = TYPE_QR_CODE,
-                                        System.currentTimeMillis()
-                                    ))
-                            } else {
-                                viewModel.insertScannedResult(
-                                    ScannedResult(
-                                        scannedString = scannedString,
-                                        scannedStringType = TYPE_TEXT,
-                                        scannedCodeType = TYPE_BAR_CODE,
-                                        System.currentTimeMillis()
-                                    ))
-                            }
-                        }
-
-                        binding.textText.apply {
-                            text = scannedString
-                            setOnClickListener {
-                                textCopyThenPost(scannedString)
-                            }
-                            setOnLongClickListener {
-                                shareText(scannedString)
-                                return@setOnLongClickListener true
-                            }
-                        }
-                        binding.textShareBtn.setOnClickListener {
-                            toggleButtonColor(binding.textShareBtn)
-                            shareText(scannedString)
-                        }
-                        binding.textCopyBtn.setOnClickListener {
-                            toggleButtonColor(binding.textCopyBtn)
-                            textCopyThenPost(scannedString)
+                        binding.resultShareImg.setOnClickListener {
+                            shareText(state.resultText)
                         }
                     }
+
+                }
+                binding.swipeToRefreshResult.apply {
+                    setOnRefreshListener {
+                        binding.swipeToRefreshResult.isRefreshing = false
+                    }
+                    isNestedScrollingEnabled = true
+                }
+            }else{
+                binding.resultCodeTypeText.text = "Barcode"
+                binding.resultMinResultText.text = state.resultText
+
+                viewModel.insertScannedResult(
+                    ScannedResult(
+                        scannedString = state.resultText,
+                        scannedStringType = TYPE_TEXT,
+                        scannedCodeType = TYPE_BAR_CODE,
+                        System.currentTimeMillis()
+                    ))
+                binding.resultCopyImg.setOnClickListener {
+                    textCopyThenPost(state.resultText)
+                }
+                binding.resultShareImg.setOnClickListener {
+                    shareText(state.resultText)
                 }
             }
+
+
         }
+
+        binding.resultBackBtn.setOnClickListener {
+            findNavController().navigate(ResultFragmentDirections.actionResultFragmentToCaptureFragment())
+        }
+
     }
 
     override fun onPause() {
@@ -570,49 +470,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         viewModel.updateScannedType("")
         viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources,R.drawable.q_code))
         _binding = null
-    }
-
-    private fun setURLTitleLogo(scannedString: String){
-        CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main){
-                binding.urlLogoProgress.visibility = View.VISIBLE
-                binding.urlTitleProgress.visibility = View.VISIBLE
-            }
-            try {
-                val document = Jsoup.connect(scannedString).get()
-                val img = document.select("img").first()
-                val imgSrc = img?.absUrl("src")
-                val title = document.title()
-                title.let {
-                    withContext(Dispatchers.Main) {
-                        binding.textUrlTitleText.text = it
-                        binding.urlTitleProgress.visibility = View.GONE
-                    }
-                }
-
-                val input: InputStream =  URL(imgSrc).openStream()
-                val bitmap = BitmapFactory.decodeStream(input)
-                if (bitmap == null){
-                    withContext(Dispatchers.Main){
-                        binding.urlLogoProgress.visibility = View.GONE
-                    }
-                }
-                bitmap?.let {
-                    withContext(Dispatchers.Main){
-                        binding.urlLogoImg.setImageBitmap(it)
-                        binding.urlLogoProgress.visibility = View.GONE
-                    }
-                }
-
-            }catch (e: Exception){
-                Timber.d("Error Result Fragment: $e")
-                //showSnackBar(e.toString())
-                withContext(Dispatchers.Main){
-                    binding.urlTitleProgress.visibility = View.GONE
-                    binding.urlLogoProgress.visibility = View.GONE
-                }
-            }
-        }
     }
 
     private fun saveImage(image: Bitmap): Uri? {

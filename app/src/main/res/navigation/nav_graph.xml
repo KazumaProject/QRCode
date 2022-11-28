@@ -40,12 +40,19 @@
         android:id="@+id/generateFragment"
         android:name="com.kazumaproject7.qrcodescanner.ui.generate.GenerateFragment"
         android:label="fragment_generate"
-        tools:layout="@layout/fragment_generate" />
+        tools:layout="@layout/fragment_generate" >
+    </fragment>
     <fragment
         android:id="@+id/resultFragment"
         android:name="com.kazumaproject7.qrcodescanner.ui.result.ResultFragment"
         android:label="fragment_result"
-        tools:layout="@layout/fragment_result" />
+        tools:layout="@layout/fragment_result" >
+        <action
+            android:id="@+id/action_resultFragment_to_captureFragment"
+            app:destination="@id/captureFragment"
+            app:popUpTo="@id/captureFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.kazumaproject7.qrcodescanner.ui.history.HistoryFragment"

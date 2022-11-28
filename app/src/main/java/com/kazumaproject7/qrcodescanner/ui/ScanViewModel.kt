@@ -14,10 +14,17 @@ import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.repository.ScannedResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class ResultState(
+    val resultText: String? = null,
+    val scannedType: String? = null,
+    val scannedStringType: ScannedStringType = ScannedStringType.Text,
+    val bitmap: Bitmap? = null,
+    val flag: Boolean = false
+)
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
@@ -49,37 +56,45 @@ class ScanViewModel @Inject constructor(
         _isFlashOn.value = value
     }
 
-    val scannedString: LiveData<String>
-        get() = _scannedString
-    private val _scannedString = MutableLiveData("")
-
+    private val _scannedString = MutableStateFlow("")
+    val scannedString = _scannedString.asStateFlow()
     fun updateScannedString(value: String){
         _scannedString.value = value
     }
 
-    val scannedType: LiveData<String>
-        get() = _scannedType
-    private val _scannedType = MutableLiveData("")
-
+    private val _scannedType = MutableStateFlow("")
+    val scannedType = _scannedType.asStateFlow()
     fun updateScannedType(value: String){
         _scannedType.value = value
     }
 
-    val scannedStringType: LiveData<ScannedStringType>
-        get() = _scannedStringType
-    private val _scannedStringType = MutableLiveData<ScannedStringType>()
-
+    private val _scannedStringType = MutableStateFlow<ScannedStringType>(ScannedStringType.Text)
+    val scannedStringType = _scannedStringType.asStateFlow()
     fun updateScannedStringType(value: ScannedStringType){
         _scannedStringType.value = value
     }
 
-    val scannedBitmap: LiveData<Bitmap>
-        get() = _scannedBitmap
-    private val _scannedBitmap = MutableLiveData(BitmapFactory.decodeResource(mContext.resources, R.drawable.q_code))
-
+    private val _scannedBitmap = MutableStateFlow(BitmapFactory.decodeResource(mContext.resources, R.drawable.q_code))
+    val scannedBitmap = _scannedBitmap.asStateFlow()
     fun updateScannedBitmap(value: Bitmap){
         _scannedBitmap.value = value
     }
+
+    private val _resultFirstFlag = MutableStateFlow(false)
+    val resultFirstFlag = _resultFirstFlag.asStateFlow()
+    fun updateResultFirstFlag(value: Boolean){
+        _resultFirstFlag.value = value
+    }
+
+    val resultState = combine(_scannedString,_scannedType,_scannedStringType,_scannedBitmap,resultFirstFlag){ resultText, codeType, resultType, bitmap, flag ->
+        ResultState(
+            resultText = resultText,
+            scannedType = codeType,
+            scannedStringType = resultType,
+            bitmap = bitmap,
+            flag = flag
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ResultState())
 
     fun insertScannedResult(scannedResult: ScannedResult) =viewModelScope.launch {
         repository.insertScannedResult(scannedResult)
@@ -93,18 +108,14 @@ class ScanViewModel @Inject constructor(
         repository.deleteScannedResult(scannedResultID)
     }
 
-    val isReceivingImage: LiveData<Boolean>
-        get() = _isReceivingImage
-    private val _isReceivingImage = MutableLiveData(false)
-
+    private val _isReceivingImage = MutableStateFlow(false)
+    val isReceivingImage = _isReceivingImage.asStateFlow()
     fun updateIsReceivingImage(value: Boolean){
         _isReceivingImage.value = value
     }
 
-    val receivingUri: LiveData<Uri>
-        get() = _receivingUri
-    private val _receivingUri = MutableLiveData(Uri.EMPTY)
-
+    private val _receivingUri = MutableStateFlow(Uri.EMPTY)
+    val receivingUri = _receivingUri.asStateFlow()
     fun updateReceivingUri(value: Uri){
         _receivingUri.value = value
     }

@@ -212,13 +212,45 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             if(isFlashOn){
                 binding.barcodeView.setTorchOn()
                 binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_on_24)
-                binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_green_dark)
+                binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.holo_orange_light)
                 binding.captureMenuFlashStateText.text = "On"
             }else{
                 binding.barcodeView.setTorchOff()
                 binding.flashBtn.background = ContextCompat.getDrawable(requireContext(),R.drawable.baseline_flash_off_24)
                 binding.flashBtn.supportBackgroundTintList = requireContext().getColorStateList(android.R.color.white)
                 binding.captureMenuFlashStateText.text = "Off"
+            }
+        }
+
+        collectLatestLifecycleFlow(viewModel.isReceivingImage){ receiveImage ->
+            if (receiveImage){
+                try {
+                    viewModel.receivingUri.value?.let { uri ->
+                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
+                        if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
+                            val resultText = readQrcode(bitmap)[0]
+                            val barcodeFormat = readQrcode(bitmap)[1]
+                            viewModel.updateScannedStringType(resultText.convertToScannedStringType())
+                            viewModel.updateScannedString(resultText)
+                            viewModel.updateScannedType(barcodeFormat)
+                            viewModel.updateScannedBitmap(bitmap)
+                            findNavController().navigate(R.id.resultFragment)
+                            viewModel.updateIsReceivingImage(false)
+                            viewModel.updateReceivingUri(Uri.EMPTY)
+                        } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
+                            val resultText = readQrcode(bitmap)[0]
+                            viewModel.updateScannedStringType(resultText.convertToScannedStringType())
+                            viewModel.updateScannedString(resultText)
+                            viewModel.updateScannedBitmap(bitmap)
+                            findNavController().navigate(R.id.resultFragment)
+                            viewModel.updateIsReceivingImage(false)
+                            viewModel.updateReceivingUri(Uri.EMPTY)
+                        }
+                    }
+                }catch (e: Exception){
+                    Timber.e(e.localizedMessage)
+                    showSnackBar("Could not read qr code. Please try again.")
+                }
             }
         }
 
@@ -269,7 +301,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         })
 
-
         val scaleDetector = ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener(){
 
             override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -301,99 +332,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             detector.onTouchEvent(event)
             scaleDetector.onTouchEvent(event)
             return@setOnTouchListener true
-        }
-
-        viewModel.isReceivingImage.observe(viewLifecycleOwner){
-            if (it){
-                try {
-                    viewModel.receivingUri.value?.let { uri ->
-                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver,uri)
-                        if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 2){
-                            val resultText = readQrcode(bitmap)[0]
-                            val barcodeFormat = readQrcode(bitmap)[1]
-
-                            if (URLUtil.isValidUrl(resultText)){
-                                viewModel.updateScannedStringType(ScannedStringType.Url)
-                            }else{
-                                when{
-                                    resultText.contains("MATMSG") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                    }
-                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                    }
-                                    resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                    }
-                                    resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                    }
-                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                            lastText.contains("xrp:")
-                                    ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                    }
-                                    else ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                                    }
-                                }
-                            }
-                            viewModel.updateScannedString(resultText)
-                            viewModel.updateScannedType(barcodeFormat)
-
-                            viewModel.updateScannedBitmap(bitmap)
-                            findNavController().navigate(R.id.resultFragment)
-                            viewModel.updateIsReceivingImage(false)
-                            viewModel.updateReceivingUri(Uri.EMPTY)
-                        } else if (readQrcode(bitmap).isNotEmpty() && readQrcode(bitmap).size == 1){
-
-                            val resultText = readQrcode(bitmap)[0]
-
-                            if (URLUtil.isValidUrl(resultText)){
-                                viewModel.updateScannedStringType(ScannedStringType.Url)
-                            }else{
-                                when{
-                                    resultText.contains("MATMSG") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                    }
-                                    resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                    }
-                                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                    }
-                                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                    }
-                                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                            lastText.contains("xrp:")
-                                    ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                    }
-                                    lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.VCard)
-                                    }
-                                    else ->{
-                                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                                    }
-                                }
-                            }
-                            viewModel.updateScannedString(resultText)
-                            viewModel.updateScannedBitmap(bitmap)
-                            findNavController().navigate(R.id.resultFragment)
-                            viewModel.updateIsReceivingImage(false)
-                            viewModel.updateReceivingUri(Uri.EMPTY)
-                        }
-                    }
-
-
-                }catch (e: Exception){
-                    Timber.e(e.localizedMessage)
-                    showSnackBar("Could not read qr code. Please try again.")
-                }
-            }
         }
 
         binding.folderOpenContainer.apply {
@@ -440,7 +378,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 viewModel.updateIsCaptureShow(false)
             }
         }
-
     }
 
     override fun onResume() {
@@ -540,33 +477,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         val resultText = readQrcode(bitmap)[0]
                         val barcodeFormat = readQrcode(bitmap)[1]
 
-                        if (URLUtil.isValidUrl(resultText)){
-                            viewModel.updateScannedStringType(ScannedStringType.Url)
-                        }else{
-                            when{
-                                resultText.contains("MATMSG") ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                }
-                                resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                }
-                                resultText.contains("smsto:") || resultText.contains("SMSTO:")->{
-                                    viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                }
-                                resultText.contains("Wifi:") || resultText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                }
-                                lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                        lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                        lastText.contains("xrp:")
-                                ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                }
-                                else ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Text)
-                                }
-                            }
-                        }
+                        viewModel.updateScannedStringType(resultText.convertToScannedStringType())
                         viewModel.updateScannedString(resultText)
                         viewModel.updateScannedType(barcodeFormat)
 
@@ -579,36 +490,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
                         val resultText = readQrcode(bitmap)[0]
 
-                        if (URLUtil.isValidUrl(resultText)){
-                            viewModel.updateScannedStringType(ScannedStringType.Url)
-                        }else{
-                            when{
-                                resultText.contains("MATMSG") ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.EMail)
-                                }
-                                resultText.contains("mailto:") || resultText.contains("MAILTO") ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                                }
-                                lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
-                                    viewModel.updateScannedStringType(ScannedStringType.SMS)
-                                }
-                                lastText.contains("Wifi:") || lastText.contains("WIFI:") || resultText.contains("EN:WPA") || resultText.contains(":WPA")->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                                }
-                                lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                                        lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                                        lastText.contains("xrp:")
-                                ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                                }
-                                lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.VCard)
-                                }
-                                else ->{
-                                    viewModel.updateScannedStringType(ScannedStringType.Text)
-                                }
-                            }
-                        }
+                        viewModel.updateScannedStringType(resultText.convertToScannedStringType())
                         viewModel.updateScannedString(resultText)
                         viewModel.updateScannedBitmap(bitmap)
                         CoroutineScope(Dispatchers.Main).launch {
@@ -635,36 +517,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
             lastText = result.text
             Timber.d("Last Text: $lastText")
-            if (URLUtil.isValidUrl(lastText)){
-                viewModel.updateScannedStringType(ScannedStringType.Url)
-            }else{
-                when{
-                    lastText.contains("MATMSG") ->{
-                        viewModel.updateScannedStringType(ScannedStringType.EMail)
-                    }
-                    lastText.contains("mailto:") || lastText.contains("MAILTO:") ->{
-                        viewModel.updateScannedStringType(ScannedStringType.EMail2)
-                    }
-                    lastText.contains("smsto:") || lastText.contains("SMSTO:")->{
-                        viewModel.updateScannedStringType(ScannedStringType.SMS)
-                    }
-                    lastText.contains("Wifi:") || lastText.contains("WIFI:") || lastText.contains("EN:WPA") || lastText.contains(":WPA")->{
-                        viewModel.updateScannedStringType(ScannedStringType.Wifi)
-                    }
-                    lastText.contains("bitcoin:") || lastText.contains("ethereum:") ||
-                            lastText.contains("bitcoincash:") || lastText.contains("litecoin:") ||
-                            lastText.contains("xrp:")
-                    ->{
-                        viewModel.updateScannedStringType(ScannedStringType.Cryptocurrency)
-                    }
-                    lastText.contains("begin:vcard") || lastText.contains("BEGIN:VCARD") ->{
-                        viewModel.updateScannedStringType(ScannedStringType.VCard)
-                    }
-                    else ->{
-                        viewModel.updateScannedStringType(ScannedStringType.Text)
-                    }
-                }
-            }
+            viewModel.updateScannedStringType(lastText.convertToScannedStringType())
             viewModel.updateScannedString(lastText)
             viewModel.updateScannedType(result.barcodeFormat.name)
             startResultFragment(result)
@@ -675,8 +528,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
         }
     }
-
-
 
     @SuppressLint("SetTextI18n")
     private fun startResultFragment(result: BarcodeResult){
@@ -692,7 +543,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
             if (AppPreferences.isResultScreenOpen){
                 croppedBitmap = when (result.transformedResultPoints.size) {
-
                     // QR Code normal data size
                     4 -> {
                         if (orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -864,6 +714,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 }
                 croppedBitmap?.let {
                     viewModel.updateScannedBitmap(it)
+                    viewModel.updateIsResultShow(false)
+                    viewModel.updateIsCaptureShow(false)
                     findNavController().navigate(R.id.resultFragment)
                 }
             } else {
@@ -871,457 +723,444 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.barcodeView.viewFinder.setLaserVisibility(false)
                 binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(false)
 
-                //showResultSnackBar(result.text, isUrl,viewModel,binding.barcodeView)
-                Timber.d("result points: ${result.resultPoints}")
-                Timber.d("transformed result: ${result.transformedResultPoints}")
-
                 result.transformedResultPoints?.let { points ->
+                if (viewModel.scannedType.value.replace("_"," ") == "QR CODE"){
+                    when(viewModel.scannedStringType.value){
+                        is ScannedStringType.Url ->{
+                            CoroutineScope(Dispatchers.IO).launch {
+                                withContext(Dispatchers.Main){
+                                    binding.progressResultTitle.visibility = View.VISIBLE
+                                    binding.resultActionBtn.text = "Open"
+                                    binding.resultSubText.text = result.text
+                                    binding.resultActionBtn.setOnClickListener {
+                                        val intent =
+                                            Intent(Intent.ACTION_VIEW, Uri.parse(result.text))
+                                        val chooser =
+                                            Intent.createChooser(intent, "Open ${result.text}")
+                                        requireActivity().startActivity(chooser)
 
-                    viewModel.scannedType.value?.let { codeType ->
-                        viewModel.scannedStringType.value?.let { strType ->
-                            // QR Code
-                            if (codeType.replace("_"," ") == "QR CODE"){
-                                when(strType){
-                                    is ScannedStringType.Url ->{
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            withContext(Dispatchers.Main){
-
-                                                binding.progressResultTitle.visibility = View.VISIBLE
-
-                                                binding.resultActionBtn.text = "Open"
-                                                binding.resultSubText.text = result.text
-                                                binding.resultActionBtn.setOnClickListener {
-                                                    val intent =
-                                                        Intent(Intent.ACTION_VIEW, Uri.parse(result.text))
-                                                    val chooser =
-                                                        Intent.createChooser(intent, "Open ${result.text}")
-                                                    requireActivity().startActivity(chooser)
-
-                                                    val scannedResult = ScannedResult(
-                                                        scannedString = result.text,
-                                                        scannedStringType = TYPE_URL,
-                                                        scannedCodeType = TYPE_QR_CODE,
-                                                        System.currentTimeMillis()
-                                                    )
-                                                    viewModel.insertScannedResult(scannedResult)
-                                                    viewModel.updateIsResultShow(false)
-                                                }
-                                                binding.resultDisplayBar.setOnClickListener {
-                                                    textCopyThenPost(result.text)
-                                                }
-                                            }
-
-                                            try {
-                                                val document = Jsoup.connect(result.text).get()
-                                                val img = document.select("img").first()
-                                                val imgSrc = img?.absUrl("src")
-                                                val title = document.title()
-                                                title.let {
-                                                    withContext(Dispatchers.Main) {
-                                                        binding.resultTitleText.text = it
-                                                        binding.progressResultTitle.visibility = View.GONE
-                                                    }
-                                                }
-
-                                                if (title == null){
-                                                    withContext(Dispatchers.Main) {
-                                                        binding.resultTitleText.text = "QR Code"
-                                                        binding.progressResultTitle.visibility = View.GONE
-                                                    }
-                                                }
-
-                                                val input: InputStream =  URL(imgSrc).openStream()
-                                                val bitmap = BitmapFactory.decodeStream(input)
-                                                bitmap?.let {
-                                                    withContext(Dispatchers.Main){
-                                                        binding.resultImgLogo.setImageBitmap(it)
-                                                    }
-                                                }
-                                                if (bitmap == null){
-                                                    withContext(Dispatchers.Main){
-                                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
-                                                        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
-                                                    }
-                                                }
-
-                                            }catch (e: Exception){
-                                                Timber.d("Error Result Fragment: $e")
-                                                withContext(Dispatchers.Main){
-                                                    binding.progressResultTitle.visibility = View.GONE
-                                                    binding.resultTitleText.text = "QR Code"
-                                                    binding.barcodeView.viewFinder.isResultShown(true)
-                                                    binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
-                                                    viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
-                                                }
-                                            }
-                                        }
+                                        val scannedResult = ScannedResult(
+                                            scannedString = result.text,
+                                            scannedStringType = TYPE_URL,
+                                            scannedCodeType = TYPE_QR_CODE,
+                                            System.currentTimeMillis()
+                                        )
+                                        viewModel.insertScannedResult(scannedResult)
+                                        viewModel.updateIsResultShow(false)
                                     }
-
-                                    is ScannedStringType.EMail ->{
-                                        val email_string = result.text
-
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
-                                        binding.resultSubText.text = email_string.getMessageEmailTypeOne()
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            createEmailIntent(
-                                                email_string.getEmailEmailTypeOne(),
-                                                email_string.getSubjectEmailTypeOne(),
-                                                email_string.getMessageEmailTypeOne()
-                                            )
-                                            val scannedResult = ScannedResult(
-                                                scannedString = "Email: ${email_string.getEmailEmailTypeOne()}\nSubject: ${email_string.getSubjectEmailTypeOne()}\nMessage: ${email_string.getMessageEmailTypeOne()}",
-                                                scannedStringType = TYPE_EMAIL1,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-                                    }
-
-                                    is ScannedStringType.EMail2 ->{
-                                        val email_string = result.text
-
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultTitleText.text = email_string.getEmailEmailTypeTwo()
-                                        binding.resultSubText.text = email_string.getEmailMessageTypeTwo()
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(email_string.getEmailEmailTypeTwo())
-
-                                            val scannedResult = ScannedResult(
-                                                scannedString = "Email: ${email_string.getEmailEmailTypeTwo()}\nSubject: ${email_string.getEmailSubjectTypeTwo()}\nMessage: ${email_string.getEmailMessageTypeTwo()}",
-                                                scannedStringType = TYPE_EMAIL2,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-                                    }
-
-                                    is ScannedStringType.SMS ->{
-                                        val sms_string = result.text
-
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_sms_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultTitleText.text = sms_string.getSMSNumber()
-                                        binding.resultSubText.text = sms_string.getSMSMessage()
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            createSMSIntent(sms_string.getSMSNumber(),sms_string.getSMSMessage())
-                                            val scannedResult = ScannedResult(
-                                                scannedString = "SMS: ${sms_string.getSMSNumber()}\nMessage: ${sms_string.getSMSMessage()}",
-                                                scannedStringType = TYPE_SMS,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-
-                                    }
-
-                                    is ScannedStringType.Wifi ->{
-                                        val wifi_string = result.text
-
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                                            "OPEN"
-                                        } else {
-                                            "COPY"
-                                        }
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_wifi_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultTitleText.text = wifi_string.getWifiSSID()
-                                        binding.resultSubText.text = wifi_string.getWifiPassword()
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(wifi_string.getWifiPassword())
-                                            val scannedResult = ScannedResult(
-                                                scannedString = "SSID: ${wifi_string.getWifiSSID()}\nPassword: ${wifi_string.getWifiPassword()}",
-                                                scannedStringType = TYPE_WIFI,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                                requireContext().startActivity(Intent(Settings.Panel.ACTION_WIFI))
-                                            }
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-
-                                    }
-
-                                    is ScannedStringType.VCard ->{
-                                        val scannedString = result.text
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Open"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_contacts_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        val vCard = Ezvcard.parse(scannedString).first()
-                                        var vcardName = ""
-                                        vCard?.formattedName?.value?.let { name ->
-                                            vcardName = name
-                                        }
-                                        if(vCard?.formattedName == null){
-                                            vcardName = scannedString.getVcardName()
-                                        }
-                                        var vcardNumber = ""
-                                        var vcardPhoneNumber = ""
-                                        var vcardFax = ""
-                                        if(vCard.telephoneNumbers.size >= 1){
-                                            for(i in 0 until vCard.telephoneNumbers.size){
-                                                when(vCard.telephoneNumbers[i].parameters.type){
-                                                    "CELL" ->{
-                                                        vcardNumber = vCard.telephoneNumbers[i].text
-                                                    }
-                                                    "WORK" ->{
-                                                        vcardPhoneNumber = vCard.telephoneNumbers[i].text
-                                                    }
-                                                    "FAX" ->{
-                                                        vcardFax = vCard.telephoneNumbers[i].text
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        var vcardEmail = ""
-                                        if(vCard.emails.size >= 1){
-                                            vCard.emails[0]?.value?.let { email ->
-                                                vcardEmail = email
-                                            }
-                                        }
-
-                                        var vcardStreet = ""
-                                        var vcardCity= ""
-                                        var vcardState = ""
-                                        var vcardCountry = ""
-                                        var vcardZip = ""
-
-                                        if(vCard.addresses.size >= 1){
-                                            vCard.addresses[0]?.let { address ->
-                                                address.streetAddress?.let { street_address ->
-                                                    vcardStreet = street_address
-                                                }
-                                                if(address.localities.size >= 1){
-                                                    address.localities[0]?.let { city ->
-                                                        vcardCity = city
-                                                    }
-                                                }
-                                                if(address.regions.size >= 1){
-                                                    address.regions[0]?.let { state ->
-                                                        vcardState = state
-                                                    }
-                                                }
-                                                if(address.countries.size >= 1){
-                                                    address.countries[0]?.let { country ->
-                                                        vcardCountry = country
-                                                    }
-                                                }
-                                                if(address.postalCodes.size >= 1){
-                                                    address.postalCodes[0]?.let { postal ->
-                                                        vcardZip = postal
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        var vcardCompany = ""
-
-                                        if(vCard.organizations.size >= 1){
-                                            vCard.organizations[0]?.let { org ->
-                                                if(org.values.size >= 1){
-                                                    org.values[0]?.let { comp_name ->
-                                                        vcardCompany = comp_name
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        var vcardTitle = ""
-
-                                        if(vCard.titles.size >= 1){
-                                            vCard.titles[0]?.let { title ->
-                                                vcardTitle = title.value
-                                            }
-                                        }
-
-                                        var vcardWebsite = ""
-
-                                        if(vCard.urls.size >= 1){
-                                            vCard.urls[0]?.let { url ->
-                                                vcardWebsite = url.value
-                                            }
-                                        }
-
-                                        binding.resultTitleText.text = vcardName
-                                        binding.resultSubText.text = "VCard Version: ${vCard.version.version}"
-
-                                        binding.resultActionBtn.setOnClickListener {
-
-                                            val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
-                                                type = ContactsContract.RawContacts.CONTENT_TYPE
-                                                if(vcardName != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
-                                                }
-                                                if(vcardNumber != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
-                                                }
-                                                if(vcardPhoneNumber != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
-                                                }
-                                                if(vcardFax != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
-                                                }
-                                                if(vcardEmail != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
-                                                }
-                                                if(vcardCompany != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
-                                                }
-                                                if(vcardTitle != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
-                                                }
-                                                putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
-                                                if(vcardWebsite != ""){
-                                                    putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
-                                                }
-                                            }
-                                            requireActivity().startActivity(intent)
-
-                                            val scannedResult = ScannedResult(
-                                                scannedString = result.text,
-                                                scannedStringType = TYPE_VCARD,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-
-                                    }
-
-                                    is ScannedStringType.Cryptocurrency ->{
-                                        val scannedString = result.text
-
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultActionBtn.text = "Copy"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultTitleText.text = scannedString.getCryptocurrencyType()
-                                        binding.resultSubText.text = scannedString.getCryptocurrencyAddress()
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(scannedString.getCryptocurrencyAddress())
-                                            val scannedResult = ScannedResult(
-                                                scannedString = scannedString,
-                                                scannedStringType = Constants.TYPE_CRYPTOCURRENCY,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-                                            textCopyThenPost(result.text)
-                                        }
-                                    }
-
-                                    else ->{
-                                        binding.progressResultTitle.visibility = View.GONE
-                                        binding.resultSubText.text = ""
-                                        binding.resultActionBtn.text = "Copy"
-                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
-
-                                        binding.resultTitleText.text = result.text
-
-                                        binding.barcodeView.viewFinder.isResultShown(true)
-
-                                        binding.resultActionBtn.setOnClickListener {
-                                            textCopyThenPost(result.text)
-
-                                            val scannedResult = ScannedResult(
-                                                scannedString = result.text,
-                                                scannedStringType = TYPE_TEXT,
-                                                scannedCodeType = TYPE_QR_CODE,
-                                                System.currentTimeMillis()
-                                            )
-                                            viewModel.insertScannedResult(scannedResult)
-                                            viewModel.updateIsResultShow(false)
-                                        }
-                                        binding.resultDisplayBar.setOnClickListener {
-
-                                        }
+                                    binding.resultDisplayBar.setOnClickListener {
+                                        textCopyThenPost(result.text)
                                     }
                                 }
-                            } else {
-                                // Barcode
-                                binding.progressResultTitle.visibility = View.GONE
-                                binding.resultSubText.text = ""
-                                binding.resultActionBtn.text = "Copy"
-                                binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
-                                //viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.baseline_content_copy_24))
-                                binding.resultTitleText.text = result.text
 
-                                binding.barcodeView.viewFinder.isResultShown(true)
+                                try {
+                                    val document = Jsoup.connect(result.text).get()
+                                    val img = document.select("img").first()
+                                    val imgSrc = img?.absUrl("src")
+                                    val title = document.title()
+                                    title.let {
+                                        withContext(Dispatchers.Main) {
+                                            binding.resultTitleText.text = it
+                                            binding.progressResultTitle.visibility = View.GONE
+                                        }
+                                    }
 
-                                binding.resultActionBtn.setOnClickListener {
-                                    textCopyThenPost(result.text)
+                                    if (title == null){
+                                        withContext(Dispatchers.Main) {
+                                            binding.resultTitleText.text = "QR Code"
+                                            binding.progressResultTitle.visibility = View.GONE
+                                        }
+                                    }
 
-                                    val scannedResult = ScannedResult(
-                                        scannedString = result.text,
-                                        scannedStringType = TYPE_TEXT,
-                                        scannedCodeType = TYPE_BAR_CODE,
-                                        System.currentTimeMillis()
-                                    )
-                                    viewModel.insertScannedResult(scannedResult)
-                                    viewModel.updateIsResultShow(false)
-                                }
-                                binding.resultDisplayBar.setOnClickListener {
+                                    val input: InputStream =  URL(imgSrc).openStream()
+                                    val bitmap = BitmapFactory.decodeStream(input)
+                                    bitmap?.let {
+                                        withContext(Dispatchers.Main){
+                                            binding.resultImgLogo.setImageBitmap(it)
+                                        }
+                                    }
+                                    if (bitmap == null){
+                                        withContext(Dispatchers.Main){
+                                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                            viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
+                                        }
+                                    }
 
+                                }catch (e: Exception){
+                                    Timber.d("Error Result Fragment: $e")
+                                    withContext(Dispatchers.Main){
+                                        binding.progressResultTitle.visibility = View.GONE
+                                        binding.resultTitleText.text = "QR Code"
+                                        binding.barcodeView.viewFinder.isResultShown(true)
+                                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.q_code))
+                                        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources, R.drawable.q_code))
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    CoroutineScope(Dispatchers.Main).launch {
-                        binding.barcodeView.viewFinder.drawResultPointsRect(points)
-                        binding.resultDisplayBar.visibility = View.VISIBLE
-                        viewModel.updateIsResultShow(true)
+                        is ScannedStringType.EMail ->{
+                            val email_string = result.text
+
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = "Open"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultTitleText.text = email_string.getEmailEmailTypeOne()
+                            binding.resultSubText.text = email_string.getMessageEmailTypeOne()
+
+                            binding.resultActionBtn.setOnClickListener {
+                                createEmailIntent(
+                                    email_string.getEmailEmailTypeOne(),
+                                    email_string.getSubjectEmailTypeOne(),
+                                    email_string.getMessageEmailTypeOne()
+                                )
+                                val scannedResult = ScannedResult(
+                                    scannedString = "Email: ${email_string.getEmailEmailTypeOne()}\nSubject: ${email_string.getSubjectEmailTypeOne()}\nMessage: ${email_string.getMessageEmailTypeOne()}",
+                                    scannedStringType = TYPE_EMAIL1,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(email_string.getEmailEmailTypeOne())
+                            }
+                        }
+
+                        is ScannedStringType.EMail2 ->{
+                            val email_string = result.text
+
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = "Open"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_email_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultTitleText.text = email_string.getEmailEmailTypeTwo()
+                            binding.resultSubText.text = email_string.getEmailMessageTypeTwo()
+
+                            binding.resultActionBtn.setOnClickListener {
+                                textCopyThenPost(email_string.getEmailEmailTypeTwo())
+
+                                val scannedResult = ScannedResult(
+                                    scannedString = "Email: ${email_string.getEmailEmailTypeTwo()}\nSubject: ${email_string.getEmailSubjectTypeTwo()}\nMessage: ${email_string.getEmailMessageTypeTwo()}",
+                                    scannedStringType = TYPE_EMAIL2,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(email_string.getEmailEmailTypeTwo())
+                            }
+                        }
+
+                        is ScannedStringType.SMS ->{
+                            val sms_string = result.text
+
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = "Open"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_sms_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultTitleText.text = sms_string.getSMSNumber()
+                            binding.resultSubText.text = sms_string.getSMSMessage()
+
+                            binding.resultActionBtn.setOnClickListener {
+                                createSMSIntent(sms_string.getSMSNumber(),sms_string.getSMSMessage())
+                                val scannedResult = ScannedResult(
+                                    scannedString = "SMS: ${sms_string.getSMSNumber()}\nMessage: ${sms_string.getSMSMessage()}",
+                                    scannedStringType = TYPE_SMS,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(sms_string.getSMSNumber())
+                            }
+
+                        }
+
+                        is ScannedStringType.Wifi ->{
+                            val wifi_string = result.text
+
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                                "OPEN"
+                            } else {
+                                "COPY"
+                            }
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_wifi_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultTitleText.text = wifi_string.getWifiSSID()
+                            binding.resultSubText.text = wifi_string.getWifiPassword()
+
+                            binding.resultActionBtn.setOnClickListener {
+                                textCopyThenPost(wifi_string.getWifiPassword())
+                                val scannedResult = ScannedResult(
+                                    scannedString = "SSID: ${wifi_string.getWifiSSID()}\nPassword: ${wifi_string.getWifiPassword()}",
+                                    scannedStringType = TYPE_WIFI,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                    requireContext().startActivity(Intent(Settings.Panel.ACTION_WIFI))
+                                }
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(wifi_string.getWifiSSID())
+                            }
+
+                        }
+
+                        is ScannedStringType.VCard ->{
+                            val scannedString = result.text
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = "Open"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_contacts_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            val vCard = Ezvcard.parse(scannedString).first()
+                            var vcardName = ""
+                            vCard?.formattedName?.value?.let { name ->
+                                vcardName = name
+                            }
+                            if(vCard?.formattedName == null){
+                                vcardName = scannedString.getVcardName()
+                            }
+                            var vcardNumber = ""
+                            var vcardPhoneNumber = ""
+                            var vcardFax = ""
+                            if(vCard.telephoneNumbers.size >= 1){
+                                for(i in 0 until vCard.telephoneNumbers.size){
+                                    when(vCard.telephoneNumbers[i].parameters.type){
+                                        "CELL" ->{
+                                            vcardNumber = vCard.telephoneNumbers[i].text
+                                        }
+                                        "WORK" ->{
+                                            vcardPhoneNumber = vCard.telephoneNumbers[i].text
+                                        }
+                                        "FAX" ->{
+                                            vcardFax = vCard.telephoneNumbers[i].text
+                                        }
+                                    }
+                                }
+                            }
+                            var vcardEmail = ""
+                            if(vCard.emails.size >= 1){
+                                vCard.emails[0]?.value?.let { email ->
+                                    vcardEmail = email
+                                }
+                            }
+
+                            var vcardStreet = ""
+                            var vcardCity= ""
+                            var vcardState = ""
+                            var vcardCountry = ""
+                            var vcardZip = ""
+
+                            if(vCard.addresses.size >= 1){
+                                vCard.addresses[0]?.let { address ->
+                                    address.streetAddress?.let { street_address ->
+                                        vcardStreet = street_address
+                                    }
+                                    if(address.localities.size >= 1){
+                                        address.localities[0]?.let { city ->
+                                            vcardCity = city
+                                        }
+                                    }
+                                    if(address.regions.size >= 1){
+                                        address.regions[0]?.let { state ->
+                                            vcardState = state
+                                        }
+                                    }
+                                    if(address.countries.size >= 1){
+                                        address.countries[0]?.let { country ->
+                                            vcardCountry = country
+                                        }
+                                    }
+                                    if(address.postalCodes.size >= 1){
+                                        address.postalCodes[0]?.let { postal ->
+                                            vcardZip = postal
+                                        }
+                                    }
+                                }
+                            }
+
+                            var vcardCompany = ""
+
+                            if(vCard.organizations.size >= 1){
+                                vCard.organizations[0]?.let { org ->
+                                    if(org.values.size >= 1){
+                                        org.values[0]?.let { comp_name ->
+                                            vcardCompany = comp_name
+                                        }
+                                    }
+                                }
+                            }
+
+                            var vcardTitle = ""
+
+                            if(vCard.titles.size >= 1){
+                                vCard.titles[0]?.let { title ->
+                                    vcardTitle = title.value
+                                }
+                            }
+
+                            var vcardWebsite = ""
+
+                            if(vCard.urls.size >= 1){
+                                vCard.urls[0]?.let { url ->
+                                    vcardWebsite = url.value
+                                }
+                            }
+
+                            binding.resultTitleText.text = vcardName
+                            binding.resultSubText.text = "VCard Version: ${vCard.version.version}"
+
+                            binding.resultActionBtn.setOnClickListener {
+
+                                val intent = Intent(ContactsContract.Intents.Insert.ACTION).apply {
+                                    type = ContactsContract.RawContacts.CONTENT_TYPE
+                                    if(vcardName != ""){
+                                        putExtra(ContactsContract.Intents.Insert.NAME, vcardName)
+                                    }
+                                    if(vcardNumber != ""){
+                                        putExtra(ContactsContract.Intents.Insert.PHONE, vcardNumber)
+                                    }
+                                    if(vcardPhoneNumber != ""){
+                                        putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, vcardPhoneNumber)
+                                    }
+                                    if(vcardFax != ""){
+                                        putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, vcardFax)
+                                    }
+                                    if(vcardEmail != ""){
+                                        putExtra(ContactsContract.Intents.Insert.EMAIL, vcardEmail)
+                                    }
+                                    if(vcardCompany != ""){
+                                        putExtra(ContactsContract.Intents.Insert.COMPANY, vcardCompany)
+                                    }
+                                    if(vcardTitle != ""){
+                                        putExtra(ContactsContract.Intents.Insert.JOB_TITLE, vcardTitle)
+                                    }
+                                    putExtra(ContactsContract.Intents.Insert.POSTAL, "$vcardStreet $vcardCity $vcardState $vcardZip")
+                                    if(vcardWebsite != ""){
+                                        putExtra(ContactsContract.Intents.Insert.NOTES, vcardWebsite)
+                                    }
+                                }
+                                requireActivity().startActivity(intent)
+
+                                val scannedResult = ScannedResult(
+                                    scannedString = result.text,
+                                    scannedStringType = TYPE_VCARD,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(result.text)
+                            }
+
+                        }
+
+                        is ScannedStringType.Cryptocurrency ->{
+                            val scannedString = result.text
+
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultActionBtn.text = "Copy"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultTitleText.text = scannedString.getCryptocurrencyType()
+                            binding.resultSubText.text = scannedString.getCryptocurrencyAddress()
+
+                            binding.resultActionBtn.setOnClickListener {
+                                textCopyThenPost(scannedString.getCryptocurrencyAddress())
+                                val scannedResult = ScannedResult(
+                                    scannedString = scannedString,
+                                    scannedStringType = Constants.TYPE_CRYPTOCURRENCY,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+                                textCopyThenPost(result.text)
+                            }
+                        }
+
+                        else ->{
+                            binding.progressResultTitle.visibility = View.GONE
+                            binding.resultSubText.text = ""
+                            binding.resultActionBtn.text = "Copy"
+                            binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+
+                            binding.resultTitleText.text = result.text
+
+                            binding.barcodeView.viewFinder.isResultShown(true)
+
+                            binding.resultActionBtn.setOnClickListener {
+                                textCopyThenPost(result.text)
+
+                                val scannedResult = ScannedResult(
+                                    scannedString = result.text,
+                                    scannedStringType = TYPE_TEXT,
+                                    scannedCodeType = TYPE_QR_CODE,
+                                    System.currentTimeMillis()
+                                )
+                                viewModel.insertScannedResult(scannedResult)
+                                viewModel.updateIsResultShow(false)
+                            }
+                            binding.resultDisplayBar.setOnClickListener {
+
+                            }
+                        }
+                    }
+                } else {
+                    // Barcode
+                    binding.progressResultTitle.visibility = View.GONE
+                    binding.resultSubText.text = ""
+                    binding.resultActionBtn.text = "Copy"
+                    binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_content_copy_24))
+                    binding.resultTitleText.text = result.text
+
+                    binding.barcodeView.viewFinder.isResultShown(true)
+
+                    binding.resultActionBtn.setOnClickListener {
+                        textCopyThenPost(result.text)
+
+                        val scannedResult = ScannedResult(
+                            scannedString = result.text,
+                            scannedStringType = TYPE_TEXT,
+                            scannedCodeType = TYPE_BAR_CODE,
+                            System.currentTimeMillis()
+                        )
+                        viewModel.insertScannedResult(scannedResult)
+                        viewModel.updateIsResultShow(false)
+                    }
+                    binding.resultDisplayBar.setOnClickListener {
+
                     }
                 }
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    binding.barcodeView.viewFinder.drawResultPointsRect(points)
+                    binding.resultDisplayBar.visibility = View.VISIBLE
+                    viewModel.updateIsResultShow(true)
+                }
+            }
 
             }
 

@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
                         receiveUri?.let { uri ->
                             CoroutineScope(Dispatchers.Main).launch {
                                 viewModel.updateReceivingUri(uri)
-                                delay(100)
                                 viewModel.updateIsReceivingImage(true)
                             }
                         }
