@@ -5,6 +5,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
+import android.text.style.UnderlineSpan
 import androidx.core.content.ContextCompat
 import com.kazumaproject7.qrcodescanner.R
 
@@ -15,8 +16,10 @@ fun String.getSmsNumberSpannable(
         setSpan(
             ForegroundColorSpan(ContextCompat.getColor( context, R.color.gray)),
             0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        setSpan( RelativeSizeSpan(0.5f),
+        setSpan( RelativeSizeSpan(0.6f),
             0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( UnderlineSpan(),
+        0, 6 , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
     return spannable
 }
@@ -28,8 +31,10 @@ fun String.getSmsMessageSpannable(
         setSpan(
             ForegroundColorSpan(ContextCompat.getColor( context, R.color.gray)),
             0, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        setSpan( RelativeSizeSpan(0.5f),
+        setSpan( RelativeSizeSpan(0.6f),
             0, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( UnderlineSpan(),
+            0, 8 , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
     return spannable
 }

@@ -556,6 +556,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 when(viewModel.scannedStringType.value){
                     is ScannedStringType.Url ->{
                         CoroutineScope(Dispatchers.IO).launch {
+
                             withContext(Dispatchers.Main){
                                 binding.progressResultTitle.visibility = View.VISIBLE
                                 binding.resultActionBtn.text = "Open"
@@ -580,6 +581,9 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                                     textCopyThenPost(result.text)
                                 }
                             }
+
+                            if (AppPreferences.isResultScreenOpen)
+                                    return@launch
 
                             try {
                                 val document = Jsoup.connect(result.text).get()

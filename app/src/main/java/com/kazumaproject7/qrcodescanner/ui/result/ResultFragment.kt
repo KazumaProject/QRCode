@@ -76,7 +76,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         return binding.root
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -428,13 +428,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                     }
 
                 }
-                binding.swipeToRefreshResult.apply {
-                    setOnRefreshListener {
-                        binding.swipeToRefreshResult.isRefreshing = false
-                        binding.resultMinResultText.clearFocus()
-                    }
-                    isNestedScrollingEnabled = true
-                }
             }else{
 
                 binding.resultMinResultText.text = state.resultText
@@ -454,6 +447,13 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 }
             }
 
+            binding.swipeToRefreshResult.apply {
+                setOnRefreshListener {
+                    binding.swipeToRefreshResult.isRefreshing = false
+                    binding.resultMinResultText.clearFocus()
+                }
+                isNestedScrollingEnabled = true
+            }
 
         }
 
