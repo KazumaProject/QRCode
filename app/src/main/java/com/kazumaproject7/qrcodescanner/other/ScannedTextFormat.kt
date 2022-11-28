@@ -189,31 +189,23 @@ fun String.getEmailMessageTypeTwo():String{
 
 fun String.getSMSNumber():String{
     val str = this.split(":" ).toTypedArray()
-    return when(str.size){
-        2 ->{
-            ""
-        }
-        3 ->{
-            str[1]
-        }
-        else ->{
-            ""
-        }
+    return when{
+        str.size >= 2 -> str[1]
+        else -> ""
     }
 }
 
 fun String.getSMSMessage():String{
     val str = this.split(":" ).toTypedArray()
-    return when(str.size){
-        2 ->{
-            ""
+    return when{
+        str.size >= 3 -> {
+            var str2 = ""
+            for (i in 2 until str.size){
+                str2 += str[i]
+            }
+            str2
         }
-        3 ->{
-            str[2]
-        }
-        else ->{
-            ""
-        }
+        else -> ""
     }
 }
 

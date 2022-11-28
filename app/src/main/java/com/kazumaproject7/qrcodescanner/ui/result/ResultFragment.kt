@@ -7,16 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.text.SpannableString
-import android.text.Spanned
 import android.text.TextUtils
-import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -89,10 +84,9 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
             Timber.d("result state:" +
                     "\ntext: ${state.resultText}" +
                     "\ncode type: ${state.scannedType}" +
-                    "\nresult type: ${state.scannedStringType}" +
-                    "\nbitmap: ${state.bitmap}")
+                    "\nresult type: ${state.scannedStringType}")
 
-            if (state.resultText.isNullOrBlank() || state.scannedType.isNullOrBlank() || state.bitmap == null){
+            if (state.resultText.isNullOrBlank() || state.scannedType.isNullOrBlank()){
                 return@collectLatestLifecycleFlow
             }
 
@@ -437,6 +431,7 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                 binding.swipeToRefreshResult.apply {
                     setOnRefreshListener {
                         binding.swipeToRefreshResult.isRefreshing = false
+                        binding.resultMinResultText.clearFocus()
                     }
                     isNestedScrollingEnabled = true
                 }
@@ -480,7 +475,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
         window.statusBarColor = ContextCompat.getColor(requireContext(),R.color.black)
         viewModel.updateScannedString("")
         viewModel.updateScannedType("")
-        viewModel.updateScannedBitmap(BitmapFactory.decodeResource(requireContext().resources,R.drawable.q_code))
         _binding = null
     }
 

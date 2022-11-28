@@ -22,7 +22,6 @@ data class ResultState(
     val resultText: String? = null,
     val scannedType: String? = null,
     val scannedStringType: ScannedStringType = ScannedStringType.Text,
-    val bitmap: Bitmap? = null,
     val flag: Boolean = false
 )
 
@@ -74,24 +73,17 @@ class ScanViewModel @Inject constructor(
         _scannedStringType.value = value
     }
 
-    private val _scannedBitmap = MutableStateFlow(BitmapFactory.decodeResource(mContext.resources, R.drawable.q_code))
-    val scannedBitmap = _scannedBitmap.asStateFlow()
-    fun updateScannedBitmap(value: Bitmap){
-        _scannedBitmap.value = value
-    }
-
     private val _resultFirstFlag = MutableStateFlow(false)
     val resultFirstFlag = _resultFirstFlag.asStateFlow()
     fun updateResultFirstFlag(value: Boolean){
         _resultFirstFlag.value = value
     }
 
-    val resultState = combine(_scannedString,_scannedType,_scannedStringType,_scannedBitmap,resultFirstFlag){ resultText, codeType, resultType, bitmap, flag ->
+    val resultState = combine(_scannedString,_scannedType,_scannedStringType,resultFirstFlag){ resultText, codeType, resultType, flag ->
         ResultState(
             resultText = resultText,
             scannedType = codeType,
             scannedStringType = resultType,
-            bitmap = bitmap,
             flag = flag
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ResultState())
