@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.provider.Settings
+import android.provider.Telephony
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -705,12 +706,23 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                         val sms_string = result.text
 
                         binding.progressResultTitle.visibility = View.GONE
-                        binding.resultActionBtn.text = "Open"
-                        binding.resultImgLogo.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.baseline_sms_24))
-                        binding.barcodeView.viewFinder.isResultShown(true)
 
-                        binding.resultTitleText.text = sms_string.getSMSNumber()
-                        binding.resultSubText.text = sms_string.getSMSMessage()
+                        binding.resultActionBtn.text = "Open"
+
+                        val defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(requireContext())
+                        val label = requireContext().packageManager.getApplicationLabel(
+                            requireContext().packageManager.getApplicationInfo(
+                                defaultSmsPackageName,
+                                PackageManager.GET_META_DATA
+                            )
+                        )
+                        val icon = requireContext().packageManager.getApplicationIcon(defaultSmsPackageName)
+
+                        binding.resultTitleText.text = "Open with $label"
+                        binding.resultImgLogo.setImageDrawable(icon)
+                        binding.resultSubText.text = sms_string.getSMSNumber()
+
+                        binding.barcodeView.viewFinder.isResultShown(true)
 
                         binding.resultActionBtn.setOnClickListener {
                             createSMSIntent(sms_string.getSMSNumber(),sms_string.getSMSMessage())
