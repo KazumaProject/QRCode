@@ -20,6 +20,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.*
 import android.webkit.URLUtil
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -63,6 +64,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
     private val viewModel: ScanViewModel by activityViewModels()
 
     private var lastText: String = ""
+
+    private var mOnBackPressedCallback: OnBackPressedCallback? = null
 
     var isZoom = false
     private var delta = 0f
@@ -384,6 +387,20 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         super.onResume()
         returnStatusBarColor()
         viewModel.updateIsResultShow(false)
+
+        mOnBackPressedCallback = object : OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                if (viewModel.isResultShow.value){
+                    viewModel.updateIsResultShow(false)
+                } else {
+                    requireActivity().finish()
+                }
+            }
+        }
+
+        mOnBackPressedCallback?.let { callback ->
+            requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+        }
     }
 
     override fun onPause() {
@@ -394,6 +411,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mOnBackPressedCallback?.remove()
+        mOnBackPressedCallback = null
         _binding = null
     }
 

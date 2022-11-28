@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
@@ -180,10 +181,6 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val email = state.resultText.getEmailEmailTypeTwo()
                         val subject = state.resultText.getEmailSubjectTypeTwo()
                         val message = state.resultText.getEmailMessageTypeTwo()
-                        email.changeSizeByPosition(
-                            email,
-                            30
-                        )
 
                         binding.resultMinResultText.text = state.resultText
 
@@ -210,8 +207,12 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val smsNumber = state.resultText.getSMSNumber()
                         val smsMessage = state.resultText.getSMSMessage()
 
-                        binding.resultMinResultText.text = "number: $smsNumber" +
-                                "\nmessage: $smsMessage"
+                        val number = smsNumber.getSmsNumberSpannable(requireContext())
+                        val message = smsMessage.getSmsMessageSpannable(requireContext())
+
+                        binding.resultMinResultText.text = TextUtils.concat(
+                            number, message
+                        )
 
                         binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(smsNumber)
