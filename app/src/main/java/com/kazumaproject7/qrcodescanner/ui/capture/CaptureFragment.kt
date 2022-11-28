@@ -747,7 +747,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                             viewModel.updateIsResultShow(false)
                         }
                         binding.resultDisplayBar.setOnClickListener {
-                            textCopyThenPost(wifi_string.getWifiSSID())
+
                         }
 
                     }

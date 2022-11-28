@@ -38,3 +38,33 @@ fun String.getSmsMessageSpannable(
     }
     return spannable
 }
+
+fun String.getSSIDSpannable(
+    context: Context
+): SpannableString{
+    val spannable = SpannableString("ssid:\n$this\n\n").apply {
+        setSpan(
+            ForegroundColorSpan(ContextCompat.getColor( context, R.color.gray)),
+            0, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( RelativeSizeSpan(0.6f),
+            0, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( UnderlineSpan(),
+            0, 4 , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+    return spannable
+}
+
+fun String.getPasswordSpannable(
+    context: Context
+): SpannableString{
+    val spannable = SpannableString("password:\n$this").apply {
+        setSpan(
+            ForegroundColorSpan(ContextCompat.getColor( context, R.color.gray)),
+            0, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( RelativeSizeSpan(0.6f),
+            0, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan( UnderlineSpan(),
+            0, 8 , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+    return spannable
+}

@@ -45,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import org.w3c.dom.Text
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -231,9 +232,12 @@ class ResultFragment : BaseFragment(R.layout.fragment_result) {
                         val wifiEncryptionType = state.resultText.getWifiEncryptionType()
                         val wifiIsHidden = state.resultText.getWifiIsHidden()
 
+                        val ssid = wifiSSID.getSSIDSpannable(requireContext())
+                        val password = wifiPassword.getPasswordSpannable(requireContext())
 
-                        binding.resultMinResultText.text = "ssid: $wifiSSID" +
-                                "\npassword: $wifiPassword"
+                        binding.resultMinResultText.text = TextUtils.concat(
+                            ssid, password
+                        )
 
                         binding.resultCopyImg.setOnClickListener {
                             textCopyThenPost(wifiPassword)
