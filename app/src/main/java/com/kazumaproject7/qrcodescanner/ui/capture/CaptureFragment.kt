@@ -187,7 +187,11 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 }
                 CoroutineScope(Dispatchers.Main).launch {
                     delay(100)
-                    binding.barcodeView.resume()
+                    try{
+                        binding.barcodeView.resume()
+                    }catch(e: Exception){
+
+                    }
                 }
             }
         }
