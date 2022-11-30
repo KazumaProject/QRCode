@@ -27,9 +27,14 @@ data class ResultState(
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    @ApplicationContext mContext: Context,
     private val repository: ScannedResultRepository
 ) : ViewModel() {
+
+    private val _isZoom = MutableStateFlow(false)
+    val isZoom = _isZoom.asStateFlow()
+    fun updateIsZoom(value: Boolean){
+        _isZoom.value = value
+    }
 
     private val _scaleDelta = MutableStateFlow(0.0)
     val scaleDelta = _scaleDelta.asStateFlow()

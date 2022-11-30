@@ -33,6 +33,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
+import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
@@ -156,12 +157,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             binding.barcodeView.barcodeView.cameraInstance?.cameraManager?.setZoomCamera(delta2,binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
             Timber.d("Scaled delta: $delta")
             delta = delta2.toFloat()
-            isZoom = when (delta2) {
+            when (delta2) {
                 in 0.0..1.1 -> {
-                    false
+                    viewModel.updateIsZoom(false)
                 }
                 else -> {
-                    true
+                    viewModel.updateIsZoom(true)
                 }
             }
         }
@@ -261,6 +262,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             }
         }
 
+        collectLatestLifecycleFlow(viewModel.isZoom){ isZoom ->
+
+            //Timber.d("current focus mode: ${binding.barcodeView.cameraSettings.focusMode}")
+
+        }
+
         val formats = listOf(
             BarcodeFormat.QR_CODE,
             BarcodeFormat.AZTEC,
@@ -296,13 +303,14 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
 
-                isZoom = if (!isZoom){
-                    viewModel.updateScaleDelta(3.0)
-                    true
-                }else{
+                if(viewModel.isZoom.value){
                     viewModel.updateScaleDelta(0.0)
-                    false
+                    viewModel.updateIsZoom(false)
+                } else {
+                    viewModel.updateScaleDelta(3.0)
+                    viewModel.updateIsZoom(true)
                 }
+
                 return super.onDoubleTap(e)
 
             }
@@ -320,7 +328,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     }
                 } else  {
                     val deltaScale = delta + (detector.scaleFactor - 1f)
-                    if (deltaScale in 1f..8.0f){
+                    if (deltaScale in 0.1f..8.0f){
                         delta = deltaScale
                         viewModel.updateScaleDelta(delta.toDouble())
                         //binding.barcodeView.barcodeView.cameraInstance.cameraManager.setZoomCamera(delta.toDouble(),binding.barcodeView.barcodeView.cameraInstance.cameraManager.camera)
