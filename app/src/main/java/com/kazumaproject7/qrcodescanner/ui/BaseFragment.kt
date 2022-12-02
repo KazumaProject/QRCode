@@ -16,6 +16,15 @@ abstract class BaseFragment (layoutId: Int): Fragment(layoutId) {
         ).show()
     }
 
+    fun showSnackBarShort(text: String){
+        Snackbar.make(
+            requireActivity().findViewById(R.id.fragmentHostView),
+            text,
+            Snackbar.LENGTH_SHORT
+        ).show()
+    }
+
+
     fun returnStatusBarColor(){
         val window = requireActivity().window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)

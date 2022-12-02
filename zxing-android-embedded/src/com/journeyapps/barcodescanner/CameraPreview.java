@@ -145,6 +145,8 @@ public class CameraPreview extends ViewGroup {
 
     public boolean maskVisibility2 = false;
 
+    protected boolean currentBarCodeMode = false;
+
     private TextureView.SurfaceTextureListener surfaceTextureListener() {
         // Cannot initialize automatically, since we may be API < 14
         return new TextureView.SurfaceTextureListener() {
@@ -387,10 +389,21 @@ public class CameraPreview extends ViewGroup {
         frameInPreview.offset(-surfaceRect.left, -surfaceRect.top);
 
         if (maskVisibility2){
-            previewFramingRect = new Rect(frameInPreview.left * previewWidth / surfaceRect.width(),
-                    frameInPreview.top * previewHeight / surfaceRect.height(),
-                    frameInPreview.right * previewWidth / surfaceRect.width(),
-                    frameInPreview.bottom * previewHeight / surfaceRect.height());
+            if (currentBarCodeMode){
+                previewFramingRect = new Rect(
+                        frameInPreview.left * previewWidth / surfaceRect.width(),
+                        (frameInPreview.top * previewHeight / surfaceRect.height()) + 330,
+                        frameInPreview.right * previewWidth / surfaceRect.width(),
+                        (frameInPreview.bottom * previewHeight / surfaceRect.height()) - 330
+                );
+            } else {
+                previewFramingRect = new Rect(
+                        frameInPreview.left * previewWidth / surfaceRect.width(),
+                        frameInPreview.top * previewHeight / surfaceRect.height(),
+                        frameInPreview.right * previewWidth / surfaceRect.width(),
+                        frameInPreview.bottom * previewHeight / surfaceRect.height());
+            }
+
         }else {
             previewFramingRect = new Rect(0, 0, previewWidth, previewHeight);
         }

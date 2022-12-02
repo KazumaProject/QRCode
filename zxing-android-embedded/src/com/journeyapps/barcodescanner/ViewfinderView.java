@@ -89,6 +89,8 @@ public class ViewfinderView extends View {
     protected Rect framingRect;
     protected Size previewSize;
 
+    protected boolean isBarCodeMode;
+
     public CameraPreview getCameraPreview(){
         return this.cameraPreview;
     }
@@ -119,6 +121,7 @@ public class ViewfinderView extends View {
                 true);
         this.maskVisibility = false;
         this.laserVisibility2 = false;
+        this.isBarCodeMode = false;
 
         attributes.recycle();
 
@@ -282,16 +285,44 @@ public class ViewfinderView extends View {
                 if (!isShow){
                     @SuppressLint("DrawAllocation") Path path2 = new Path();
                     paint.setPathEffect(null);
-                    path2.addRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,Path.Direction.CW);
+                    path2.addRoundRect(
+                            frame.left,
+                            frame.top,
+                            frame.right,
+                            frame.bottom,
+                            20f,
+                            20f,
+                            Path.Direction.CW);
                     path2.setFillType(Path.FillType.INVERSE_WINDING);
                     paint.setColor(maskColor);
                     canvas.drawPath(path2,paint);
                 }
             }else {
                 if (rRectVisibility){
+                    @SuppressLint("DrawAllocation") Path path5 = new Path();
+                    paint.setPathEffect(null);
+                    if (isBarCodeMode){
+                        path5.addRoundRect(
+                                frame.left,
+                                frame.top + 300,
+                                frame.right,
+                                frame.bottom - 300,
+                                20f,
+                                20f,
+                                Path.Direction.CW);
+                    }else {
+                        path5.addRoundRect(
+                                frame.left,
+                                frame.top,
+                                frame.right,
+                                frame.bottom,
+                                20f,
+                                20f,
+                                Path.Direction.CW);
+                    }
                     paint.setPathEffect(null);
                     paint.setColor(maskColor);
-                    //canvas.drawRoundRect(frame.left,frame.top,frame.right,frame.bottom,20f,20f,paint);
+                    canvas.drawPath(path5,paint);
                 }
 
             }

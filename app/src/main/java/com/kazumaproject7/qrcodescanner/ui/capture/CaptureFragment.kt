@@ -70,7 +70,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     private var mOnBackPressedCallback: OnBackPressedCallback? = null
 
-    var isZoom = false
     private var delta = 0f
 
     companion object{
@@ -268,6 +267,12 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
         }
 
+        collectLatestLifecycleFlow(viewModel.scanModeQRorBarCode){ isBarcodeCodeMode ->
+            updateBarCodeMode(binding.barcodeView,isBarcodeCodeMode)
+            updateBarCodeModeInTargetView(binding.barcodeView,isBarcodeCodeMode)
+            updateBarCodeModeInCameraPreview(binding.barcodeView, isBarcodeCodeMode)
+        }
+
         val formats = listOf(
             BarcodeFormat.QR_CODE,
             BarcodeFormat.AZTEC,
@@ -310,10 +315,20 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     viewModel.updateScaleDelta(3.0)
                     viewModel.updateIsZoom(true)
                 }
-
                 return super.onDoubleTap(e)
-
             }
+
+            override fun onLongPress(e: MotionEvent) {
+                super.onLongPress(e)
+                if(!AppPreferences.isCaptureFullScreen){
+                    viewModel.updateScanModeQRorBarcode(!viewModel.scanModeQRorBarCode.value)
+                    binding.barcodeView.pauseAndWait()
+                    binding.barcodeView.resume()
+                } else{
+                    showSnackBarShort("Capture in full screen mode is on.\nPlease check settings.")
+                }
+            }
+
         })
 
         val scaleDetector = ScaleGestureDetector(requireContext(), object : ScaleGestureDetector.SimpleOnScaleGestureListener(){
@@ -419,6 +434,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
     override fun onPause() {
         super.onPause()
+        viewModel.updateScanModeQRorBarcode(false)
         binding.barcodeView.pause()
         viewModel.updateIsFlashOn(false)
     }
@@ -473,6 +489,34 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("laserVisibility2")
         scannerAlphaField.isAccessible = true
         scannerAlphaField.set(decoratedBarcodeView.viewFinder, true)
+    }
+
+    private fun updateBarCodeMode(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        scanMode: Boolean
+    ) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("isBarCodeMode")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, scanMode)
+    }
+
+    private fun updateBarCodeModeInTargetView(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        scanMode: Boolean
+    ) {
+        val scannerAlphaField = TargetView::class.java.getDeclaredField("isBarcodeModeOn")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.targetView, scanMode)
+        binding.barcodeView.targetView.invalidate()
+    }
+
+    private fun updateBarCodeModeInCameraPreview(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        scanMode: Boolean
+    ) {
+        val scannerAlphaField = CameraPreview::class.java.getDeclaredField("currentBarCodeMode")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder.cameraPreview, scanMode)
     }
 
     private fun showCenterCrossLine(decoratedBarcodeView: DecoratedBarcodeView) {

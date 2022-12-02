@@ -1,19 +1,12 @@
 package com.kazumaproject7.qrcodescanner.ui
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
 import com.kazumaproject7.qrcodescanner.other.ScannedStringType
 import com.kazumaproject7.qrcodescanner.repository.ScannedResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,6 +22,13 @@ data class ResultState(
 class ScanViewModel @Inject constructor(
     private val repository: ScannedResultRepository
 ) : ViewModel() {
+
+    // False for QR Code
+    private val _scanModeQRorBarCode = MutableStateFlow(false)
+    val scanModeQRorBarCode = _scanModeQRorBarCode.asStateFlow()
+    fun updateScanModeQRorBarcode(value: Boolean){
+        _scanModeQRorBarCode.value = value
+    }
 
     private val _isZoom = MutableStateFlow(false)
     val isZoom = _isZoom.asStateFlow()

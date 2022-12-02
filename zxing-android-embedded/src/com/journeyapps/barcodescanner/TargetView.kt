@@ -33,23 +33,31 @@ open class TargetView(
 
     var targetMaskVisibility = false
 
+    var isBarcodeModeOn = false
+
     private val c: Context by lazy {
         context
     }
 
     private val margin: Float = 200f
+    private val marginB: Float = 100f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        drawLeftTopLine(canvas, setupPaint(),getPath())
-        drawLeftBottomLine(canvas, setupPaint(),getPath())
-        drawRightTopLine(canvas, setupPaint(),getPath())
-        drawRightBottomLine(canvas, setupPaint(),getPath())
+        if(isBarcodeModeOn){
+            drawLeftTopLineB(canvas, setupPaint(),getPath())
+            drawRightTopLineB(canvas, setupPaint(),getPath())
+            drawLeftBottomLineB(canvas, setupPaint(),getPath())
+            drawRightBottomLineB(canvas, setupPaint(),getPath())
+        }else{
+            drawLeftTopLine(canvas, setupPaint(),getPath())
+            drawLeftBottomLine(canvas, setupPaint(),getPath())
+            drawRightTopLine(canvas, setupPaint(),getPath())
+            drawRightBottomLine(canvas, setupPaint(),getPath())
+        }
         if (isCrossLineVisible)
             drawCrossLine(canvas,setupCrossLinePaint())
-        if (!targetMaskVisibility){
-            drawCenterRectangle(canvas,setupPaintRectangle())
-        }else{
+        if (targetMaskVisibility){
             objectAnimator.cancel()
         }
     }
@@ -95,8 +103,6 @@ open class TargetView(
         paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
-        /*canvas?.drawLine(width.toFloat() - margin, 0.0f, width.toFloat(), 0.0f, paint)
-        canvas?.drawLine(width.toFloat(), 0.0f, width.toFloat(), margin, paint)*/
     }
 
     private fun drawRightBottomLine(canvas: Canvas?, paint: Paint, path: Path) {
@@ -109,8 +115,54 @@ open class TargetView(
         paint.strokeCap = Paint.Cap.ROUND
         canvas?.drawPath(path,paint)
         path.close()
-        /*canvas?.drawLine(width.toFloat() - margin, height.toFloat(), width.toFloat(), height.toFloat(), paint)
-        canvas?.drawLine(width.toFloat(), height.toFloat() - margin, width.toFloat(), height.toFloat(), paint)*/
+    }
+
+    private fun drawLeftTopLineB(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(marginB,330f)
+        path.lineTo(10f,330f)
+        path.lineTo(10f,marginB + 330f)
+        paint.style = Paint.Style.STROKE
+        paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
+        canvas?.drawPath(path,paint)
+        path.close()
+    }
+
+    private fun drawLeftBottomLineB(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(marginB,height.toFloat() - 330f)
+        path.lineTo(10f,height.toFloat() - 330f)
+        path.lineTo(10f,height.toFloat() - 330f - marginB)
+        paint.style = Paint.Style.STROKE
+        paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
+        canvas?.drawPath(path,paint)
+        path.close()
+    }
+
+    private fun drawRightTopLineB(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(width.toFloat() - marginB ,330f)
+        path.lineTo(width.toFloat() - 10f,330f)
+        path.lineTo(width.toFloat() - 10f,marginB + 330)
+        paint.style = Paint.Style.STROKE
+        paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
+        canvas?.drawPath(path,paint)
+        path.close()
+    }
+
+    private fun drawRightBottomLineB(canvas: Canvas?, paint: Paint, path: Path) {
+        path.rewind()
+        path.moveTo(width.toFloat() - marginB,height.toFloat() - 330f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - 330f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - 330f -  marginB)
+        paint.style = Paint.Style.STROKE
+        paint.pathEffect = CornerPathEffect(90f)
+        paint.strokeCap = Paint.Cap.ROUND
+        canvas?.drawPath(path,paint)
+        path.close()
     }
 
     private fun setupPaint(): Paint {
