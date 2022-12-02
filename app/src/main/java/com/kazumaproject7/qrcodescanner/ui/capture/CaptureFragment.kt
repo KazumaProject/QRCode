@@ -323,6 +323,8 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 super.onLongPress(e)
                 if(!AppPreferences.isCaptureFullScreen){
                     viewModel.updateScanModeQRorBarcode(!viewModel.scanModeQRorBarCode.value)
+                    viewModel.updateScaleDelta(0.0)
+                    viewModel.updateIsZoom(false)
                     binding.barcodeView.pauseAndWait()
                     binding.barcodeView.resume()
                 } else{
