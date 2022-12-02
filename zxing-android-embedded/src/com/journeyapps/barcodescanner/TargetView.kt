@@ -119,9 +119,9 @@ open class TargetView(
 
     private fun drawLeftTopLineB(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(marginB,330f)
-        path.lineTo(10f,330f)
-        path.lineTo(10f,marginB + 330f)
+        path.moveTo(marginB,280f)
+        path.lineTo(10f,280f)
+        path.lineTo(10f,marginB + 280f)
         paint.style = Paint.Style.STROKE
         paint.pathEffect = CornerPathEffect(90f)
         paint.strokeCap = Paint.Cap.ROUND
@@ -131,9 +131,9 @@ open class TargetView(
 
     private fun drawLeftBottomLineB(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(marginB,height.toFloat() - 330f)
-        path.lineTo(10f,height.toFloat() - 330f)
-        path.lineTo(10f,height.toFloat() - 330f - marginB)
+        path.moveTo(marginB,height.toFloat() - 280f)
+        path.lineTo(10f,height.toFloat() - 280f)
+        path.lineTo(10f,height.toFloat() - 280f - marginB)
         paint.style = Paint.Style.STROKE
         paint.pathEffect = CornerPathEffect(90f)
         paint.strokeCap = Paint.Cap.ROUND
@@ -143,9 +143,9 @@ open class TargetView(
 
     private fun drawRightTopLineB(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(width.toFloat() - marginB ,330f)
-        path.lineTo(width.toFloat() - 10f,330f)
-        path.lineTo(width.toFloat() - 10f,marginB + 330)
+        path.moveTo(width.toFloat() - marginB ,280f)
+        path.lineTo(width.toFloat() - 10f,280f)
+        path.lineTo(width.toFloat() - 10f,marginB + 280)
         paint.style = Paint.Style.STROKE
         paint.pathEffect = CornerPathEffect(90f)
         paint.strokeCap = Paint.Cap.ROUND
@@ -155,9 +155,9 @@ open class TargetView(
 
     private fun drawRightBottomLineB(canvas: Canvas?, paint: Paint, path: Path) {
         path.rewind()
-        path.moveTo(width.toFloat() - marginB,height.toFloat() - 330f)
-        path.lineTo(width.toFloat() - 10f,height.toFloat() - 330f)
-        path.lineTo(width.toFloat() - 10f,height.toFloat() - 330f -  marginB)
+        path.moveTo(width.toFloat() - marginB,height.toFloat() - 280f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - 280f)
+        path.lineTo(width.toFloat() - 10f,height.toFloat() - 280f -  marginB)
         paint.style = Paint.Style.STROKE
         paint.pathEffect = CornerPathEffect(90f)
         paint.strokeCap = Paint.Cap.ROUND

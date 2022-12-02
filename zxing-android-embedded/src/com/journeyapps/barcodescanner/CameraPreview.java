@@ -392,9 +392,9 @@ public class CameraPreview extends ViewGroup {
             if (currentBarCodeMode){
                 previewFramingRect = new Rect(
                         frameInPreview.left * previewWidth / surfaceRect.width(),
-                        (frameInPreview.top * previewHeight / surfaceRect.height()) + 330,
+                        (frameInPreview.top * previewHeight / surfaceRect.height()) + 280,
                         frameInPreview.right * previewWidth / surfaceRect.width(),
-                        (frameInPreview.bottom * previewHeight / surfaceRect.height()) - 330
+                        (frameInPreview.bottom * previewHeight / surfaceRect.height()) - 280
                 );
             } else {
                 previewFramingRect = new Rect(

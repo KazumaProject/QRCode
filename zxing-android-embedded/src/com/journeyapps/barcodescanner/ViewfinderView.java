@@ -16,11 +16,6 @@
 
 package com.journeyapps.barcodescanner;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -33,18 +28,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.os.Build;
-import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-
-import androidx.core.content.ContextCompat;
 
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.R;
@@ -91,6 +76,8 @@ public class ViewfinderView extends View {
 
     protected boolean isBarCodeMode;
 
+    protected boolean isMenuShow;
+
     public CameraPreview getCameraPreview(){
         return this.cameraPreview;
     }
@@ -122,6 +109,7 @@ public class ViewfinderView extends View {
         this.maskVisibility = false;
         this.laserVisibility2 = false;
         this.isBarCodeMode = false;
+        this.isMenuShow = false;
 
         attributes.recycle();
 
@@ -283,30 +271,46 @@ public class ViewfinderView extends View {
 
             if (maskVisibility){
                 if (!isShow){
-                    @SuppressLint("DrawAllocation") Path path2 = new Path();
-                    paint.setPathEffect(null);
-                    path2.addRoundRect(
-                            frame.left,
-                            frame.top,
-                            frame.right,
-                            frame.bottom,
-                            20f,
-                            20f,
-                            Path.Direction.CW);
-                    path2.setFillType(Path.FillType.INVERSE_WINDING);
-                    paint.setColor(maskColor);
-                    canvas.drawPath(path2,paint);
+                    if (isBarCodeMode){
+                        @SuppressLint("DrawAllocation") Path path2 = new Path();
+                        paint.setPathEffect(null);
+                        path2.addRoundRect(
+                                frame.left,
+                                frame.top + 280,
+                                frame.right,
+                                frame.bottom - 280,
+                                20f,
+                                20f,
+                                Path.Direction.CW);
+                        path2.setFillType(Path.FillType.INVERSE_WINDING);
+                        paint.setColor(maskColor);
+                        canvas.drawPath(path2,paint);
+                    }else {
+                        @SuppressLint("DrawAllocation") Path path2 = new Path();
+                        paint.setPathEffect(null);
+                        path2.addRoundRect(
+                                frame.left,
+                                frame.top,
+                                frame.right,
+                                frame.bottom,
+                                20f,
+                                20f,
+                                Path.Direction.CW);
+                        path2.setFillType(Path.FillType.INVERSE_WINDING);
+                        paint.setColor(maskColor);
+                        canvas.drawPath(path2,paint);
+                    }
                 }
             }else {
-                if (rRectVisibility){
+                if (rRectVisibility && !isMenuShow){
                     @SuppressLint("DrawAllocation") Path path5 = new Path();
                     paint.setPathEffect(null);
                     if (isBarCodeMode){
                         path5.addRoundRect(
                                 frame.left,
-                                frame.top + 300,
+                                frame.top + 280,
                                 frame.right,
-                                frame.bottom - 300,
+                                frame.bottom - 280,
                                 20f,
                                 20f,
                                 Path.Direction.CW);

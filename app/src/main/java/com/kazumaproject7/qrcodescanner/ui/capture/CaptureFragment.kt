@@ -215,6 +215,7 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     binding.barcodeView.targetView.visibility = View.VISIBLE
                 }
             }
+            updateIsMenuShowInViewFinder(binding.barcodeView,isMenuShow)
         }
 
         collectLatestLifecycleFlow(viewModel.isFlashOn){ isFlashOn ->
@@ -436,7 +437,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         super.onPause()
         viewModel.updateScanModeQRorBarcode(false)
         binding.barcodeView.pause()
-        viewModel.updateIsFlashOn(false)
     }
 
     override fun onDestroyView() {
@@ -489,6 +489,15 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("laserVisibility2")
         scannerAlphaField.isAccessible = true
         scannerAlphaField.set(decoratedBarcodeView.viewFinder, true)
+    }
+
+    private fun updateIsMenuShowInViewFinder(
+        decoratedBarcodeView: DecoratedBarcodeView,
+        visibility: Boolean
+    ) {
+        val scannerAlphaField = ViewfinderView::class.java.getDeclaredField("isMenuShow")
+        scannerAlphaField.isAccessible = true
+        scannerAlphaField.set(decoratedBarcodeView.viewFinder, visibility)
     }
 
     private fun updateBarCodeMode(
