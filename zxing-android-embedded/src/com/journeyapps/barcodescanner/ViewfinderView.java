@@ -301,7 +301,7 @@ public class ViewfinderView extends View {
                         canvas.drawPath(path2,paint);
                     }
                 }
-            }else {
+            }/*else {
                 if (rRectVisibility && !isMenuShow){
                     @SuppressLint("DrawAllocation") Path path5 = new Path();
                     paint.setPathEffect(null);
@@ -329,7 +329,7 @@ public class ViewfinderView extends View {
                     canvas.drawPath(path5,paint);
                 }
 
-            }
+            }*/
 
             if (laserVisibility2) {
                 paint.setColor(laserColor);
