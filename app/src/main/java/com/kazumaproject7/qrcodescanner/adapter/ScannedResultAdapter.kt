@@ -81,7 +81,6 @@ class ScannedResultAdapter(
         if (URLUtil.isValidUrl(scannedResult.scannedString)){
             urlImg.visibility = View.VISIBLE
             urlText.visibility = View.VISIBLE
-            //scannedResultText.setTextColor(Color.parseColor("#5e6fed"))
             setURLTitle(scannedResult.scannedString,urlText,urlTitleProgress)
             setURLTitleLogo(scannedResult.scannedString,urlImg,urlImgProgress)
         }
@@ -138,8 +137,17 @@ class ScannedResultAdapter(
     }
 
     private suspend fun getURLTitle(scannedString: String): String = withContext(Dispatchers.IO) {
-        val document = Jsoup.connect(scannedString).get()
-        return@withContext document.title()
+        try {
+            val document = Jsoup.connect(scannedString).get()
+            val title = document.title()
+            title?.let {
+                return@withContext it
+            }
+
+        }catch (_: Exception){
+
+        }
+        return@withContext ""
     }
 
 
