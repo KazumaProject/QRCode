@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
@@ -55,7 +54,6 @@ public class ViewfinderView extends View {
     protected boolean laserVisibility2;
 
     protected final Paint paint;
-    protected Bitmap resultBitmap;
     protected int maskColor;
     protected final int resultColor;
     protected final int laserColor;
@@ -78,6 +76,8 @@ public class ViewfinderView extends View {
 
     protected boolean isMenuShow;
 
+    private final PathEffect cornerPathEffect;
+
     public CameraPreview getCameraPreview(){
         return this.cameraPreview;
     }
@@ -92,18 +92,18 @@ public class ViewfinderView extends View {
         Resources resources = getResources();
 
         // Get set attributes on view
-        TypedArray attributes = getContext().obtainStyledAttributes(attrs, R.styleable.zxing_finder);
+        @SuppressLint("CustomViewStyleable") TypedArray attributes = getContext().obtainStyledAttributes(attrs, R.styleable.zxing_finder);
 
         this.maskColor = attributes.getColor(R.styleable.zxing_finder_zxing_viewfinder_mask,
-                resources.getColor(R.color.zxing_viewfinder_mask));
+                resources.getColor(R.color.zxing_viewfinder_mask, null));
         this.resultColor = attributes.getColor(R.styleable.zxing_finder_zxing_result_view,
-                resources.getColor(R.color.zxing_result_view));
+                resources.getColor(R.color.zxing_result_view, null));
         this.laserColor = attributes.getColor(R.styleable.zxing_finder_zxing_viewfinder_laser,
-                resources.getColor(R.color.zxing_laser));
+                resources.getColor(R.color.zxing_laser, null));
         this.targetColor = attributes.getColor(R.styleable.zxing_finder_zxing_viewfinder_laser,
-                resources.getColor(R.color.zxing_off_white));
+                resources.getColor(R.color.zxing_off_white, null));
         this.resultPointColor = attributes.getColor(R.styleable.zxing_finder_zxing_possible_result_points,
-                resources.getColor(R.color.zxing_possible_result_points));
+                resources.getColor(R.color.zxing_possible_result_points, null));
         this.laserVisibility = attributes.getBoolean(R.styleable.zxing_finder_zxing_viewfinder_laser_visibility,
                 true);
         this.maskVisibility = false;
@@ -112,6 +112,8 @@ public class ViewfinderView extends View {
         this.isMenuShow = false;
 
         attributes.recycle();
+
+        cornerPathEffect = new CornerPathEffect(90);
 
         scannerAlpha = 0;
         possibleResultPoints = new ArrayList<>(MAX_RESULT_POINTS);
@@ -162,39 +164,39 @@ public class ViewfinderView extends View {
         }
     }
 
-    private void drawSmallTarget(Canvas canvas, Paint paint, Rect rect){
-        Path path = new Path();
-        float margin = 40f;
-        //Left Top
-        path.rewind();
-        path.moveTo((float) (rect.left + margin), (float) (rect.top));
-        path.lineTo((float) (rect.left), (float) (rect.top));
-        path.lineTo((float) (rect.left), (float) (rect.top + margin));
-        canvas.drawPath(path,paint);
-        path.close();
-        // Left Bottom
-        path.rewind();
-        path.moveTo((float) (rect.left + margin), (float) (rect.bottom));
-        path.lineTo((float) (rect.left), (float) (rect.bottom));
-        path.lineTo((float) (rect.left), (float) (rect.bottom - margin));
-        paint.setPathEffect(new CornerPathEffect(90f));
-        canvas.drawPath(path,paint);
-        path.close();
-        //Right Top
-        path.rewind();
-        path.moveTo((float) (rect.right - margin), (float) (rect.top));
-        path.lineTo((float) (rect.right), (float) (rect.top));
-        path.lineTo((float) (rect.right), (float) (rect.top + margin));
-        canvas.drawPath(path,paint);
-        path.close();
-        //Right Bottom
-        path.rewind();
-        path.moveTo((float) (rect.right - margin), (float) (rect.bottom));
-        path.lineTo((float) (rect.right), (float) (rect.bottom));
-        path.lineTo((float) (rect.right), (float) (rect.bottom - margin));
-        canvas.drawPath(path,paint);
-        path.close();
-    }
+//    private void drawSmallTarget(Canvas canvas, Paint paint, Rect rect){
+//        Path path = new Path();
+//        float margin = 40f;
+//        //Left Top
+//        path.rewind();
+//        path.moveTo((float) (rect.left + margin), (float) (rect.top));
+//        path.lineTo((float) (rect.left), (float) (rect.top));
+//        path.lineTo((float) (rect.left), (float) (rect.top + margin));
+//        canvas.drawPath(path,paint);
+//        path.close();
+//        // Left Bottom
+//        path.rewind();
+//        path.moveTo((float) (rect.left + margin), (float) (rect.bottom));
+//        path.lineTo((float) (rect.left), (float) (rect.bottom));
+//        path.lineTo((float) (rect.left), (float) (rect.bottom - margin));
+//        paint.setPathEffect(new CornerPathEffect(90f));
+//        canvas.drawPath(path,paint);
+//        path.close();
+//        //Right Top
+//        path.rewind();
+//        path.moveTo((float) (rect.right - margin), (float) (rect.top));
+//        path.lineTo((float) (rect.right), (float) (rect.top));
+//        path.lineTo((float) (rect.right), (float) (rect.top + margin));
+//        canvas.drawPath(path,paint);
+//        path.close();
+//        //Right Bottom
+//        path.rewind();
+//        path.moveTo((float) (rect.right - margin), (float) (rect.bottom));
+//        path.lineTo((float) (rect.right), (float) (rect.bottom));
+//        path.lineTo((float) (rect.right), (float) (rect.bottom - margin));
+//        canvas.drawPath(path,paint);
+//        path.close();
+//    }
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -209,11 +211,12 @@ public class ViewfinderView extends View {
 
         if (resultPoints != null) {
             // Draw the opaque result bitmap over the scanning rectangle
-            PathEffect cornerPathEffect = new CornerPathEffect(90);
             paint.setColor(targetColor);
             paint.setAlpha(CURRENT_POINT_OPACITY);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setPathEffect(cornerPathEffect);
+            if (cornerPathEffect != null){
+                paint.setPathEffect(cornerPathEffect);
+            }
             paint.setStrokeWidth(10f);
             if (resultPoints.size() >= 3){
                 @SuppressLint("DrawAllocation") Rect rect = new Rect(
@@ -301,35 +304,7 @@ public class ViewfinderView extends View {
                         canvas.drawPath(path2,paint);
                     }
                 }
-            }/*else {
-                if (rRectVisibility && !isMenuShow){
-                    @SuppressLint("DrawAllocation") Path path5 = new Path();
-                    paint.setPathEffect(null);
-                    if (isBarCodeMode){
-                        path5.addRoundRect(
-                                frame.left,
-                                frame.top + 280,
-                                frame.right,
-                                frame.bottom - 280,
-                                20f,
-                                20f,
-                                Path.Direction.CW);
-                    }else {
-                        path5.addRoundRect(
-                                frame.left,
-                                frame.top,
-                                frame.right,
-                                frame.bottom,
-                                20f,
-                                20f,
-                                Path.Direction.CW);
-                    }
-                    paint.setPathEffect(null);
-                    paint.setColor(maskColor);
-                    canvas.drawPath(path5,paint);
-                }
-
-            }*/
+            }
 
             if (laserVisibility2) {
                 paint.setColor(laserColor);
@@ -387,21 +362,6 @@ public class ViewfinderView extends View {
         }
     }
 
-    public void drawViewfinder() {
-        this.resultPoints = null;
-        invalidate();
-    }
-
-    /**
-     * Draw a bitmap with the result points highlighted instead of the live scanning display.
-     *
-     * @param result An image of the result.
-     */
-    public void drawResultBitmap(Bitmap result) {
-        resultBitmap = result;
-        invalidate();
-    }
-
     private List<ResultPoint> resultPoints;
 
     public void drawResultPointsRect(List<ResultPoint> points){
@@ -428,18 +388,8 @@ public class ViewfinderView extends View {
             possibleResultPoints.add(point);
     }
 
-    public void setMaskVisibility(boolean visibility) {
-        this.maskVisibility = visibility;
-    }
-
     public void setLaserVisibility(boolean visible) {
         this.laserVisibility2 = visible;
-    }
-
-    private boolean rRectVisibility = true;
-
-    public void shouldRoundRectMaskVisible(boolean visibility){
-        this.rRectVisibility = visibility;
     }
 
     private Boolean isShow = false;

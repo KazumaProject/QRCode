@@ -35,31 +35,34 @@ open class TargetView(
 
     var isBarcodeModeOn = false
 
+    var isCaptureFullScreen = false
+
     private val c: Context by lazy {
         context
     }
 
-    private val margin: Float = 200f
+    private val margin: Float = 125f
     private val marginB: Float = 100f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if(isBarcodeModeOn){
-            drawLeftTopLineB(canvas, setupPaint(),getPath())
-            drawRightTopLineB(canvas, setupPaint(),getPath())
-            drawLeftBottomLineB(canvas, setupPaint(),getPath())
-            drawRightBottomLineB(canvas, setupPaint(),getPath())
+            if (!isCaptureFullScreen && !targetMaskVisibility){
+                drawLeftTopLineB(canvas, setupPaint(),getPath())
+                drawRightTopLineB(canvas, setupPaint(),getPath())
+                drawLeftBottomLineB(canvas, setupPaint(),getPath())
+                drawRightBottomLineB(canvas, setupPaint(),getPath())
+            }
         }else{
-            drawLeftTopLine(canvas, setupPaint(),getPath())
-            drawLeftBottomLine(canvas, setupPaint(),getPath())
-            drawRightTopLine(canvas, setupPaint(),getPath())
-            drawRightBottomLine(canvas, setupPaint(),getPath())
+            if (!isCaptureFullScreen && !targetMaskVisibility){
+                drawLeftTopLine(canvas, setupPaint(),getPath())
+                drawLeftBottomLine(canvas, setupPaint(),getPath())
+                drawRightTopLine(canvas, setupPaint(),getPath())
+                drawRightBottomLine(canvas, setupPaint(),getPath())
+            }
         }
         if (isCrossLineVisible)
             drawCrossLine(canvas,setupCrossLinePaint())
-        if (targetMaskVisibility){
-            objectAnimator.cancel()
-        }
     }
 
 
@@ -169,41 +172,16 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, R.color.zxing_off_white)
-            strokeWidth = 8f
+            strokeWidth = 25f
         }
     }
-
-    private fun setupPaintRectangle(): Paint {
-        return Paint().apply {
-            isAntiAlias = true
-            color = ContextCompat.getColor(c, R.color.zxing_viewfinder_mask)
-            alpha = 60
-            strokeWidth = 12f
-        }
-    }
-
     private fun getPath(): Path{
         return Path()
     }
 
-    private fun drawCenterRectangle(canvas: Canvas?, paint: Paint) {
-        val rect = Rect().apply {
-            set(64, 64, width - 64, height - 64)
-        }
-        canvas?.drawRoundRect(
-            rect.left.toFloat(),
-            rect.top.toFloat(),
-            rect.right.toFloat(),
-            rect.bottom.toFloat(),
-            40f,
-            40f,
-            paint
-        )
-    }
-
     private fun expandedAnimation() {
-        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 1.03f, 0.98f)
-        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 1.03f, 0.98f)
+        val expandedScaleX = PropertyValuesHolder.ofFloat("scaleX", 0.7f, 0.65f)
+        val expandedScaleY = PropertyValuesHolder.ofFloat("scaleY", 0.7f, 0.65f)
 
         objectAnimator = ObjectAnimator.ofPropertyValuesHolder(this, expandedScaleX, expandedScaleY).apply {
             duration = 1000

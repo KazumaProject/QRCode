@@ -1,9 +1,9 @@
 package com.kazumaproject7.qrcodescanner.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,6 +65,7 @@ class ScannedResultAdapter(
         )
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onBindViewHolder(holder: ScannedResultViewHolder, position: Int) {
         val scannedResult = scannedResults[position]
         val scannedResultText = holder.itemView.findViewById<MaterialTextView>(R.id.scanned_result_text)
@@ -80,7 +81,7 @@ class ScannedResultAdapter(
         if (URLUtil.isValidUrl(scannedResult.scannedString)){
             urlImg.visibility = View.VISIBLE
             urlText.visibility = View.VISIBLE
-            scannedResultText.setTextColor(Color.parseColor("#5e6fed"))
+            //scannedResultText.setTextColor(Color.parseColor("#5e6fed"))
             setURLTitle(scannedResult.scannedString,urlText,urlTitleProgress)
             setURLTitleLogo(scannedResult.scannedString,urlImg,urlImgProgress)
         }
@@ -137,17 +138,8 @@ class ScannedResultAdapter(
     }
 
     private suspend fun getURLTitle(scannedString: String): String = withContext(Dispatchers.IO) {
-        try {
-            val document = Jsoup.connect(scannedString).get()
-            val title = document.title()
-            title?.let {
-                return@withContext it
-            }
-
-        }catch (_: Exception){
-
-        }
-        return@withContext ""
+        val document = Jsoup.connect(scannedString).get()
+        return@withContext document.title()
     }
 
 

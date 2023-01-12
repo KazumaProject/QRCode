@@ -33,7 +33,6 @@ import androidx.navigation.fragment.findNavController
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.journeyapps.barcodescanner.*
-import com.journeyapps.barcodescanner.camera.CameraSettings
 import com.kazumaproject7.qrcodescanner.MainActivity
 import com.kazumaproject7.qrcodescanner.R
 import com.kazumaproject7.qrcodescanner.data.local.entities.ScannedResult
@@ -138,6 +137,10 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
             showCenterCrossLine(binding.barcodeView)
         }
 
+        if (AppPreferences.isCaptureFullScreen){
+            notShowSquare(binding.barcodeView)
+        }
+
         updateRectangleVisibility(
             binding.barcodeView,
             AppPreferences.isMaskVisible
@@ -181,7 +184,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                 binding.barcodeView.viewFinder.isResultShown(false)
 
                 binding.barcodeView.targetView.isVisible = true
-                binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(true)
                 if (AppPreferences.isHorizontalLineVisible){
                     binding.barcodeView.viewFinder.setLaserVisibility(true)
                 }
@@ -536,6 +538,13 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
         scannerAlphaField.set(decoratedBarcodeView.targetView, true)
     }
 
+    private fun notShowSquare(decoratedBarcodeView: DecoratedBarcodeView) {
+        val captureFullScreen = TargetView::class.java.getDeclaredField("isCaptureFullScreen")
+        captureFullScreen.isAccessible = true
+        captureFullScreen.set(decoratedBarcodeView.targetView, true)
+    }
+
+
     private fun updateRectangleVisibility(
         decoratedBarcodeView: DecoratedBarcodeView,
         visibility: Boolean
@@ -620,7 +629,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
 
         binding.barcodeView.targetView.isVisible = false
         binding.barcodeView.viewFinder.setLaserVisibility(false)
-        binding.barcodeView.viewFinder.shouldRoundRectMaskVisible(false)
         result.transformedResultPoints?.let { points ->
             if (viewModel.scannedType.value.replace("_"," ") == "QR CODE"){
                 when(viewModel.scannedStringType.value){
