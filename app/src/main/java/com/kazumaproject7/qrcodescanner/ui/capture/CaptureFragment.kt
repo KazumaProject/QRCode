@@ -329,8 +329,6 @@ class CaptureFragment : BaseFragment(R.layout.fragment_capture_fragment) {
                     viewModel.updateIsZoom(false)
                     binding.barcodeView.pauseAndWait()
                     binding.barcodeView.resume()
-                } else{
-                    showSnackBarShort("Capture in full screen mode is on.\nPlease check settings.")
                 }
             }
 

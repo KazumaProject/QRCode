@@ -172,7 +172,7 @@ open class TargetView(
         return Paint().apply {
             isAntiAlias = true
             color = ContextCompat.getColor(c, R.color.zxing_off_white)
-            strokeWidth = 25f
+            strokeWidth = 16f
         }
     }
     private fun getPath(): Path{
